@@ -1,0 +1,51 @@
+name: Refine T1 browser feedback
+on:
+  push:
+    branches: ['training/workflow-labs']
+    paths:
+      - 'validation_browser/**'
+      - '.github/workflows/refine-browser-feedback.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned Copilot
+        run: npm install -g @github/copilot@1.0.97
+      - name: Install Selenium requirements
+        run: python -m pip install -r validation_browser/seed/requirements.txt
+      - name: Confirm runner Chrome
+        run: google-chrome --version
+      - name: Prepare clean seeded workspace
+        run: python validation_browser/refine.py prepare
+      - name: Targeted Copilot refinement
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+        run: python validation_browser/refine.py agent
+      - name: Independent token-free grading
+        if: always()
+        run: |
+          git diff --exit-code -- training_kit training_ci validation_browser
+          python validation_browser/refine.py verify
+      - name: Retain all measured evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t1-refined
+          retention-days: 14
+          path: |
+            runs/t1-refined/
+            runs/t1-refined-protected.json
+          if-no-files-found: error

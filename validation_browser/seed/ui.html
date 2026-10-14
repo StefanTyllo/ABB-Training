@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>Device settings lab</title>
+<style>body{font:18px system-ui;max-width:620px;margin:3rem auto}label{display:block;margin:1rem 0}input,select,button{font:inherit} [hidden]{display:none}</style>
+<h1>Device settings</h1><p>Synthetic local device · no login · invented credentials only</p>
+<form id="settings" novalidate aria-busy="true">
+<label>Connection <select id="connection"><option value="serial">Serial</option><option value="tcp">TCP</option></select></label>
+<div id="serial-fields"><label>Device <input id="device"></label></div>
+<div id="tcp-fields" hidden><label>Host <input id="host"></label><label>Port <input id="port" inputmode="numeric"></label></div>
+<label>Authentication <select id="auth"><option value="none">None</option><option value="password">Password</option></select></label>
+<div id="password-fields" hidden><label>Password <input id="password" type="password"></label></div>
+<button id="save" disabled>Save</button><p id="status" role="status"></p></form>
+<script>
+const $ = id => document.getElementById(id);
+const keys = ['connection', 'device', 'host', 'port', 'auth', 'password'];
+const delay = () => new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 250));
+function busy(value) { $('settings').setAttribute('aria-busy', String(value)); $('save').disabled = value; }
+async function fields() {
+  busy(true); await delay();
+  $('serial-fields').hidden = $('connection').value !== 'serial';
+  $('tcp-fields').hidden = $('connection').value !== 'tcp';
+  $('password-fields').hidden = $('auth').value !== 'password';
+  busy(false);
+}
+for (const id of ['connection', 'auth']) $(id).addEventListener('change', fields);
+$('settings').addEventListener('submit', async event => {
+  event.preventDefault(); busy(true); $('status').textContent = 'Saving…'; await delay();
+  try {
+    const response = await fetch('/api/settings', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(Object.fromEntries(keys.map(key => [key, $(key).value])))});
+    $('status').textContent = (await response.json()).message;
+  } catch (error) { $('status').textContent = 'Save failed'; }
+  busy(false);
+});
+fetch('/api/settings').then(response => response.json()).then(async data => {
+  for (const key of keys) $(key).value = data[key];
+  await fields();
+}).catch(() => { $('status').textContent = 'Load failed'; });
+</script></html>
