@@ -1,0 +1,10 @@
+{
+  "lab": "t1",
+  "case": "alternate",
+  "connection": "serial",
+  "host": "plc.example.test",
+  "port": "5020",
+  "auth": "password",
+  "password": "other-practice-only",
+  "device": "COM9"
+}

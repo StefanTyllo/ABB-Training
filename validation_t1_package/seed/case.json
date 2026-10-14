@@ -1,0 +1,10 @@
+{
+  "lab": "t1",
+  "case": "transfer",
+  "connection": "serial",
+  "host": "lab.example.test",
+  "port": "65535",
+  "auth": "password",
+  "password": "transfer-only",
+  "device": "COM9"
+}
