@@ -1,0 +1,4 @@
+{
+  "demo": {"device_id": "SIM-017", "firmware": "1.4.2", "baud": 19200},
+  "transfer": {"device_id": "SIM-083", "firmware": "1.4.2", "baud": 38400}
+}

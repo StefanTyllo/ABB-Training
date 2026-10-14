@@ -1,0 +1,64 @@
+name: Validate workflow training labs
+on:
+  workflow_dispatch:
+  push:
+    branches: ['training/workflow-labs']
+    paths:
+      - 'training_kit/**'
+      - 'training_ci/**'
+      - 'training_author/guide.md'
+      - '.github/workflows/validate-workflow-labs.yml'
+permissions:
+  contents: read
+jobs:
+  lab:
+    name: Copilot rehearsal (${{ matrix.lab }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        lab: [fw1, fw2, hw1, hw2, t1, t2]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install verified Copilot CLI
+        run: |
+          npm install -g @github/copilot@1.0.97
+          copilot --version
+      - name: Install browser test dependencies
+        if: startsWith(matrix.lab, 't')
+        run: |
+          python -m pip install -r training_kit/test_team/scaffold/requirements.txt
+          google-chrome --version
+      - name: Rehearse four stages and fresh transfers with Copilot
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+        run: |
+          test -n "$COPILOT_GITHUB_TOKEN" || { echo '::error::COPILOT secret missing'; exit 1; }
+          python training_ci/run_lab.py '${{ matrix.lab }}'
+      - name: Independently grade generated work
+        if: always()
+        run: python training_ci/grade_all.py '${{ matrix.lab }}'
+      - name: Retain generated code and execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lab-${{ matrix.lab }}-${{ github.run_attempt }}
+          path: runs/${{ matrix.lab }}/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Publish assessment summary
+        if: always()
+        run: |
+          if [ -f 'runs/${{ matrix.lab }}/assessment.md' ]; then
+            cat 'runs/${{ matrix.lab }}/assessment.md' >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "board_id": "SENSE-BETA",
+  "approved_revision": "R8",
+  "authority": "Synthetic training design authority",
+  "approved_sources": [
+    "source/bom.csv",
+    "source/schematic.json"
+  ],
+  "rule": "Both source documents must identify this board and this approved revision. A missing revision blocks reconciliation. Do not infer it from this approval record."
+}

@@ -1,0 +1,48 @@
+{
+  "hw1/demo": {
+    "status": "pass",
+    "board_id": "SENSE-ALPHA",
+    "finding_codes": ["value_mismatch", "pin_mapping_mismatch", "equivalent_notation"],
+    "corrected_resistor": {"ref": "R1", "value": "4.7 kOhm"},
+    "corrected_pins": {"ref": "U1", "pins": {"1": "VDD", "2": "SENSE", "3": "GND", "4": "OUT"}},
+    "equivalent_capacitor": {"ref": "C1", "source": "100 nF", "derived": "0.1 uF"},
+    "source_revision": "R7"
+  },
+  "hw1/transfer": {
+    "status": "blocked",
+    "board_id": "SENSE-BETA",
+    "finding_codes": ["missing_source_revision"],
+    "missing_field": "source/schematic.json:source_revision",
+    "required_action": "Obtain an approved schematic export that explicitly identifies its source revision; preserve derived/netlist.json until then."
+  },
+  "hw2/demo": {
+    "status": "pass",
+    "board_id": "DIVIDER-ALPHA",
+    "finding_codes": ["stale_calibration"],
+    "calculations": {
+      "nominal_gain": 0.09090909090909091,
+      "worst_case_gain": 0.0925756186984418,
+      "nominal_adc_v": 2.727272727272727,
+      "worst_case_adc_v": 2.777268560953254,
+      "r_th_ohm": 9090.90909090909,
+      "cutoff_hz": 175.0704374010849,
+      "inverse_gain": 11.0,
+      "adc_margin_v": 0.5227314390467459
+    }
+  },
+  "hw2/transfer": {
+    "status": "fail",
+    "board_id": "DIVIDER-BETA",
+    "finding_codes": ["stale_calibration", "adc_limit_exceeded"],
+    "calculations": {
+      "nominal_gain": 0.10869565217391304,
+      "worst_case_gain": 0.11064855390008764,
+      "nominal_adc_v": 3.260869565217391,
+      "worst_case_adc_v": 3.319456617002629,
+      "r_th_ohm": 8913.04347826087,
+      "cutoff_hz": 178.56408249334598,
+      "inverse_gain": 9.2,
+      "adc_margin_v": -0.01945661700262935
+    }
+  }
+}

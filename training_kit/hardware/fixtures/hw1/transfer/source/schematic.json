@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "board_id": "SENSE-BETA",
+  "source_revision": null,
+  "components": [
+    {
+      "ref": "U7",
+      "kind": "ic",
+      "value": "AMP-DEMO",
+      "pins": {
+        "1": "VDD",
+        "2": "SENSE",
+        "3": "GND",
+        "4": "OUT"
+      }
+    },
+    {
+      "ref": "R11",
+      "kind": "resistor",
+      "value": "4.7 kOhm",
+      "pins": {
+        "1": "VIN",
+        "2": "SENSE"
+      }
+    },
+    {
+      "ref": "C8",
+      "kind": "capacitor",
+      "value": "100 nF",
+      "pins": {
+        "1": "SENSE",
+        "2": "GND"
+      }
+    }
+  ]
+}

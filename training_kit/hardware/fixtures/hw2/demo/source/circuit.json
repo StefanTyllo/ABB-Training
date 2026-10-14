@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "board_id": "DIVIDER-ALPHA",
+  "source_revision": "D3",
+  "r_top_ohm": 100000,
+  "r_bottom_ohm": 10000,
+  "resistor_tolerance_fraction": 0.01,
+  "c_farad": 1e-07,
+  "vin_max_v": 30.0,
+  "adc_max_v": 3.3,
+  "model": "Ideal DC source, unloaded divider, ideal capacitor from ADC node to ground. Resistor tolerances independent; capacitor nominal only."
+}
