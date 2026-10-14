@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest" tests="4">
+<testcase classname="tests.test_settings" name="test_connection_visibility_both_directions"/>
+<testcase classname="tests.test_settings" name="test_auth_visibility_both_directions"/>
+<testcase classname="tests.test_settings" name="test_save_reload_restores_values[tcp]"/>
+<testcase classname="tests.test_settings" name="test_save_reload_restores_values[serial]"><skipped type="pytest.skip" message="placeholder"/></testcase>
+</testsuite></testsuites>

@@ -1,17 +1,33 @@
-# Author verification record
+# Author verification record — 14 October 2026
 
-Date: 2026-10-14. Host Python 3.12; GCC available. This record concerns the supplied fixtures and document, not measured agent performance.
+This record distinguishes fixture checks, authenticated agent rehearsals, and classroom acceptance. All exercises use synthetic inputs.
 
-Passed:
-- Uniform prepare_lab.py: all twelve lab/case combinations prepare successfully; existing output is refused; instructor directories are excluded.
-- Firmware: demo and transfer device behavior; invalid parameter/value preservation; seeded parser defects reproduced; isolated corrected source passes 50 stream cases and malformed-input checks. Learner source remains deliberately broken.
-- Hardware: five unittest methods covering four case preparations, overwrite refusal, calibration generation/provenance, invalid-input preservation, independent acceptance and false-assessment rejection.
-- Test team: three HTTP contract variants; case preparation; overwrite refusal; pytest collection; Python/JavaScript syntax. See test_team/VERIFICATION.md for details.
+## Fixture and packaging checks
 
-Not passed or not performed:
-- Real Selenium browser startup failed in the author environment with SessionNotCreatedException (Chrome exited). Browser behavior and improved learner-suite mutation detection are NOT verified here. Run the supplied browser_preflight.py and the PDF facilitator rehearsal on training machines before delivery.
-- No authenticated Codex or Copilot request was executed. The author environment had neither CLI authenticated. Official setup instructions were verified against documentation; participants must pass the real smoke tests.
-- No GitHub Actions run was executed. Account entitlements, organization policy, repository access, and live CI readiness remain local acceptance gates.
-- No representative learner pilot or formal classroom acceptance was performed.
+- All twelve prepare_lab.py combinations prepared successfully; overwrite was refused; instructor directories were excluded.
+- Firmware: device cases and invalid-input preservation checked; seeded parser defects reproduced; an isolated correction passed 50 stream cases and malformed-input checks. The learner starter remains deliberately broken.
+- Hardware: case preparation, provenance, calculation generation, invalid-input preservation, independent acceptance and false-assessment rejection passed.
+- Test: all three real HTTP variants, preparation, overwrite refusal, collection and syntax passed. The initial local Chrome launch failed; later hosted real-browser execution supersedes that environment limitation, not the requirement to preflight teaching machines.
+- PDF: pages visually reviewed; embedded ZIP extracted and all twelve clean workspace preparations exercised. This attachment contains starters, not the completed agent solutions.
 
-Do not describe these fixtures as classroom-accepted until the PDF readiness/rehearsal gates have actual recorded evidence. A correctly reported engineering fail or blocked result may be an accepted training outcome.
+## Authenticated Copilot rehearsal
+
+Repository: StefanTyllo/ABB-Training; branch training/workflow-labs. Ubuntu Actions runner, Node 22, Python 3.12.15, Copilot CLI 1.0.97. The secret COPILOT was mapped to COPILOT_GITHUB_TOKEN only for agent steps. Independent grading ran without that token. Default model identity was not pinned or captured.
+
+Initial run: https://github.com/StefanTyllo/ABB-Training/actions/runs/38592278866
+Commit: e36498d5e48667077444be81c6061a6dacd11bd6
+
+Each lab received four scripted stage invocations and separate fresh MD-only/code-assisted transfers. These approximate the handbook process; they are not a facilitated human conversation or a controlled performance experiment.
+
+- FW2: all three submissions passed; actual code helper execution and 50-case independent parser checks verified.
+- HW1: demo passed; both transfers correctly blocked on missing revision without changing the export.
+- HW2: demo passed; both transfers correctly reported the unsafe idealized divider design. Hardware helper self-tests initially used demo-specific assumptions and were made independent during transfer.
+- FW1: initial final-state grades passed, but transcript review found manual fallback after a denied compound command. A fresh code transfer fixed raw capture retention and used the helper for the mutation. Eighteen helper tests, before/after captures and rerun preservation passed: https://github.com/StefanTyllo/ABB-Training/actions/runs/38594335199
+- T1: initial real Chrome runs passed. Follow-up retained failure screenshots, captured actual browser identity, added empty-password rejection and invalid-save preservation: https://github.com/StefanTyllo/ABB-Training/actions/runs/38595251454 . Four original XML fixtures omitted from its seed were restored. Complete package passed 13 helper tests, eight browser cases and the independent semantic oracle: https://github.com/StefanTyllo/ABB-Training/actions/runs/38596385772
+- T2: demo and MD-only transfer passed. Code transfer's 300-second outer grader limit expired after its direct browser suites passed; the original run remains failed. The unchanged package passed the complete 900-second-limit regrade, including 16 helper self-tests, all 12 correct-app browser tests, relevant assertion failures for both mutants, helper execution and protected-input hashes. Regrade: https://github.com/StefanTyllo/ABB-Training/actions/runs/38597697875
+
+The repository's validation_records directory preserves exact original archives, follow-ups and SHA-256 hashes. Read original failures alongside corrections. A heuristic T2 failure-phase label is explicitly marked for human review; the 65535 Save rejection occurs before reload, despite the demo report's heuristic label.
+
+## Not established
+
+No authenticated Codex execution or representative learner pilot was performed. Production hardware, comprehensive adversarial robustness, learning improvements and speed/cost advantages are not established. Local account/browser readiness and the handbook's facilitator pilot remain required before classroom acceptance. A correctly reported engineering failure or blocked input is an accepted lab result.

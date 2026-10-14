@@ -10,11 +10,11 @@ Firmware, hardware, and test teams | 14 October 2026 | Edition 1
 3. Identify operations that do not need an LLM and can become deterministic code.
 4. Ask Codex to implement highly verbose, readable code for those operations; verify it and update the workflow.
 
-**What is included.** Six lab guides, shared prompts, local Copilot CLI and Codex setup, two CI authentication options, an assessment rubric, and an embedded ZIP containing runnable synthetic starters. Starter tools provide basic access to data and systems. Participants create the reusable workflow automation during the labs.
+**What is included.** Six lab guides, shared prompts, local Copilot CLI and Codex setup, the verified ABB-Training Actions setup, an assessment rubric, and an embedded ZIP containing runnable synthetic starters. Starter tools provide basic access to data and systems. Participants create the reusable workflow automation during the labs.
 
 **Scope.** These exercises use synthetic devices, board data, and a local WebUI. No ABB production repository, device, Azure DevOps project, or proprietary document is required. Firmware lab 2 runs host C; hardware calculations use an explicitly idealized circuit; browser labs use Selenium against an actual local application.
 
-**Acceptance status.** Technical and editorial checks are recorded at the end of this guide. Authenticated Codex/Copilot runs and a facilitated learner pilot require the training environment. The readiness gates make those requirements explicit; this document does not claim an unperformed classroom acceptance.
+**Acceptance status.** Technical and editorial checks are recorded at the end of this guide. Live Copilot Actions results are recorded in the release record. Codex access and a facilitated learner pilot remain separate checks. The readiness gates make those requirements explicit; this document does not claim an unperformed classroom acceptance.
 
 Start with the route on page 2. Extract the starter attachment before running any lab command.
 <!-- PAGE -->
@@ -28,8 +28,8 @@ Start with the route on page 2. Extract the starter attachment before running an
 | Firmware | FW1 device troubleshooting, then FW2 parser repair |
 | Hardware | HW1 board-data reconciliation, then HW2 calculations and calibration |
 | Test | T1 dynamic WebUI automation, then T2 test effectiveness |
-| CI operator | Section 8, after local access works; choose one authentication route |
-| Facilitator | Section 10 and the embedded instructor checks before delivery |
+| CI operator | Section 8: use the existing ABB-Training secret and validation workflow |
+| Facilitator | Sections 9-10 and the embedded instructor checks before delivery |
 
 **Roles.** The participant explains decisions and reviews generated work. The coding agent executes agreed operations and writes the extracted artifacts. The facilitator prepares the environment, controls reset copies, checks acceptance evidence, and resolves specification questions. No one should mark a result accepted because the agent says it is complete.
 
@@ -87,8 +87,8 @@ GitHub's npm installation requires Node.js 22 or later. An eligible Copilot acco
 ```bash
 node --version
 npm --version
-npm install -g @github/copilot
-copilot version
+npm install -g @github/copilot@1.0.97
+copilot --version
 copilot login
 ```
 Complete the displayed browser or device-code flow using your intended account. Start `copilot`, enter `/user`, and confirm the identity. Exit the interactive session before returning to shell commands. Environment tokens can override a stored login; check their presence without printing their values. [G2]
@@ -162,15 +162,7 @@ The check must launch a real browser and verify dynamic field visibility. If Chr
 | Test browser | Real-browser preflight passes; versions and server URL recorded |
 | Workspace | Participant writes only in its work directory; clean starter remains available |
 
-**Failure recovery**
-| Observation | Required next action |
-| --- | --- |
-| `copilot` not found | Confirm npm installation and executable PATH in this terminal; reopen it and rerun the version check |
-| Wrong account or 401/403 | Inspect `/user`, unintended token-variable presence, entitlement, and CLI policy; rerun the actual smoke test [G2, G4] |
-| Noninteractive tool denied | Compare the requested operation with its exact allowance; the no-question flag grants no tool rights [G3] |
-| Missing Python module | Activate the intended venv and install the named requirements there |
-| Browser/driver failure | Resolve browser binary, driver compatibility, or download access; repeat the browser preflight |
-| Port already occupied | Stop the previous lab server with Ctrl-C; use the documented port consistently |
+**Recovery:** use the failing command's actual error. Resolve missing executables or packages in this terminal; check account/token selection for authentication; check exact tool allowances for denied execution. For browser errors verify the binary, driver and download access, then repeat the real-browser preflight. Stop a previous owned server if port 8765 is occupied.
 
 **Gate decision:** READY only when every applicable row has evidence. Otherwise record BLOCKED, the failing command, and its error; resolve it before the lab. Account policies and software installation must be handled through the organization's normal support process.
 <!-- PAGE -->
@@ -204,7 +196,7 @@ Explain reasoning as you work: “I am capturing configuration before changing i
 **Stage 3 exit:** every proposed function has a defined input/output contract and a meaningful failure condition. Keep hypotheses, ambiguous requirements, and interpretation of unfamiliar evidence with the model or engineer.
 
 ## Stage 4 Implement highly verbose code
-> Implement the deterministic activities in extraction-map.md under automation/. Use descriptive function and variable names, small functions, type hints where useful, docstrings, explicit intermediate values, and comments explaining engineering intent. Log steps and expected/observed results. Make failures actionable. Do not silently default missing observations or swallow exceptions. Return machine-readable results and meaningful exit codes. Implement feasible prerequisites in code. Keep source-of-truth inputs and instructor checks unchanged. Add checks for the observed defect, a valid case, and the lab's failure branch. Create altered test inputs in disposable fixtures under automation/tests/; preserve prepared authoritative sources. Run them, inspect the results, and revise until the stated criteria pass. Update workflow.md to call the new entry points and interpret their output; preserve workflow-md-only.md unchanged. Document the exact commands in automation/README.md.
+> Implement the deterministic activities in extraction-map.md under automation/. Use descriptive function and variable names, small functions, type hints where useful, docstrings, explicit intermediate values, and comments explaining engineering intent. Log steps and expected/observed results. Make failures actionable. Do not silently default missing observations or swallow exceptions. Return machine-readable results and meaningful exit codes. Implement feasible prerequisites in code. Keep source-of-truth inputs and instructor checks unchanged. Add checks for the observed defect, a valid case, and the lab's failure branch. Build self-contained fixtures under automation/tests/; their expected values must not depend on which task case is active. Preserve prepared authoritative sources. Run them, inspect the results, and revise until the stated criteria pass. Update workflow.md to call the new entry points and interpret their output; preserve workflow-md-only.md unchanged. Document the exact commands in automation/README.md.
 
 **Operation-log envelope for learner-created automation**
 ```json
@@ -242,7 +234,7 @@ Do this after completing the two labs for your team. The facilitator selects at 
 | Correctness | Each acceptance criterion passed, failed, or blocked |
 | Process | Baseline collected; branches followed; missing inputs handled |
 | Reuse | Old IDs, paths, values, or results accidentally carried forward |
-| Execution | Commands/tool calls and whether supplied code was actually invoked |
+| Execution | Actual helper invocation in code mode; manual fallback is not a code-mode pass |
 | Effort | Elapsed time and facilitator interventions |
 | Claims | Any completion claim unsupported by the recorded evidence |
 
@@ -299,9 +291,9 @@ Inputs are the device tool path, state-directory path, expected-configuration pa
 | Compare before/after values and probe status | Explain why the observed change demonstrates recovery |
 
 ## Stage 4 Required implementation behavior
-Create `automation/capture_state.py` and a controlled experiment entry point with documented arguments. Capture must invoke the existing low-level tool, preserve raw results, and add timestamp and input identity. It must fail if any required read fails; a partial capture cannot become a baseline marked complete.
+Create `automation/capture_state.py` and a controlled experiment entry point with documented arguments. Capture must invoke the low-level tool and retain complete raw outputs, commands, exit status, timestamps and input identity by default. Save the before-capture before any mutation; failed evidence persistence blocks the write. It must fail if any required read fails; a partial capture cannot become a baseline marked complete.
 
-The experiment operation must require a valid baseline for the same device and compare the current configuration with that baseline before writing. If they differ, return blocked and request a new capture. It must apply at most one allowed parameter change, then capture and compare again. This is enforcement inside the learner's entry point; direct simulator access remains available in this teaching fixture.
+The experiment operation must require a valid baseline for the same device and compare the current configuration with that baseline before writing. If they differ, return blocked and request a new capture. It must apply at most one allowed parameter change, then capture and compare again. Preserve original before/after and mutation records on repeat runs. This is enforcement inside the learner's entry point; direct simulator access remains available in this teaching fixture.
 
 **Required checks:** valid capture; missing/nonexistent state directory produces blocked; unknown identity cannot select a reference; experiment without a baseline is rejected; stale baseline is rejected; correct change restores the probe. Use disposable prepared cases for checks that mutate state.
 
@@ -552,12 +544,12 @@ python -m pytest -q
 2. Explore the actual page in the browser, using Selenium operations through the terminal. Record visible fields, locators, and readiness signals. Use `HEADED=1` when a desktop display is available; headless execution is acceptable evidence.
 3. Switch Serial to TCP and back. Switch authentication None to Password and back. Observe asynchronous visibility changes.
 4. Extend SettingsPage only as needed to represent the demonstrated interactions. Keep behavioral expectations in tests.
-5. Save values from case.json, wait for completion, reload the browser, and assert exact restored active values. Do not replace the UI interaction with HTTP calls.
+5. Save values from case.json, wait for completion, reload, and assert exact restored active values. Also reject an empty password in Password mode and an invalid port; after each rejected save, reload and prove the previous valid values survived. Use browser interactions and assertions.
 6. Run the tests and inspect actual failure evidence. Remove the skipped placeholder only after substantive coverage exists.
 
 **Demonstration complete:** UI-01, UI-02, SAVE-01, and ASYNC-01 have real assertions; both switch directions work; saved values survive reload; no skips or fixed sleeps. Document the workflow before adding orchestration helpers.
 <!-- PAGE -->
-# T1 Extract browser setup and evidence collection
+# T1 Extract browser execution helpers
 
 ## Stage 2 Abstraction focus
 Parameterize base URL, case-data path, connection mode, values, and artifact destination. Preserve framework conventions and the requirement to wait on observable state. A locator tied to this application is a legitimate adapter detail; a demo-only field value is an input.
@@ -571,9 +563,9 @@ Parameterize base URL, case-data path, connection mode, values, and artifact des
 | Run collected tests and summarize real results | Review whether the suite covers the requirement |
 
 ## Stage 4 Required implementation behavior
-Create reusable execution/evidence helpers under automation/. Extend the existing Page Objects where an interaction belongs there; do not create a competing framework. Record actual collected tests, pass/fail/skip counts, browser identity, URL, and relevant failure artifacts.
+Create reusable execution/evidence helpers under automation/. Extend the existing Page Objects where an interaction belongs there; do not create a competing framework. Record actual collected tests, counts, live browser capabilities and URL. Retain an intentional missing-element screenshot and error context under the workspace evidence/ directory, not only a temporary test directory.
 
-The helper must treat a browser startup error separately from a failing UI assertion. A requirement marker is traceability, not proof of coverage. Keep assertions in tests; readiness checks may remain in Page Objects. [S1, S2]
+The helper must distinguish browser startup errors from UI assertion failures and actually populate its browser identity field. A requirement marker is traceability, not proof of coverage. Keep assertions in tests; readiness checks may remain in Page Objects. [S1, S2]
 
 **Required checks:** known-good interaction; wrong URL reports blocked; missing expected element produces useful failure evidence; no fixed sleep; a skipped required test cannot be presented as complete coverage.
 
@@ -584,7 +576,7 @@ python materials/prepare_lab.py t1 transfer work/t1-transfer-code
 ```
 Stop the demo server with Ctrl-C. Start the correct variant in the chosen transfer workspace using the T1 server command. Run one workspace at a time on port 8765. Transfer uses a different device value and Serial/Password as its saved target; it must also test the reverse visibility transitions.
 
-For MD-only, begin from the clean supplied Page Objects/tests plus the extracted Markdown. For code-assisted replay, copy only general reusable Page Object methods and automation helpers; do not copy completed demo test cases. Both runs must produce assertions for the new case.
+For MD-only, begin from the clean supplied Page Objects/tests plus the extracted Markdown. For code-assisted replay, copy only automation helpers. Both runs start from the supplied Page Objects and tests, extend the Page Objects as needed, and produce assertions for the new case. Do not copy completed demo tests or Page Objects.
 
 **Acceptance:** real-browser execution, no required skips, exact saved/restored current case values, both switch directions, and reuse of the provided framework. Review screenshots/logs together with test assertions.
 
@@ -656,93 +648,63 @@ Transfer general runners/helpers, not a finished demo test file. Keep the varian
 
 **Debrief:** how did executable feedback expose a misleading green test result, and which parts of that evaluation still need human judgment?
 <!-- PAGE -->
-# 8 Copilot CLI in CI with a personal token
+# 8 Use the verified ABB-Training CI setup
 
-CI authentication is an extension after local setup. Choose this personal-token route or the organization-token route on the next page. Neither requires interactive login on the runner. These examples target GitHub.com Actions with a hosted Ubuntu runner; other CI systems use the same token environment variable but their own checkout and secret-injection mechanisms. [G5]
+**Repository:** StefanTyllo/ABB-Training. The existing **Copilot authentication test** uses repository secret **COPILOT**, mapped to **COPILOT_GITHUB_TOKEN**. It ran successfully on 14 October 2026. Its response was “Copilot authentication successful.” This proves authentication and prompt execution; tools are disabled in that test, so it does not prove code editing or test execution.
 
-**CI prerequisite gate.** The facilitator supplies a GitHub.com training repository URL and confirms that the CI operator can manage its Actions secrets/variables and submit a workflow to its default branch. The local smoke directory is not automatically such a repository. Clone the supplied repository into a separate directory, then work at that checkout's root. If the URL or access is unavailable, mark the optional CI exercise blocked; the six local labs do not depend on it.
+https://github.com/StefanTyllo/ABB-Training/actions/runs/38589531650
 
-**Version variable for either route.** In that repository, open Settings -> Secrets and variables -> Actions -> Variables. Create COPILOT_CLI_VERSION containing the package version that passed local preflight. Run `npm list -g @github/copilot --depth=0` locally and enter only the version number. Complete this step for both authentication routes.
+**Rerun authentication:** open the repository's Actions tab, select Copilot authentication test, choose Run workflow on main, then inspect Test Copilot authentication and execution and the run summary. The existing workflow remains unchanged.
 
-## Create and store the personal credential
-1. Open https://github.com/settings/personal-access-tokens/new in your own GitHub account.
-2. Choose your personal account as Resource owner. Select repository access appropriate to the exercise.
-3. Under Permissions, choose Account and add Copilot Requests. Generate a fine-grained token. A `github_pat_` token is supported; a classic `ghp_` token is not. [G1, G2]
-4. In the training repository, open Settings -> Secrets and variables -> Actions. Create a repository secret named `COPILOT_GITHUB_TOKEN` with that token value. Do not put it in the repository or agent prompt.
-
-Create `.github/workflows/copilot-smoke.yml` in your training repository:
+## Credential and runner contract
+The lab validation workflow uses Ubuntu, Node.js 22, Python 3.12, and the verified Copilot CLI version 1.0.97. Its relevant setup is:
 ```yaml
-name: Copilot CLI readiness
-on:
-  workflow_dispatch:
-permissions:
-  contents: read
-jobs:
-  smoke:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-          package-manager-cache: false
-      - name: Install verified CLI version
-        env:
-          CLI_VERSION: ${{ vars.COPILOT_CLI_VERSION }}
-        run: |
-          test -n "$CLI_VERSION"
-          npm install -g "@github/copilot@$CLI_VERSION"
-          copilot version
-      - name: Exercise read-only tool access
-        env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
-        run: >
-          copilot
-          -p "Run exactly git status --short and explain its output."
-          --no-ask-user
-          --allow-tool='shell(git status --short)'
+- uses: actions/checkout@v6
+  with:
+    persist-credentials: false
+- uses: actions/setup-node@v4
+  with:
+    node-version: '22'
+- run: npm install -g @github/copilot@1.0.97
+- name: Run the lab rehearsal
+  env:
+    COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+  run: python training_ci/run_lab.py fw1
 ```
+The complete workflow supplies Python, browser dependencies, the six-lab matrix, independent grading, and artifact retention. Do not replace it with this excerpt. No interactive login is needed in CI. [G2, G3, G5]
 
-Commit this workflow to the training repository's default branch using its normal review process. In Actions, select **Copilot CLI readiness -> Run workflow**. Pass requires a successful install, an authenticated model response, actual permitted Git execution, and no denied-tool error. An empty status is correct for a clean checkout. [G3, G5, G7]
+**Renew the existing credential only when necessary:** open the fine-grained token page below in the intended personal account; choose the personal Resource owner, name and expiration; add Permissions -> Account -> Copilot Requests; generate the token. Update repository Settings -> Secrets and variables -> Actions -> **COPILOT**. Do not rename the secret. Use a fine-grained `github_pat_` token; classic `ghp_` tokens are unsupported. Never commit or print the value.
+
+https://github.com/settings/personal-access-tokens/new
+
+**Troubleshooting:** missing COPILOT fails before the request; authentication rejection requires checking expiration, account entitlement and CLI policy; denied tools require checking the actual permission pattern. The authentication-only test's `--available-tools=''` must not be copied into the lab rehearsal, which needs tools. `--no-ask-user` grants no execution permission by itself.
+
+**Organization-token alternative:** for a separately configured organization-owned repository, an administrator can enable organization-billed Copilot CLI use and use `copilot-requests: write` with GITHUB_TOKEN. That is a different authentication route, not the configuration validated in this personal repository. Follow [G6] if adopting it.
 <!-- PAGE -->
-# 8 Copilot CLI in CI with an organization token
+# 8 Run and inspect the six-lab rehearsal
 
-**Use this route for an organization-owned training repository when its policy permits organization-billed Copilot CLI use.** The built-in GitHub Actions token avoids storing a personal token. A recent supported CLI is required; use the locally verified version recorded in COPILOT_CLI_VERSION. [G6]
+**Workflow:** `.github/workflows/validate-workflow-labs.yml`, named **Validate workflow training labs**. **Branch:** `training/workflow-labs`. It runs on changes to the training files on that branch. The workflow and materials are reviewable there; they have not been merged into main.
 
-Complete the preceding page's CI prerequisite gate and version-variable step. Skip its personal-credential steps if using this route.
+https://github.com/StefanTyllo/ABB-Training/tree/training/workflow-labs
 
-## Change only the authentication parts of the preceding workflow
-1. An organization administrator confirms **Allow use of Copilot CLI billed to the organization** under the organization's Copilot CLI policy. The policy must be enabled for this route.
-2. Retain the complete workflow structure, checkout, Node setup, CLI installation, and smoke command from the preceding page.
-3. Replace the top-level permissions block with:
-```yaml
-permissions:
-  contents: read
-  copilot-requests: write
-```
-4. Replace the smoke step's env block with:
-```yaml
-env:
-  GITHUB_TOKEN: ${{ github.token }}
-```
-Do not retain COPILOT_GITHUB_TOKEN in that step. This route uses no stored PAT. Run the same manual workflow and inspect the same acceptance evidence. Policy rejection or unsupported token behavior means this route is not ready; resolve the policy/version issue or deliberately select the personal-token route.
+The initial validation run is linked below. To repeat the same commit, open the run and choose **Re-run all jobs**. Also rerun the targeted follow-ups and package check linked in Section 10 to reproduce the reviewed result. A revised training commit triggers a new run. The workflow also defines workflow_dispatch; GitHub's manual dispatch UI requires the workflow to exist on the default branch, so do not depend on that UI before normal review and merge.
 
-## Distinguish three separate checks
-| Check | What proves it |
-| --- | --- |
-| Installation | `copilot version` completes on the runner |
-| Authentication and model access | A real Copilot request completes using the selected route |
-| Permission to perform the task | The transcript shows the intended allowed tool operation |
+https://github.com/StefanTyllo/ABB-Training/actions/runs/38592278866
 
-`--no-ask-user` does not replace an allowance. `-s` may be added later to suppress decoration, but it is omitted from readiness checks to retain useful execution detail. Keep the smoke task limited to Git status; broader repository analysis needs its own explicit tool permissions. [G3]
+## What each job does
+1. Prepare three isolated workspaces: demonstration, fresh MD-only transfer, and fresh MD-plus-code transfer.
+2. Invoke Copilot in four ordered stages. Each stage reads the previous saved artifacts: demonstrate/document, abstract, select deterministic work, implement verbose code. The task card supplies the scripted engineering rationale in CI; a human supplies it in class.
+3. Preserve the MD-only checkpoint. Transfer only the selected workflow and, in code mode, reusable helpers. Do not transfer repaired parser sources, finished browser tests, device state, reports, or demo evidence.
+4. Execute both fresh tasks with actual tools. Compare authoritative input hashes with the clean preparation snapshot.
+5. Run independent Python/C/browser checks in a separate step without the Copilot token. These exit statuses determine assessment, not Copilot's completion message.
 
-## CI on another platform
-Use its normal checkout and Node.js 22+ installation steps. Inject the fine-grained token from its secret manager as COPILOT_GITHUB_TOKEN for the Copilot process, install the verified CLI version, and run the same smoke command. GitHub Actions' built-in token and `copilot-requests` permission are specific to Actions. Do not copy them into another CI platform and assume they provide authentication.
+**Independent checks:** firmware grading verifies the original device baseline and one-change recovery, or rebuilds the parser for 50 stream cases. Hardware grading verifies authority, report arithmetic, calibration provenance and repeat-run stability. Browser grading uses real Chrome, exact persistence assertions, and relevant failures on deliberately faulty variants. All modes use the same task criteria; code mode additionally invokes the generated helpers.
 
-**Troubleshooting:** missing version variable fails before npm installation; 401/403 points to credential/access checks; a successful response with a denied command points to tool permissions. Keep token values out of logs and prompts. Rerun the failed check after the change.
+## Inspect and retain the evidence
+Open each job's **Independently grade generated work** step and summary. Download its `lab-<id>-<attempt>` artifact before the 14-day retention expires. Inspect assessment.json, grader logs, stage prompts/transcripts, generated workflows/code, and test evidence. A green agent step alone is insufficient. Browser startup failures and missing evidence are failures of readiness, not detected application defects.
+
+**Interpretation:** this is a scripted Copilot rehearsal with separate stage invocations and file handoffs. It does not reproduce a human teaching conversation, validate Codex account access, establish classroom completion time, or prove MD-plus-code is statistically superior. Use the facilitator rubric and learner pilot for those remaining training judgments.
+
 <!-- PAGE -->
 # 9 Assess the learning outcome
 
@@ -794,11 +756,58 @@ These verify supplied fixture behavior. They do not replace learner code review 
 | Pilot | One representative learner completes each team's first lab and understands the handoff to its second |
 | PDF | All pages readable; commands copy correctly; attachment extracts and matches its recorded digest |
 
-**Author verification for this edition.** Fixture preparation, protocol behavior, hardware reference arithmetic, HTTP application variants, and document structure are checked during production. The actual measured results and limitations are in the attachment's VERIFICATION.md. No authenticated Codex/Copilot session or GitHub Actions run is claimed. Browser startup did not succeed in the author environment; the real-browser rehearsal is therefore a mandatory outstanding gate.
+**Author verification for this edition.** All twelve clean lab/case preparations, firmware reference checks, hardware fixture checks and HTTP variants passed. Every PDF page was visually inspected and the embedded ZIP was extracted and exercised. Authenticated Copilot Actions rehearsals, real Chrome checks, and targeted refinements are recorded on the following page and in the attachment's VERIFICATION.md. Codex account access and a representative learner pilot were not performed by CI.
 
 **Release decision to complete locally:** READY / BLOCKED. Record date, environment, reviewer, evidence location, unresolved issue, and owner. Mark READY only after every applicable row passes. This keeps “training accepted” tied to observed readiness rather than the appearance of the document.
 
 **Known boundaries:** instructor material is separated by folders and preparation, not hardened isolation; the fixtures are single-user and sequential; source-format extraction, physical hardware, and live Azure DevOps are later extensions. Do not infer coverage of those integrations from these exercises.
+<!-- PAGE -->
+# 10 Observed CI results and refinements
+
+**Environment:** GitHub-hosted Ubuntu; Node.js 22; Python 3.12.15; Copilot CLI 1.0.97; repository secret COPILOT. The CLI default model was used; its exact model identity was not pinned or captured. These are functional rehearsal results, not a controlled model-performance study.
+
+**Initial six-lab run:** commit `e36498d5e48667077444be81c6061a6dacd11bd6`. Four stage invocations and two fresh transfer invocations ran per lab. Independent graders executed separately without the Copilot token.
+
+https://github.com/StefanTyllo/ABB-Training/actions/runs/38592278866
+
+| Lab | Demonstration | MD-only transfer | Code-assisted transfer |
+| --- | --- | --- | --- |
+| FW1 | Pass | Pass | Pass after targeted refinement |
+| FW2 | Pass | Pass | Pass |
+| HW1 | Pass | Accepted blocked | Accepted blocked |
+| HW2 | Pass | Accepted design fail | Accepted design fail |
+| T1 | Pass | Pass | Pass; reporting refinement below |
+| T2 | Pass | Pass | Pass after timeout correction |
+
+**How to read this table.** “Accepted blocked” means missing source authority was correctly detected; “accepted design fail” means the unsafe design was accurately reported. Neither means the underlying engineering item passed. Code-assisted outcomes include the explicitly identified follow-ups on the next page.
+
+**Evidence location.** On the training branch, open validation_records/README.md for archive-to-run and commit mappings. archive_manifest.json contains byte counts and SHA-256 hashes. The exact original Actions archives are retained with the corrections; the initial six-job run remains failed because of the T2 timeout.
+
+https://github.com/StefanTyllo/ABB-Training/tree/training/workflow-labs/validation_records
+
+**Use in training.** Copy the student starters from this PDF. Completed CI-generated code is review evidence; giving it to learners before their demonstration would bypass the workflow-extraction exercise.
+<!-- PAGE -->
+# Review findings and corrections
+**FW1:** the initial evaluator accepted the final state, but the transcript showed a denied compound shell command and manual fallback. A fresh follow-up corrected default raw-capture retention, used atomic helper invocations, made the one change through code, and independently verified before/after captures, mutation evidence and byte-preserved reruns. Its transcript records 18 passing helper tests.
+
+https://github.com/StefanTyllo/ABB-Training/actions/runs/38594335199
+
+**T1:** initial real-Chrome checks verified visibility and exact persistence, and the code transfer actually invoked unchanged helpers. Review found a null browser field and temporary-only screenshots. A targeted follow-up adds actual browser capabilities, retained missing-element evidence, empty-password rejection and invalid-save preservation. The follow-up passed. A complete-package check restored four original XML fixtures omitted from the refinement seed, then passed all 13 helper self-tests and the eight browser tests.
+
+https://github.com/StefanTyllo/ABB-Training/actions/runs/38595251454
+
+Complete T1 package verification:
+https://github.com/StefanTyllo/ABB-Training/actions/runs/38596385772
+
+**T2:** the initial demo and MD-only transfer passed. Code transfer hit the outer 300-second grader limit after its direct browser checks passed. The unchanged generated package was regraded with a 900-second limit; assertions and protected-input checks are unchanged. The full package passed: 16 helper tests, 12 correct-app browser cases, relevant failures for both mutants and protected-input hashes.
+
+https://github.com/StefanTyllo/ABB-Training/actions/runs/38597697875
+
+**Hardware:** both transferred calculation/checker implementations worked. Their test suites initially assumed demo inputs and were repaired into independent fixtures during transfer. The handbook now explicitly requires fixtures independent of the active case. Do not describe those transfers as zero-repair portability.
+
+**Interpretation:** T2 reports mark inferred failure phases for review. The valid 65535 rejection occurs at Save, before reload; the demo heuristic labels it after reload. Use the assertion evidence to determine the phase.
+
+**Evidence and limits:** original run archives and review notes are retained under validation_records/ on the training branch, with hashes. The six synthetic tasks exercise the stated paths; they do not establish production-device readiness, comprehensive adversarial resistance or improved learning outcomes. Use the local account/browser gates and representative learner pilot before classroom acceptance.
 <!-- PAGE -->
 # 11 Official setup references
 
@@ -844,3 +853,26 @@ https://git-scm.com/downloads
 https://www.google.com/chrome/
 
 The four-stage training method comes from the user's demonstrated-workflow approach. The rubric, fixtures, prompts, and replay procedure are authored training designs. No claim of published validation of these six specific labs is made.
+<!-- PAGE -->
+# 12 Research basis and limits of the evidence
+
+The shared hypothesis is that engineers can express a repeatable process as a workflow, then replace its fully specified operations with code that gives the agent observable feedback. The papers below support parts of this design. They do not validate these ABB exercises or establish that code extraction always outperforms a well-written Markdown workflow.
+
+| Publication evidence | Training design implication |
+| --- | --- |
+| Yang et al., SWE-agent, NeurIPS 2024: the interface through which an agent edits files and runs programs affects repository-task performance. [R1] | Give repeated operations explicit commands, bounded inputs and interpretable results. This is the rationale for capture/build/check entry points. |
+| Shinn et al., Reflexion, 2023: agents can use task feedback and retained textual reflection to improve later attempts in studied environments. [R2] | Preserve observations and explanations before abstraction. Use actual execution feedback in the next decision; do not merely ask for another confident answer. |
+| Olausson et al., Is Self-Repair a Silver Bullet for Code Generation?, ICLR 2024: repair gains can be modest, variable or absent when cost is considered; feedback quality matters. [R3] | Keep independent checks, compare fresh cases, record effort and failure reasons, and retain human engineering review. More repair iterations are not automatically better. |
+
+**Our inference:** explicit deterministic collectors and evaluators can reduce the amount of routine reconstruction requested from the model, while making some process deviations detectable. This is a design argument to test, not a published causal result for the four-stage training method.
+
+**What to measure in these labs:** the same task criteria for both replay conditions; source preservation; correct handling of missing authority and failed limits; use of actual tool output; assertion-based detection of seeded defects; runtime and interventions. A single pair can expose a defect in the workflow, but cannot estimate a reliable success-rate difference. CI stage invocations also differ from the classroom's continuous demonstration conversation.
+
+**R1** John Yang et al. SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering. NeurIPS 2024. Official proceedings:
+https://papers.nips.cc/paper_files/paper/2024/hash/5a7c947568c1b1328ccc5230172e1e7c-Abstract-Conference.html
+
+**R2** Noah Shinn et al. Reflexion: Language Agents with Verbal Reinforcement Learning. Author manuscript, version 4, 10 October 2023:
+https://arxiv.org/abs/2303.11366
+
+**R3** Theo X. Olausson et al. Is Self-Repair a Silver Bullet for Code Generation? ICLR 2024. Official proceedings:
+https://proceedings.iclr.cc/paper_files/paper/2024/hash/9ddc141bdbf9d1db510cefff56c586ad-Abstract-Conference.html

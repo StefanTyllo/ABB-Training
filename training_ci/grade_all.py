@@ -16,6 +16,8 @@ group = 'firmware' if lab.startswith('fw') else 'hardware' if lab.startswith('hw
 snapshots_path = output/'protected-inputs.json'
 snapshots = json.loads(snapshots_path.read_text()) if snapshots_path.exists() else {}
 results = []
+# T2 executes seven real-browser suites, including the learner variant runner.
+grading_timeout = 900 if lab == 't2' else 300
 for case, mode in [('demo','code'), ('transfer-md','md-only'), ('transfer-code','code')]:
     workspace = output/case
     changed = []
@@ -27,11 +29,11 @@ for case, mode in [('demo','code'), ('transfer-md','md-only'), ('transfer-code',
                '--workspace',str(workspace),'--mode',mode]
     started = time.time()
     try:
-        run = subprocess.run(command,capture_output=True,text=True,timeout=300)
+        run = subprocess.run(command,capture_output=True,text=True,timeout=grading_timeout)
         returncode = run.returncode
         log = run.stdout+'\n'+run.stderr
     except subprocess.TimeoutExpired:
-        returncode = 2; log = 'Independent grading timed out after 300 seconds.'
+        returncode = 2; log = f'Independent grading timed out after {grading_timeout} seconds.'
     (output/f'{case}-independent-grader.log').write_text(log)
     print(case, log[-10000:], flush=True)
     for relative, expected in snapshots.get(case, {}).items():

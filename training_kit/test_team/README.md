@@ -74,4 +74,4 @@ For a separate port, start `python server.py --variant correct --port 8766 --sta
 
 ## Verification boundary
 
-From the training root, `python materials/test_team/author_checks/check_server.py` checks real HTTP contracts using stdlib only. It does not verify browser rendering or Selenium waits. See `materials/test_team/VERIFICATION.md` for measured results. Author browser startup failed; passing real-browser preflight, starter runs, and improved reload/boundary checks on all variants remain mandatory rehearsal gates before teaching.
+From the training root, `python materials/test_team/author_checks/check_server.py` checks real HTTP contracts using stdlib only. It does not verify browser rendering or Selenium waits. See `materials/test_team/VERIFICATION.md` for measured results. The initial author browser could not start; the subsequent GitHub Actions rehearsals used real Chrome successfully. Passing the supplied preflight on each teaching machine remains required. See VERIFICATION.md for run links and the exact scope.
