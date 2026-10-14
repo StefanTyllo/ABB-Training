@@ -1,0 +1,40 @@
+name: Refine FW1 code transfer
+on:
+  push:
+    branches: ['training/workflow-labs']
+    paths:
+      - 'validation_replay/**'
+      - '.github/workflows/refine-fw1-replay.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fw1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm install -g @github/copilot@1.0.97
+      - name: Refine guardrail and execute fresh transfer
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+        run: python validation_replay/run_fw1.py
+      - name: Independently verify raw evidence and recovery
+        if: always()
+        run: |
+          git diff --exit-code -- training_kit training_ci validation_replay
+          python validation_replay/check_fw1.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fw1-refined
+          path: runs/fw1-refined/
+          retention-days: 14
