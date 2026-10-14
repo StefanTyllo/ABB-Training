@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="3">
+<testcase classname="tests.test_settings" name="test_save_reload_restores_tcp_values[a]"/>
+<testcase classname="tests.test_settings" name="test_port_boundary_accepts_valid[1]"/>
+<testcase classname="tests.test_settings" name="test_invalid_save_preserves_baseline[0]"/>
+</testsuite></testsuites>

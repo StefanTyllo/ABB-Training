@@ -1,0 +1,41 @@
+{
+  "demo": {
+    "conftest.py": "c0e3b10945c8efc1b402a13dc6be19eee0f238eb807158d5e6d5caefe3f24bc4",
+    "server.py": "fcd86fc47ac26972fd4ff3390f236924ad34437dd1d81b919acd47fd38bb39f1",
+    "REQUIREMENTS.md": "4355ab78256fdce8f1decc4bade51b4f99003d2db32caf71cb89fbbe8a5e6e6f",
+    "task-card.md": "70137c54322b70a70ebad0dec1c88fa6a93e664c4078fa1f94bfa2d8bfc4cbb0",
+    "pytest.ini": "8e9c6ce0799112493ca94483cad5ef352428db1bfb0ea1ff4009361c31764803",
+    "requirements.txt": "f92bbe223bf344c05e159a824cc04525ee358065e13a4aa2f503ebfd0f1caa1b",
+    "ui.html": "de44386df8728645ee8967b7d1a23566b78dc788370cc34ac0f8f37e202eb4a6",
+    "CI_CONTRACT.md": "2acfc99e9a582d96634a98594b81c9085b3e137cbc8708bb8fa670009af3ed36",
+    "browser_preflight.py": "e016eff4c02410a150a3a7bf1fc988eeaa662db091a50f845ebeedfc2407e94e",
+    "case.json": "1ff6797fbe38ea04e074c5d3a139894032203172cb71da6b38f9d88caa4854df",
+    "pages/base_page.py": "7ec370d0756e0b19f79634515a42b84ba00d7845d62385c9f661e0ff0672022a"
+  },
+  "transfer-md": {
+    "conftest.py": "c0e3b10945c8efc1b402a13dc6be19eee0f238eb807158d5e6d5caefe3f24bc4",
+    "server.py": "fcd86fc47ac26972fd4ff3390f236924ad34437dd1d81b919acd47fd38bb39f1",
+    "REQUIREMENTS.md": "4355ab78256fdce8f1decc4bade51b4f99003d2db32caf71cb89fbbe8a5e6e6f",
+    "task-card.md": "70137c54322b70a70ebad0dec1c88fa6a93e664c4078fa1f94bfa2d8bfc4cbb0",
+    "pytest.ini": "8e9c6ce0799112493ca94483cad5ef352428db1bfb0ea1ff4009361c31764803",
+    "requirements.txt": "f92bbe223bf344c05e159a824cc04525ee358065e13a4aa2f503ebfd0f1caa1b",
+    "ui.html": "de44386df8728645ee8967b7d1a23566b78dc788370cc34ac0f8f37e202eb4a6",
+    "CI_CONTRACT.md": "2acfc99e9a582d96634a98594b81c9085b3e137cbc8708bb8fa670009af3ed36",
+    "browser_preflight.py": "e016eff4c02410a150a3a7bf1fc988eeaa662db091a50f845ebeedfc2407e94e",
+    "case.json": "636e3ddc67e7a54e6c821ee09e3b8a6a65795b2adcdafc187ec28b19a8b181e6",
+    "pages/base_page.py": "7ec370d0756e0b19f79634515a42b84ba00d7845d62385c9f661e0ff0672022a"
+  },
+  "transfer-code": {
+    "conftest.py": "c0e3b10945c8efc1b402a13dc6be19eee0f238eb807158d5e6d5caefe3f24bc4",
+    "server.py": "fcd86fc47ac26972fd4ff3390f236924ad34437dd1d81b919acd47fd38bb39f1",
+    "REQUIREMENTS.md": "4355ab78256fdce8f1decc4bade51b4f99003d2db32caf71cb89fbbe8a5e6e6f",
+    "task-card.md": "70137c54322b70a70ebad0dec1c88fa6a93e664c4078fa1f94bfa2d8bfc4cbb0",
+    "pytest.ini": "8e9c6ce0799112493ca94483cad5ef352428db1bfb0ea1ff4009361c31764803",
+    "requirements.txt": "f92bbe223bf344c05e159a824cc04525ee358065e13a4aa2f503ebfd0f1caa1b",
+    "ui.html": "de44386df8728645ee8967b7d1a23566b78dc788370cc34ac0f8f37e202eb4a6",
+    "CI_CONTRACT.md": "2acfc99e9a582d96634a98594b81c9085b3e137cbc8708bb8fa670009af3ed36",
+    "browser_preflight.py": "e016eff4c02410a150a3a7bf1fc988eeaa662db091a50f845ebeedfc2407e94e",
+    "case.json": "636e3ddc67e7a54e6c821ee09e3b8a6a65795b2adcdafc187ec28b19a8b181e6",
+    "pages/base_page.py": "7ec370d0756e0b19f79634515a42b84ba00d7845d62385c9f661e0ff0672022a"
+  }
+}
