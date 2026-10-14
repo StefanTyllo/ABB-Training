@@ -519,9 +519,9 @@ Change case/workspace for transfer. The check validates numerical results and ar
 
 **Debrief:** which parts of the calculation previously consumed model reasoning despite having a fully specified deterministic answer?
 <!-- PAGE -->
-# T1 Explore a dynamic form and extend Page Objects
+# T1 Explore WebUI with Playwright MCP
 
-**Task card.** Explore the running configuration form, explain its dynamic states, and extend the existing Selenium Page Object Model and tests. Cover visibility transitions and saving/reloading actual values.
+**Task card.** Use Copilot CLI with Playwright MCP to inspect a running dynamic form, then extend the existing Selenium Page Objects and pytest tests. This replaces terminal-driven Selenium inspection; Selenium remains the test execution framework.
 
 **Prepare from the training root**
 ```bash
@@ -529,58 +529,63 @@ python materials/prepare_lab.py t1 demo work/t1-demo
 cd work/t1-demo
 python server.py --variant correct --port 8765 --state state.json
 ```
-Keep this terminal running. Open terminal B at the training root, activate `.venv`, then:
-```bash
-cd work/t1-demo
-python -m pytest browser_preflight.py -q
-python -m pytest -q
-```
-**Initial expected result:** the preflight passes in a working browser environment; the starter suite has one passing smoke test and one skipped placeholder. That skip is unfinished work, not acceptance. Stop if browser creation fails.
+Keep the server running. In terminal B, activate the training venv, enter work/t1-demo, and run `python -m pytest browser_preflight.py -q`, then `python -m pytest -q`. Expect a passing preflight, one smoke pass and one skipped placeholder. Browser startup failure is BLOCKED; the skip is unfinished coverage.
 
-**Allowed changes:** `pages/settings_page.py`, `tests/test_settings.py`, and common workflow/automation/evidence files. Preserve the server, BasePage, conftest.py, case.json, and REQUIREMENTS.md. The app has no login; no login helper is required. The fixture resets state before each test.
+**Session preparation.** Follow the next page before exploration. The supplied synthetic app has no login; use its no-login session bootstrap. To exercise authentication, the facilitator supplies an authorized test URL, account, approved login selectors and an authenticated readiness signal. Do not add login to the protected fixture. Use Copilot consistently in the demonstration and both transfer conditions; record versions and model.
+
+**Allowed changes.** Extend pages/settings_page.py, tests/test_settings.py and workflow/automation/evidence files; add bootstrap and non-secret configuration files. Preserve server, BasePage, conftest.py, case.json and REQUIREMENTS.md. The fixture resets state before each test. For an external target, agree its independent requirements and adapter first; local graders do not validate that target.
 
 ## Stage 1 Guided operations
-1. Read REQUIREMENTS.md, case.json, BasePage, SettingsPage, and existing tests. Explain which helpers already exist.
-2. Explore the actual page in the browser, using Selenium operations through the terminal. Record visible fields, locators, and readiness signals. Use `HEADED=1` when a desktop display is available; headless execution is acceptable evidence.
-3. Switch Serial to TCP and back. Switch authentication None to Password and back. Observe asynchronous visibility changes.
-4. Extend SettingsPage only as needed to represent the demonstrated interactions. Keep behavioral expectations in tests.
-5. Save values from case.json, wait for completion, reload, and assert exact restored active values. Also reject an empty password in Password mode and an invalid port; after each rejected save, reload and prove the previous valid values survived. Use browser interactions and assertions.
-6. Run the tests and inspect actual failure evidence. Remove the skipped placeholder only after substantive coverage exists.
 
-**Demonstration complete:** UI-01, UI-02, SAVE-01, and ASYNC-01 have real assertions; both switch directions work; saved values survive reload; no skips or fixed sleeps. Document the workflow before adding orchestration helpers.
+1. Read REQUIREMENTS.md, case.json, BasePage, SettingsPage and existing tests. Identify helpers to reuse. Explain the purpose of each action before running it.
+
+2. In Copilot, use Playwright MCP to open the target and inspect live snapshots; inspect DOM attributes when needed. Record action, resulting fields, visibility/enabled/required state, readiness signal and proposed Selenium locator. Separate observations from requirements. Snapshot references are temporary, not test locators.
+
+3. Switch Serial to TCP and back, and None to Password and back. Wait for each asynchronous transition. Check locator uniqueness in each relevant state; prefer stable IDs/test attributes or scoped semantic selectors supported by the existing framework.
+
+4. Extend SettingsPage only for the demonstrated interactions. Keep behavioral assertions in tests and readiness checks in Page Objects. Do not replace Selenium with Playwright-generated tests.
+
+5. Save case.json values, wait for completion, reload and assert exact restored active values. Reject an empty password and an invalid port; reload after each rejected save and prove the last valid configuration survived.
+
+6. Run pytest through the actual framework; retain useful failure evidence. Remove the placeholder only after substantive coverage exists. MCP click-through success alone does not establish test coverage. Document the demonstrated workflow before extracting automation.
+
+**Demonstration complete:** UI-01, UI-02, SAVE-01 and ASYNC-01 have assertions; both switch directions work; values survive reload; no required skips or fixed sleeps. Retain sanitized MCP observations and actual pytest results in evidence/session.md.
 <!-- PAGE -->
-# T1 Extract browser execution helpers
+# T1 Login bootstrap and Copilot handover
 
-## Stage 2 Abstraction focus
-Parameterize base URL, case-data path, connection mode, values, and artifact destination. Preserve framework conventions and the requirement to wait on observable state. A locator tied to this application is a legitimate adapter detail; a demo-only field value is an input.
+**Replacement focus.** Replace generic browser-helper extraction with a deterministic local JavaScript bootstrap, authenticated-session handover and reusable execution/evidence helpers. The script runs in Node.js; never serve credentials in browser JavaScript.
 
-## Stage 3 Deterministic boundary
-| Move into code | Retain as reasoning |
-| --- | --- |
-| Capture browser/application setup and check readiness | Discover unfamiliar interactions and identify meaningful behavior |
-| Repeat demonstrated Page Object actions and condition-based waits | Decide what an assertion must establish |
-| Collect screenshots/logs when operations fail | Interpret unexpected UI behavior |
-| Run collected tests and summarize real results | Review whether the suite covers the requirement |
+## Stage 2 Abstract the session workflow
 
-## Stage 4 Required implementation behavior
-Create reusable execution/evidence helpers under automation/. Extend the existing Page Objects where an interaction belongs there; do not create a competing framework. Record actual collected tests, counts, live browser capabilities and URL. Retain an intentional missing-element screenshot and error context under the workspace evidence/ directory, not only a temporary test directory.
+Parameterize target URL, login selectors, authenticated readiness signal, case path and evidence destination. Store test credentials in a local `.env`: `TEST_BASE_URL`, `TEST_USERNAME`, `TEST_PASSWORD`. Commit only an `.env.example` with empty credential values. Before creating secrets, add these rules to the training workspace's `.gitignore`:
+```text
+.env
+.env.*
+!.env.example
+.auth/
+```
+Check `git check-ignore .env .auth/storage-state.json` and `git ls-files -- .env .auth`. Ignored files must not already be tracked. Git ignore prevents accidental tracking; it does not hide files from the agent or protect local access. Restrict local permissions and exclude secrets/state from prompts, logs, screenshots and archives. Have the operator populate .env without showing its contents to Copilot.
 
-The helper must distinguish browser startup errors from UI assertion failures and actually populate its browser identity field. A requirement marker is traceability, not proof of coverage. Keep assertions in tests; readiness checks may remain in Page Objects. [S1, S2]
+## Stage 3 Demonstrate the deterministic boundary
 
-**Required checks:** known-good interaction; wrong URL reports blocked; missing expected element produces useful failure evidence; no fixed sleep; a skipped required test cannot be presented as complete coverage.
+With the facilitator's reviewed bootstrap first, demonstrate the path; after abstraction, implement/adapt it under automation/. The Node.js script loads .env at runtime, validates inputs, uses Playwright to log in and waits for the agreed authenticated signal. Save `context.storageState()` to `.auth/storage-state.json`, then close the bootstrap browser. No-login fixture mode opens the local form and exports session state without credentials. Do not claim this tests authentication.
+
+Start Copilot without the login environment variables. In `/mcp add`, configure a local server: command `npx`; arguments `-y`, `@playwright/mcp@<reviewed-version>`, `--isolated`, and `--storage-state=<absolute-path>`. Replace both placeholders with real reviewed values; pin and record the version. The script's Playwright dependency must also be installed and recorded. Verify the MCP browser reaches the protected form before exploration. Saved state initializes a new context; it does not transfer an open tab. If the app needs sessionStorage or unsupported state, rehearse an attached-browser alternative before class. [M1, M2]
+
+## Stage 4 Implement and verify reuse
+
+Implement bootstrap and pytest execution/evidence helpers under automation/; retain the existing Selenium framework. Missing inputs, rejected login, expired state or unreachable URL must report BLOCKED without secrets. Keep assertions in tests. Record actual browser identity, URL, collected/skipped counts and outcomes; distinguish startup failures from assertion failures. Retain a sanitized intentional missing-element screenshot and error context in evidence/. Selenium tests use their own reviewed authentication fixture for external targets; Playwright state is not automatically a Selenium session.
 
 **Transfer preparation, from the training root**
 ```bash
 python materials/prepare_lab.py t1 transfer work/t1-transfer-md
 python materials/prepare_lab.py t1 transfer work/t1-transfer-code
 ```
-Stop the demo server with Ctrl-C. Start the correct variant in the chosen transfer workspace using the T1 server command. Run one workspace at a time on port 8765. Transfer uses a different device value and Serial/Password as its saved target; it must also test the reverse visibility transitions.
+**Transfer and acceptance.** Follow Section 7. MD-only starts with clean Page Objects/tests plus extracted Markdown; code-assisted additionally copies only reusable automation and documented dependencies. Supply credentials locally and bootstrap a fresh session in each; never copy auth state, demo tests or finished Page Objects. Run one workspace at a time on port 8765. Verify both visibility directions and exact current-case persistence. Test successful handover, wrong URL, missing credentials in login mode, invalid/expired authentication and useful element-failure evidence. Mark unexercised login paths BLOCKED. T2 still checks defect detection. Prior CI results cover the Selenium baseline, not this new MCP/login route; rehearse it before delivery.
 
-For MD-only, begin from the clean supplied Page Objects/tests plus the extracted Markdown. For code-assisted replay, copy only automation helpers. Both runs start from the supplied Page Objects and tests, extend the Page Objects as needed, and produce assertions for the new case. Do not copy completed demo tests or Page Objects.
+**M1** https://github.com/microsoft/playwright-mcp
 
-**Acceptance:** real-browser execution, no required skips, exact saved/restored current case values, both switch directions, and reuse of the provided framework. Review screenshots/logs together with test assertions.
-
-**Debrief:** what did the model still need to discover, and which repetitive browser mechanics became ordinary code?
+**M2** https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers
 <!-- PAGE -->
 # T2 Test whether the suite detects defects
 
