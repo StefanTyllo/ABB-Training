@@ -1,0 +1,38 @@
+name: Copilot authentication test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/copilot-smoke-test.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  copilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Copilot secret is configured
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+        run: |
+          if [ -z "$COPILOT_GITHUB_TOKEN" ]; then
+            echo "::error::Repository secret COPILOT is missing or empty."
+            exit 1
+          fi
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+      - name: Test Copilot authentication and execution
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+        run: |
+          copilot --version
+          copilot -p 'Reply with exactly: Copilot authentication successful' --no-ask-user -s --available-tools='' > copilot-response.txt
+          cat copilot-response.txt
+          cat copilot-response.txt >> "$GITHUB_STEP_SUMMARY"
