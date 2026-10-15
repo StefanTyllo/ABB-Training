@@ -91,6 +91,42 @@ The in-container shell starts at `/workspace`; existing `python materials/prepar
 
 `abb doctor` writes JSON plus a short readable report. It checks versions, writeability, compilation, clean preparation and actual Selenium/Playwright startup; optional provider checks require an actual harmless tool call. Missing credentials do not fail an explicitly offline tool-only check, and tool readiness must not be presented as account readiness. It must distinguish intentional starter defects/skips from infrastructure failure.
 
+### Container entry instructions in every exercise
+
+Each FW1, FW2, HW1, HW2, T1 and T2 lab card, student guide and track walkthrough must show its own container-entry instructions. A link to the general prerequisites is not sufficient. Label command blocks **Host terminal** or **Inside the container**, give the exact exercise directory, and show `pwd` with the expected directory before exercise commands. Entering the container means opening its local shell through Docker Compose; no SSH server, container username/password or agent-account login is required for that shell. Explain agent authentication separately, and repeat it only when the selected provider is not already authenticated.
+
+For a fresh FW1 demonstration, the proposed instructions are:
+
+**Host terminal, in the unpacked package directory:**
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 demo
+docker compose exec --workdir /workspace/work/fw1-demo training bash
+```
+
+**Inside the container:**
+```bash
+pwd
+# Expected: /workspace/work/fw1-demo
+```
+
+Every guide substitutes its own concrete path, rather than leaving `<lab>` placeholders:
+
+| Exercise | Demonstration directory |
+|---|---|
+| FW1 | `/workspace/work/fw1-demo` |
+| FW2 | `/workspace/work/fw2-demo` |
+| HW1 | `/workspace/work/hw1-demo` |
+| HW2 | `/workspace/work/hw2-demo` |
+| T1 | `/workspace/work/t1-demo` |
+| T2 | `/workspace/work/t2-demo` |
+
+Each exercise's fresh transfer instructions prepare **two separate** workspaces using `abb prepare LAB transfer --name LAB-transfer-md` and `--name LAB-transfer-code`, then give the full host-side `docker compose exec --workdir /workspace/work/LAB-transfer-md training bash` or code-workspace equivalent with the real lab ID filled in. Keep copied Markdown versus supplied automation rules unchanged.
+
+For T1/T2, Terminal A enters the chosen workspace and runs its server; Terminal B repeats the same host-side container-entry command into the same service and directory before running bootstrap/tests. Do not run the server/test commands on the host or in different one-off containers. Show how to keep/stop the owned server and serialize workspaces using port 8765.
+
+Each guide also states: `exit` returns to the host without deleting work; reopening a terminal requires repeating the package-directory/container-entry steps; resume an existing workspace without running preparation again; normal `docker compose stop training`/`up -d training` preserves work. Stages 2–4 state whether to stay in the existing shell or repeat its entry command. Include learner-readable recovery for a stopped/missing container and a wrong working directory.
+
 ### Browser lifecycle and T1 support
 
 Keep the default app binding at `127.0.0.1` inside the container. Add an explicit `--host` server option, preserving its default, solely for optional preview. A separate Compose preview override publishes `127.0.0.1:8765:8765` and starts the chosen app with `--host 0.0.0.0`. Default exercises expose no ports. Test alternate host ports and collisions; variants remain internal and only owned children are stopped.
@@ -122,7 +158,7 @@ Current support slides contain no setup text according to inspection. Review the
 5. Stopping/restarting/rebuilding preserves work. Two isolated participant projects do not share ports, state or credentials. Exports contain current code/evidence and no auth material.
 6. Container checks for firmware, hardware and existing replay/T1/T2 packages pass under Python 3.12. Existing validation seeds stay historical and protected hashes are not silently regenerated to permit edits.
 7. Before declaring migration complete, run all six current main rehearsal labs with the unchanged provider and independently assess all 18 submissions in the container. Record expected engineering FAIL/BLOCKED outcomes separately; agent exit alone is not acceptance. A missing account/model is explicitly BLOCKED.
-8. Updated PDF, attachment, package manifest, Markdown instructions and actual CLI behavior agree. Verify a representative Windows Docker Desktop path with spaces and Linux Engine path; unsupported ARM/host policies are stated rather than claimed tested.
+8. Every lab and transfer has independently usable, explicitly labeled host/container entry, expected-directory, second-terminal and resume instructions; a learner need not infer these from another lab. Updated PDF, attachment, package manifest, Markdown instructions and actual CLI behavior agree. Verify a representative Windows Docker Desktop path with spaces and Linux Engine path; unsupported ARM/host policies are stated rather than claimed tested.
 
 Roll out runtime feasibility first, then the shared image/launcher, then portability changes, T1 support, CI, synchronized documentation/release packaging, and final live verification of the frozen image. Old experiment records remain intact. This is a plan for review, not a claim that container execution has passed.
 
