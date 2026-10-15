@@ -23,10 +23,12 @@ RUN pip install --no-cache-dir --require-hashes -r /opt/abb/runtime/requirements
 COPY docker/package.json docker/package-lock.json /opt/abb/node/
 RUN cd /opt/abb/node && npm ci --no-audit --no-fund && npm cache clean --force
 COPY docker/playwright.json /opt/abb/runtime/playwright.json
+COPY docker/launcher.py docker/doctor.py docker/export.py /opt/abb/runtime/
 COPY docker/abb /usr/local/bin/abb
 RUN chmod 755 /usr/local/bin/abb && useradd --create-home --uid 1000 --shell /bin/bash learner \
     && mkdir -p /workspace/work /workspace/runs /workspace/export \
-    && chown -R learner:learner /workspace
+    && mkdir -p /home/learner/.codex /home/learner/.copilot \
+    && chown -R learner:learner /workspace /home/learner
 WORKDIR /workspace
 USER learner
 CMD ["sleep", "infinity"]

@@ -12,6 +12,12 @@ x-runtime: &runtime
 services:
   training:
     <<: *runtime
+    volumes:
+      - work:/workspace/work
+      - runs:/workspace/runs
+      - export:/workspace/export
+      - codex-auth:/home/learner/.codex
+      - copilot-auth:/home/learner/.copilot
     image: abb-training:dev
     build:
       context: .
@@ -21,3 +27,5 @@ volumes:
   work:
   runs:
   export:
+  codex-auth:
+  copilot-auth:
