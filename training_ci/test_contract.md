@@ -26,3 +26,24 @@ python training_ci/grade_test.py --lab t2 --workspace work/t2-transfer-md --mode
 ```
 
 The grader serially owns servers on ephemeral loopback ports and passes BASE_URL to pytest. It runs the selected learner suite directly, checks JUnit (no skips/errors; required relevant assertion failures), and in code mode checks guardrails.py against the correct server too. T2 code mode also executes the server-owning evaluate_variants.py contract after those servers stop. It records logs/JUnit and grade.json under workspace/evidence/ci, plus a screenshot on a T1 semantic failure after browser creation. Exit 0 means the measured contract passed; any other exit means failed or blocked. Node 22 and Copilot CLI belong to the caller's agent setup; the grader itself requires no agent authentication. Classroom grading is not adversarial isolation.
+
+## Stage context and evidence ownership
+
+Read the current-stage context first; the full task-card.md and this contract
+remain authoritative. Do not create automation/ before Stage 4, including fixture
+or placeholder directories. Early disposable fixtures belong under
+evidence/stage1-fixtures/. Preserve workflow-md-only.md byte-for-byte.
+
+Original source authorities, baselines and raw captures stay immutable.
+evidence/session.md is append-only: preserve earlier entries while allowing
+later entries. Verify original captures and journal prefixes separately from the
+current growing journal hash. Host-generated context/ changes between stages;
+it is not an original capture and must not be frozen into preservation guards.
+
+Complete required artifacts/checks before optional hardening. Helper-owned logs
+and metadata use unique run directories. Caller-owned stdout/stderr capture can
+already exist when a helper starts; do not reject or overwrite an inferred
+sibling .log. Exercise the documented entry point with caller console redirection
+and a fresh requested report path. Preserve actual subprocess exits and evidence.
+Verify an already completed task without repeating its mutation or inventing
+historical observations. Honest FAIL/BLOCKED outcomes remain visible.

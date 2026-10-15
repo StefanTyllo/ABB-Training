@@ -19,6 +19,9 @@ def main():
     parser.add_argument('output', type=Path)
     args = parser.parse_args()
     root = Path(__file__).resolve().parent
+    task_card = root / 'task_cards' / (args.lab + '.md')
+    if not task_card.is_file():
+        parser.error('Bundled task card is missing; re-extract the current starter materials.')
     output = args.output.resolve()
     if output.exists():
         parser.error('Output exists; choose a fresh directory to preserve prior work.')
@@ -38,9 +41,10 @@ def main():
                         '--case',args.case,'--output',str(output)],check=True)
     if args.lab.startswith('hw'):
         shutil.copy2(root/'hardware/REPORT_CONTRACT.md', output/'REPORT_CONTRACT.md')
+    shutil.copy2(task_card, output/'task-card.md')
     (output/'evidence').mkdir(exist_ok=True)
     print('Prepared workspace:',output)
-    print('Read the PDF lab card before starting the agent.')
+    print('Read task-card.md and the PDF shared prompts before starting GitHub Copilot CLI.')
 
 if __name__=='__main__':
     main()

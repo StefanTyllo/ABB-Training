@@ -160,3 +160,38 @@ Keep secret-bearing jobs limited to trusted code. Do not use `pull_request_targe
 - [Running Copilot CLI programmatically](https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/run-cli-programmatically)
 - [Programmatic CLI reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference)
 - [Copilot CLI in GitHub Actions](https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/automate-with-actions)
+
+## Stage-focused lab rehearsals
+
+The lab runner still invokes GitHub Copilot CLI 1.0.97 with the existing `COPILOT`
+secret mapped only to `COPILOT_GITHUB_TOKEN` in its agent step. Independent grading
+runs separately without that token. It never invokes a different coding agent.
+
+`training_kit/prompts/` contains common, stage and fresh-transfer instructions.
+`training_ci/context_delivery.py` selects the current card section and reading
+list without editing the full task card or acceptance contract. Exact prompts,
+context snapshots and SHA-256 delivery metadata are saved in each workspace's
+evidence directory; context/current-stage.md is host-managed and may change.
+
+Each invocation uses a temporary COPILOT_HOME, --no-custom-instructions and disabled
+skill retrieval, so personal instructions/configuration do not enter a rehearsal.
+The temporary profile is deleted afterwards; no global settings are changed.
+Local scripted rehearsals consequently need the intended token in the environment,
+not only a stored interactive login. Classroom guided work keeps normal approvals.
+Pinned browser MCP configuration is supplied explicitly for T1/T2; Selenium remains
+the test framework. npm uses a writable runner cache. Native Copilot model/effort
+can be set through repository variables COPILOT_MODEL/COPILOT_REASONING_EFFORT;
+if unset, metadata honestly records CLI defaults rather than a pinned model.
+
+The existing 600-second stage limit is authoritative, with no shorter inner cutoff.
+Timeouts retain failure metadata and delivered evidence. Smaller default context
+and mandatory-artifact-first prompts do not permit skipping acceptance checks.
+
+Token-free PR checks cover all real card/stage/replay combinations, preservation,
+Copilot command isolation, timeout recording and PDF/embedded starter consistency.
+Authenticated Copilot rehearsals remain separately dispatchable; passing structural
+checks does not establish a new agent acceptance result or a learner pilot.
+
+References: [Copilot programmatic options](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference),
+[configuration directory](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference),
+[tool permissions](https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli/allowing-tools).

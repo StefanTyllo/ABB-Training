@@ -19,4 +19,4 @@ T2: demonstration and MD-only transfer passed independent checks. The code trans
 
 Actual Copilot invocations and byte-identical transfer helpers were checked. All 16 T2 helper self-tests and referenced fixtures were present. The generated defect phase label is heuristic: the valid 65535 rejection fails at Save before reload. Review the recorded assertion, not the heuristic label alone.
 
-See ../VERIFICATION.md and the repository validation_records archives for provenance. Learners still derive their own tests from REQUIREMENTS.md; these starters do not ship the finished solutions. Run browser_preflight.py on every teaching machine. A facilitated learner pilot and authenticated Codex execution remain unperformed.
+See ../VERIFICATION.md and the repository validation_records archives for provenance. Learners still derive their own tests from REQUIREMENTS.md; these starters do not ship the finished solutions. Run browser_preflight.py on every teaching machine. A facilitated learner pilot remains unperformed.

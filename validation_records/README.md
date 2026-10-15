@@ -21,7 +21,7 @@ Run URL pattern: https://github.com/StefanTyllo/ABB-Training/actions/runs/ follo
 
 ## Review notes
 
-- Real Copilot CLI version 1.0.97, Node 22 and Python 3.12.15 were used on hosted Ubuntu. Exact model identity was not recorded. No authenticated Codex execution or human classroom pilot is claimed.
+- Real Copilot CLI version 1.0.97, Node 22 and Python 3.12.15 were used on hosted Ubuntu. Exact model identity was not recorded. No human classroom pilot is claimed.
 - Copilot performed four scripted stage invocations and two fresh transfers per lab. Stage/file handoffs are an approximation of the learner's continuous, narrated terminal conversation.
 - Hardware transfer checker implementations were reused. Their initial helper unit tests depended on demo inputs; the agent repaired those tests into independent fixtures during transfer. This is not zero-intervention portability. Unexercised stale-report/provenance combinations remain outside the measured claims.
 - T1 initial code transfer used unchanged helper implementations. Follow-up browser 154.0.8037.97 and retained PNG were observed. The follow-up package omission was a packaging defect, not grounds to suppress failed self-test evidence.
