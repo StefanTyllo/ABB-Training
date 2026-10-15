@@ -1,0 +1,6 @@
+import time
+
+
+def test_example(page):
+    page.choose_connection("tcp")
+    time.sleep(1)

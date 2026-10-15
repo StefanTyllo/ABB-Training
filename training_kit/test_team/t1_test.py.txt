@@ -1,0 +1,15 @@
+import pytest
+
+
+@pytest.mark.requirement("UI-01")
+def test_connection_scaffold(page):
+    page.choose_connection("tcp")
+    assert page.visible("host").is_displayed()
+
+
+@pytest.mark.skip(reason="Learner must implement requirement assertions after guided discovery")
+@pytest.mark.requirement("UI-02")
+@pytest.mark.requirement("SAVE-01")
+def test_auth_and_persistence(page, case):
+    # Remove skip only after replacing this placeholder with meaningful assertions.
+    raise NotImplementedError("Extend the existing POM and test the independently specified behavior")

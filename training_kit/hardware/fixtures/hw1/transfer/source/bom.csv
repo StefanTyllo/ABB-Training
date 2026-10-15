@@ -1,0 +1,4 @@
+board_id,source_revision,ref,kind,value
+SENSE-BETA,R8,U7,ic,AMP-DEMO
+SENSE-BETA,R8,R11,resistor,4.7 kOhm
+SENSE-BETA,R8,C8,capacitor,100 nF

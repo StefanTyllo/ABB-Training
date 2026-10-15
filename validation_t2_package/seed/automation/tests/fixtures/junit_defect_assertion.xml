@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2">
+<testcase classname="tests.test_settings" name="test_save_reload_restores_tcp_values[a]"><failure message="AssertionError: assert 'serial' == 'tcp'&#10;  - tcp&#10;  + serial">trace</failure></testcase>
+<testcase classname="tests.test_settings" name="test_port_boundary_accepts_valid[1]"/>
+</testsuite></testsuites>

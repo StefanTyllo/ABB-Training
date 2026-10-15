@@ -1,0 +1,4 @@
+board_id,source_revision,ref,kind,value
+SENSE-ALPHA,R7,R1,resistor,4.7 kOhm
+SENSE-ALPHA,R7,C1,capacitor,100 nF
+SENSE-ALPHA,R7,U1,ic,AMP-DEMO

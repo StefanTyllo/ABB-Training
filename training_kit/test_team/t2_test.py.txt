@@ -1,0 +1,10 @@
+import pytest
+
+
+@pytest.mark.requirement("SAVE-01")
+def test_weak_save_smoke(page):
+    # Intentionally weak existing test: the marker is a claim, not proof of coverage.
+    page.choose_connection("tcp")
+    page.fill("host", "lab.example.test")
+    page.fill("port", "1502")
+    assert page.save() == "Saved"

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites><testsuite name="pytest" tests="1">
+<testcase classname="tests.test_settings" name="test_connection_visibility_both_directions"><error message="failed on setup with &quot;ConnectionRefusedError: [Errno 111] Connection refused&quot;">urllib.error.URLError: ConnectionRefusedError</error></testcase>
+</testsuite></testsuites>
