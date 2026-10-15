@@ -47,6 +47,8 @@ def test_clean_preparation_from_readonly_source(lab, case, tmp_path):
     if lab.startswith('t'):
         for name in ['server.py', 'ui.html', 'browser_preflight.py']:
             assert (output/name).read_bytes() == (MATERIALS/'test_team/scaffold'/name).read_bytes()
+    assert os.access(output, os.W_OK)
+    assert all(os.access(path, os.W_OK) for path in output.rglob("*") if not path.is_symlink())
     repeated = subprocess.run(command, capture_output=True, text=True)
     assert repeated.returncode != 0
 

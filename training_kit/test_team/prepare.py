@@ -13,6 +13,10 @@ if args.output.exists():
     parser.error("Output already exists; choose a fresh directory")
 root = Path(__file__).resolve().parent
 shutil.copytree(root / "scaffold", args.output, ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"))
+# Copies belong to the learner; image-owned source stays read-only.
+for copied in [args.output, *args.output.rglob("*")]:
+    if not copied.is_symlink():
+        copied.chmod(copied.stat().st_mode | 0o200)
 (args.output / "tests").mkdir(exist_ok=True)
 shutil.copyfile(root / (args.lab + "_test.py.txt"), args.output / "tests" / "test_settings.py")
 shutil.copyfile(root / "REQUIREMENTS.md", args.output / "REQUIREMENTS.md")

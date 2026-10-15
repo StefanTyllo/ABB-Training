@@ -38,6 +38,10 @@ def main():
                         '--case',args.case,'--output',str(output)],check=True)
     if args.lab.startswith('hw'):
         shutil.copy2(root/'hardware/REPORT_CONTRACT.md', output/'REPORT_CONTRACT.md')
+    # Copies belong to the learner; image-owned source stays read-only.
+    for copied in [output, *output.rglob("*")]:
+        if not copied.is_symlink():
+            copied.chmod(copied.stat().st_mode | 0o200)
     subprocess.run(['git', 'init', '--quiet', '--initial-branch=main', str(output)], check=True)
     ignore = output / '.gitignore'
     previous = ignore.read_text() if ignore.exists() else ''

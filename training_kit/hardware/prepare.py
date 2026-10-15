@@ -16,6 +16,10 @@ def main():
         parser.error(f"output already exists; choose a fresh directory: {args.output}")
     source = root / "fixtures" / args.lab / args.case
     shutil.copytree(source, args.output)
+    # Copies belong to the learner; image-owned source stays read-only.
+    for copied in [args.output, *args.output.rglob("*")]:
+        if not copied.is_symlink():
+            copied.chmod(copied.stat().st_mode | 0o200)
     if args.lab == "hw2":
         (args.output / "tools").mkdir()
         shutil.copy2(root / "tools/generate_calibration.py", args.output / "tools/generate_calibration.py")
