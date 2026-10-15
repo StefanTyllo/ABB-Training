@@ -1,0 +1,30 @@
+name: Check Copilot training context and materials
+on:
+  pull_request:
+    paths:
+      - 'training_ci/**'
+      - 'training_kit/**'
+      - 'training_author/**'
+      - 'docs/ABB_Workflow_Training.pdf'
+      - '.github/workflows/check-training-context.yml'
+      - '.github/workflows/validate-workflow-labs.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  context-and-materials:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check actual lab cards, Copilot interface and timeout evidence
+        run: python -m unittest discover -s training_ci/tests -v
+      - name: Install material verification dependencies
+        run: python -m pip install -r training_author/requirements.txt
+      - name: Verify published PDF and exact embedded starter sources
+        run: python training_author/check_materials.py

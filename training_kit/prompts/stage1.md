@@ -1,0 +1,3 @@
+Demonstrate the task one engineering operation at a time using existing low-level tools. For each decision record a short rationale, exact command, actual result/exit and interpretation in evidence/session.md; link raw output files rather than repeating them. Complete the required task and its prescribed valid/failure checks, preserving the original baseline before any mutation.
+
+Write workflow.md describing the observed prerequisites, ordered steps, branches, evidence, recovery and completion criteria. Do not create automation/ at all, even for test fixtures or a placeholder directory. Put disposable Stage 1 fixtures under evidence/stage1-fixtures/. Do not implement reusable helpers.

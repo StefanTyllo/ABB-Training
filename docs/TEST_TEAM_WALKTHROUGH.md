@@ -21,6 +21,9 @@ The local form's None/Password selector represents simulated device configuratio
 
 **Guided-work prompt:** “Read the task, requirements, fixture and Page Objects. Guide one action at a time. Explain its purpose, expected evidence and allowed changes. Wait for my reasoning between actions. Record actual commands/tool calls, observations and recovery in `evidence/session.md`. Build reusable helpers only after demonstrating the process.”
 
+
+**Copilot context and evidence.** Use GitHub Copilot CLI consistently, with a fresh conversation/invocation for each stage after the guided demo. Read the prepared task-card.md and pass only the saved stage inputs needed. Provide the current stage and its named inputs; keep the full card/contract available on demand. Link raw evidence instead of repeating entire transcripts. No automation/ directory exists before Stage 4; early fixtures go under evidence/stage1-fixtures/. Keep original captures immutable and evidence/session.md append-only. In Stage 4, finish required helpers/checks before optional expansion, keep workflow-md-only.md unchanged, and test caller-owned console redirection plus fresh report paths. Helper logs belong in unique run directories; a growing journal or an already-open caller log must not block valid verification. Completed device tasks are verified without a second write.
+
 ---
 
 ## T1 — Explore the form and extend Page Objects

@@ -18,6 +18,9 @@ Python 3.12 and GCC are required. Complete the handbook's live agent smoke tests
 
 **How to work with the agent:** “Read the exercise and requirements. Guide one operation at a time. Explain its purpose, expected evidence and files it may change. Record actual commands, observations, decisions and recovery in `evidence/session.md`. Wait for my explanation between operations. Do not build reusable automation until the demonstration is complete.”
 
+
+**Copilot context and evidence.** Use GitHub Copilot CLI consistently, with a fresh conversation/invocation for each stage after the guided demo. Read the prepared task-card.md and pass only the saved stage inputs needed. Provide the current stage and its named inputs; keep the full card/contract available on demand. Link raw evidence instead of repeating entire transcripts. No automation/ directory exists before Stage 4; early fixtures go under evidence/stage1-fixtures/. Keep original captures immutable and evidence/session.md append-only. In Stage 4, finish required helpers/checks before optional expansion, keep workflow-md-only.md unchanged, and test caller-owned console redirection plus fresh report paths. Helper logs belong in unique run directories; a growing journal or an already-open caller log must not block valid verification. Completed device tasks are verified without a second write.
+
 ---
 
 ## FW1 — Capture state before troubleshooting
