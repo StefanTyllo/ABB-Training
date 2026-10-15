@@ -7,7 +7,9 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-WORK = ROOT / 'runs/t2-regraded'
+sys.path.insert(0, str(ROOT))
+from training_ci.runtime_paths import runs_root
+WORK = runs_root() / 't2-regraded'
 shutil.copytree(ROOT / 'validation_t2_package/seed', WORK)
 (WORK / 'evidence').mkdir()
 expected = json.loads((ROOT / 'validation_t2_package/source_hashes.json').read_text())

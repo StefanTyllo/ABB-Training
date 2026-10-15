@@ -60,10 +60,11 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--variant", choices=("correct", "no-persist", "bad-boundary"), default="correct")
     parser.add_argument("--state", type=Path, default=Path("state.json"))
     args = parser.parse_args()
     STATE, VARIANT = args.state, args.variant
-    print(f"Training UI: http://127.0.0.1:{args.port}", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
+    print(f"Training UI: http://{args.host}:{args.port}", flush=True)
+    ThreadingHTTPServer((args.host, args.port), Handler).serve_forever()

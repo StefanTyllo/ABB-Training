@@ -1,0 +1,14 @@
+# One active T1/T2 workspace per service. Prepare it before using this override.
+services:
+  training:
+    ports:
+      - "127.0.0.1:${ABB_PREVIEW_PORT:-8765}:8765"
+    command:
+      - python
+      - /workspace/work/${ABB_PREVIEW_WORKSPACE:?Set a prepared T1 or T2 workspace name}/server.py
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8765"
+      - --state
+      - /workspace/work/${ABB_PREVIEW_WORKSPACE}/state.json

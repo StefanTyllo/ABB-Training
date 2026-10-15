@@ -38,6 +38,10 @@ def main():
                         '--case',args.case,'--output',str(output)],check=True)
     if args.lab.startswith('hw'):
         shutil.copy2(root/'hardware/REPORT_CONTRACT.md', output/'REPORT_CONTRACT.md')
+    subprocess.run(['git', 'init', '--quiet', '--initial-branch=main', str(output)], check=True)
+    ignore = output / '.gitignore'
+    previous = ignore.read_text() if ignore.exists() else ''
+    ignore.write_text(previous + '\n.env\n.env.*\n.auth/\n.codex/\n.copilot/\n__pycache__/\n.pytest_cache/\n')
     (output/'evidence').mkdir(exist_ok=True)
     print('Prepared workspace:',output)
     print('Read the PDF lab card before starting the agent.')

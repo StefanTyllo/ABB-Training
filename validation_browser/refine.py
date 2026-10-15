@@ -11,7 +11,9 @@ import time
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
-WORK = ROOT / "runs" / "t1-refined"
+sys.path.insert(0, str(ROOT))
+from training_ci.runtime_paths import runs_root
+WORK = runs_root() / "t1-refined"
 PROTECTED = ("server.py", "ui.html", "conftest.py", "case.json", "REQUIREMENTS.md", "pytest.ini", "requirements.txt", "browser_preflight.py", "pages/base_page.py")
 
 
@@ -22,7 +24,7 @@ def hashes():
 def prepare():
     shutil.copytree(ROOT / "validation_browser" / "seed", WORK)
     (WORK / "evidence").mkdir()
-    (ROOT / "runs" / "t1-refined-protected.json").write_text(json.dumps(hashes()))
+    (runs_root() / "t1-refined-protected.json").write_text(json.dumps(hashes()))
 
 
 def agent():
@@ -58,7 +60,7 @@ def agent():
 
 
 def verify():
-    expected = json.loads((ROOT / "runs" / "t1-refined-protected.json").read_text())
+    expected = json.loads((runs_root() / "t1-refined-protected.json").read_text())
     if hashes() != expected:
         raise RuntimeError("Protected application/framework changed")
     result = subprocess.run([sys.executable, str(ROOT / "training_ci" / "grade_test.py"), "--lab", "t1", "--workspace", str(WORK), "--mode", "code"], cwd=ROOT)

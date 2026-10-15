@@ -7,10 +7,12 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from training_ci.runtime_paths import runs_root
 lab = sys.argv[1]
 if lab not in ('fw1','fw2','hw1','hw2','t1','t2'):
     raise SystemExit('Unknown lab')
-output = ROOT/'runs'/lab
+output = runs_root()/lab
 output.mkdir(parents=True, exist_ok=True)
 group = 'firmware' if lab.startswith('fw') else 'hardware' if lab.startswith('hw') else 'test'
 snapshots_path = output/'protected-inputs.json'

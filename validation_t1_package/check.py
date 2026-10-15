@@ -7,12 +7,14 @@ import sys
 import time
 import urllib.request
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from training_ci.runtime_paths import runs_root
 sys.path.insert(0,str(ROOT))
 from validation_browser import refine
 WORK=refine.WORK
 shutil.copytree(ROOT/'validation_t1_package/seed',WORK)
 (WORK/'evidence').mkdir()
-(ROOT/'runs/t1-refined-protected.json').write_text(json.dumps(refine.hashes()))
+(runs_root() / 't1-refined-protected.json').write_text(json.dumps(refine.hashes()))
 with (WORK/'evidence/package-server.log').open('w') as log:
     app=subprocess.Popen([sys.executable,'server.py','--variant','correct','--port','8765','--state','state.json'],cwd=WORK,stdout=log,stderr=log)
     try:

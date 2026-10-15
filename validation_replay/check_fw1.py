@@ -4,7 +4,9 @@ import json
 import subprocess
 import sys
 ROOT=Path(__file__).resolve().parents[1]
-w=ROOT/'runs/fw1-refined'
+sys.path.insert(0, str(ROOT))
+from training_ci.runtime_paths import runs_root
+w=runs_root() / 'fw1-refined'
 paths=[w/'evidence'/name for name in ('baseline.json','capture-before.json','capture-after.json','mutation.json')]
 saved={p:p.read_bytes() for p in paths}
 for moment,baud,ok in [('before',9600,False),('after',38400,True)]:

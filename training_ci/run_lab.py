@@ -9,12 +9,15 @@ import hashlib
 import json
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import time
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from training_ci.runtime_paths import runs_root
 LABS = ('fw1', 'fw2', 'hw1', 'hw2', 't1', 't2')
 ALLOWED_SHELL = ('python', 'python3', 'gcc', './fw2/parser', 'cat', 'ls', 'pwd', 'mkdir', 'sed', 'head', 'rg')
 
@@ -77,18 +80,28 @@ or blocked results must remain visible. This is a scripted rehearsal, not a huma
 
 
 def server_start(workspace):
+    with socket.socket() as probe:
+        try:
+            probe.bind(('127.0.0.1', 8765))
+        except OSError as error:
+            raise RuntimeError('Application port 8765 is occupied; stop its owner first') from error
     stream = (workspace / 'evidence/server.log').open('w')
     process = subprocess.Popen([sys.executable, 'server.py', '--variant', 'correct', '--port', '8765',
                                 '--state', 'state.json'], cwd=workspace, stdout=stream, stderr=stream)
     for _ in range(50):
         if process.poll() is not None:
-            raise RuntimeError('Application server exited')
+            stream.close()
+            raise RuntimeError('Application server exited; inspect evidence/server.log')
         try:
             urllib.request.urlopen('http://127.0.0.1:8765', timeout=1).close()
             return process, stream
         except OSError:
             time.sleep(.1)
     process.terminate()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill(); process.wait()
     stream.close()
     raise RuntimeError('Application readiness timeout')
 
@@ -98,7 +111,7 @@ def main():
     parser.add_argument('lab', choices=LABS)
     args = parser.parse_args()
     lab = args.lab
-    output = ROOT / 'runs' / lab
+    output = runs_root() / lab
     output.mkdir(parents=True, exist_ok=True)
     contract_name = 'firmware' if lab.startswith('fw') else 'hardware' if lab.startswith('hw') else 'test'
     snapshots = {}

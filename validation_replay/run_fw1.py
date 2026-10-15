@@ -6,7 +6,9 @@ import subprocess
 import sys
 import time
 ROOT=Path(__file__).resolve().parents[1]
-workspace=ROOT/'runs/fw1-refined'
+sys.path.insert(0, str(ROOT))
+from training_ci.runtime_paths import runs_root
+workspace=runs_root() / 'fw1-refined'
 subprocess.run([sys.executable,str(ROOT/'training_kit/prepare_lab.py'),'fw1','transfer',str(workspace)],check=True)
 for name in ('automation','workflow.md','workflow-md-only.md','extraction-map.md'):
     source=ROOT/'validation_replay/seed/fw1'/name
