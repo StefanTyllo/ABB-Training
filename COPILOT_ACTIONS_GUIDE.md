@@ -1,162 +1,41 @@
-# Using GitHub Copilot CLI in GitHub Actions
+# Container CI, rehearsal and independent grading
 
-This guide describes the working setup in **StefanTyllo/ABB-Training**.
+All six workflows call `build-training-image.yml`. It builds the locked facilitator target without credentials, records the immutable image ID, and uploads the image archive plus SHA-256 checksum once per workflow run. Matrix jobs verify and load that artifact. The runner performs checkout, Docker operations and artifact upload; application, agent, compiler and browser commands run in the image.
 
-## Verified setup
+`validate-workflow-labs.yml` retains all six labs, four teaching stages, two fresh transfers, 600-second stage timeouts and a separate 900-second T2 grading allowance. The main harness remains Copilot with its scoped tool allowances. Codex interactive rehearsals request `gpt-6.1-sol` / medium and have separate account acceptance.
 
-- Workflow: [Copilot authentication test](.github/workflows/copilot-smoke-test.yml)
-- Repository secret: `COPILOT`
-- CLI authentication variable: `COPILOT_GITHUB_TOKEN`
-- Runner: `ubuntu-latest`, with Node.js 22
-- Verified CLI version: 1.0.97
-- [Successful test run](https://github.com/StefanTyllo/ABB-Training/actions/runs/38589531650), on 14 October 2026
+The repository secret is **COPILOT**. The selected rehearsal container receives one runtime token file in `/run/secrets/copilot_token`; the CLI imports it through standard input. Its host directory is private, and its file is readable inside the non-root container without assuming the runner's UID. The wrapper removes provider tokens from the child environment. A fresh grader container uses the same immutable image and run volume with `--network none`, no token file and no provider-auth mounts. Authentication state remains outside source and retained artifacts.
 
-The test returned:
+Rehearsal ends before grading starts. A failed rehearsal still runs independent grading and artifact collection. Failed child exits reach the job; a successful agent response is not an acceptance result. The four remaining validation/refinement workflows retain their distinct purposes, triggers, timeouts and measured evidence. Authentication smoke still verifies a response with tools disabled; it is not the real tool smoke required by release acceptance.
+
+## Local deterministic checks
+
+**Host terminal**, from the facilitator package:
 
 ```text
-Copilot authentication successful
+docker compose --profile facilitator build facilitator
+docker compose --profile facilitator run --rm grader python -m pytest /opt/abb/repo/tests/container -q
 ```
 
-This confirms that the stored token can authenticate Copilot CLI and execute a prompt on an Actions runner. It does not test editing code, running project tests, or opening pull requests.
+These checks do not verify a paid model account. Live rehearsal needs approved Copilot entitlement, token scope and organization policy. Never replace the provider, impersonate its executable, substitute a model, or suppress a failed/blocked result to get a green job.
 
-## Run the existing test
+## Unattended provider access
 
-1. Open [the repository's Actions tab](https://github.com/StefanTyllo/ABB-Training/actions).
-2. Select **Copilot authentication test**.
-3. Select **Run workflow**, choose **main**, and confirm **Run workflow**.
-4. Open the new run and inspect the **copilot** job.
-5. Check **Test Copilot authentication and execution** for the response. It also appears in the run summary.
+Use `compose.auth.yaml` only in the facilitator package. It defines separate `codex-auth` and `copilot-auth` services; each mounts only its own provider secret and auth volume. The selected file contains one plain token line: a Codex API key or a supported Copilot token. Device login through the learner service is the normal interactive route.
 
-The workflow also runs when its own YAML file changes. Other file changes do not trigger it.
+On Linux, keep the host secret in a private directory and make the selected file readable by the container user; Compose bind-backed secrets do not remap the host file's UID. A private parent directory with mode 700 and a file with mode 444 supports different host/container UIDs. On Windows, apply equivalent access restrictions. Do not store secret files in the build context.
 
-## Authentication
+**Host terminal** — after setting the selected secret-file path through `ABB_COPILOT_SECRET_FILE`:
 
-The workflow maps your repository secret into the environment:
-
-```yaml
-env:
-  COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+```text
+docker compose -f compose.yaml -f compose.auth.yaml --profile auth run --rm copilot-auth python /opt/abb/runtime/ci.py --provider copilot -- python /opt/abb/repo/training_ci/run_lab.py fw1
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_ci/grade_all.py fw1
 ```
 
-No interactive `copilot login` is needed in CI.
+Use a fresh run volume/project for a new attempt. Normal commands preserve run evidence and refuse existing work; deleting prior results is a separate explicit operator decision. The grader receives neither provider state nor the runtime secret.
 
-To replace or renew the token:
+Artifact collection uses the same sanitizer as learner exports, excluding authentication state, provider stores and caches while retaining failed evidence. Inspect the job's assessment JSON/Markdown, grader logs, raw stage transcripts, generated workflows/code and browser evidence. Artifacts remain for 14 days. Record actual provider/model identity and meaningful engineering outcomes. Prior host-based Actions results and the older Codex experiment remain historical; they are not container acceptance.
 
-1. In your browser, open [GitHub's fine-grained token creation page](https://github.com/settings/personal-access-tokens/new).
-2. Choose your **personal account** as the resource owner.
-3. Choose a name and expiration.
-4. Under **Permissions → Account**, add **Copilot Requests**.
-5. Generate the token.
-6. In this repository, open **Settings → Secrets and variables → Actions**.
-7. Update the secret named **COPILOT** with the new token.
+## Rebuilding and publishing
 
-Use a fine-grained token beginning with `github_pat_`. Classic tokens beginning with `ghp_` are unsupported. Store the value as a secret; do not put it in a committed file.
-
-On a phone, open the token creation page in Safari or Chrome.
-
-## How the command works
-
-The existing test uses:
-
-```bash
-copilot -p 'Reply with exactly: Copilot authentication successful' \
-  --no-ask-user -s --available-tools='' > copilot-response.txt
-```
-
-| Option | Purpose |
-| --- | --- |
-| `-p` | Execute the supplied prompt and exit. |
-| `--no-ask-user` | Avoid clarification questions during CI. |
-| `-s` | Produce clean response text. |
-| `--available-tools=''` | Disable tools for this authentication-only test. |
-
-The workflow writes the response into the Actions summary:
-
-```bash
-cat copilot-response.txt >> "$GITHUB_STEP_SUMMARY"
-```
-
-## Adapt it to inspect repository code
-
-The current test does not check out the repository. To let Copilot inspect code, add a checkout step and replace the test step with a task-specific command.
-
-For example, a separate manually triggered workflow can summarize the latest commit:
-
-```yaml
-name: Copilot commit summary
-
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-jobs:
-  summary:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 2
-          persist-credentials: false
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Install Copilot CLI
-        run: npm install -g @github/copilot
-
-      - name: Summarize latest commit
-        env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
-        run: |
-          copilot -p 'Use git show HEAD to summarize the latest commit.' \
-            -s --no-ask-user \
-            --allow-tool='shell(git show:*)' > summary.md
-          cat summary.md >> "$GITHUB_STEP_SUMMARY"
-```
-
-Save this example as `.github/workflows/copilot-commit-summary.yml` to make it available in Actions. This example is documentation; it has not been added or run.
-
-Remove `--available-tools=''` when adapting the authentication test for tasks that need tools. Grant only the tool permissions that the task needs.
-
-## Adapt it to modify code
-
-For an npm project with lint and test scripts, a possible Copilot step is:
-
-```yaml
-- name: Fix lint errors
-  env:
-    COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
-  run: |
-    copilot -p 'Fix ESLint errors. Keep changes limited to lint fixes.' \
-      -s --no-ask-user \
-      --allow-tool='read, write, shell(npm:*), shell(npx:*)'
-```
-
-Check out the code and install its dependencies before this step. Then run ordinary validation commands in separate steps, for example `npm run lint` and `npm test`, so their exit codes determine CI status.
-
-Edits stay on the temporary runner. Add an explicit artifact-upload or pull-request step if you want to retain them. The existing authentication test does not commit, push, or open pull requests.
-
-## Troubleshooting
-
-| Symptom | Check |
-| --- | --- |
-| Secret missing or empty | Confirm that **COPILOT** exists under Actions secrets. |
-| Authentication denied | Check expiration and the **Copilot Requests** account permission. |
-| Copilot unavailable through your employer | Ask the administrator whether Copilot CLI is enabled. |
-| Tool action denied | Add the required `--allow-tool` permission; check that tools are not disabled. |
-| Code cannot be found | Add checkout before the Copilot step. |
-| Run times out | Inspect logs and narrow the prompt or adjust the five-minute limit. |
-| Changes disappear | Export them explicitly from the runner. |
-
-Keep secret-bearing jobs limited to trusted code. Do not use `pull_request_target` to check out and execute untrusted fork changes with this token.
-
-## Official documentation
-
-- [Authentication](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/authenticate-copilot-cli)
-- [Running Copilot CLI programmatically](https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/run-cli-programmatically)
-- [Programmatic CLI reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference)
-- [Copilot CLI in GitHub Actions](https://docs.github.com/en/copilot/how-tos/copilot-cli/automate-copilot-cli/automate-with-actions)
+Change dependency pins and hashes deliberately, rebuild, rerun offline checks and then repeat the affected live baselines. Freeze an image ID before a release rehearsal. A later runtime or source change invalidates the corresponding acceptance evidence. Image registry publication and release publication require their own authorization.

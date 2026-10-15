@@ -1,6 +1,6 @@
 # From demonstrated work to executable workflows
 ## ABB engineering training guide
-Firmware, hardware, and test teams | 14 October 2026 | Edition 1
+Firmware, hardware, and test teams | 15 October 2026 | Docker edition
 
 **Outcome.** Complete a real task with a coding agent, explain your decisions, extract a reusable Markdown workflow, and implement its repeatable activities as clear deterministic code. Prove that the extracted workflow works on a fresh case.
 
@@ -10,17 +10,17 @@ Firmware, hardware, and test teams | 14 October 2026 | Edition 1
 3. Identify operations that do not need an LLM and can become deterministic code.
 4. Ask Codex to implement highly verbose, readable code for those operations; verify it and update the workflow.
 
-**What is included.** Six lab guides, shared prompts, local Copilot CLI and Codex setup, the verified ABB-Training Actions setup, an assessment rubric, and an embedded ZIP containing runnable synthetic starters. Starter tools provide basic access to data and systems. Participants create the reusable workflow automation during the labs.
+**What is included.** Six lab guides, shared prompts, in-container Copilot CLI and Codex setup, containerized CI and labeled historical Actions results, an assessment rubric, and an embedded ZIP containing runnable synthetic starters. Starter tools provide basic access to data and systems. Participants create the reusable workflow automation during the labs.
 
-**Scope.** These exercises use synthetic devices, board data, and a local WebUI. No ABB production repository, device, Azure DevOps project, or proprietary document is required. Firmware lab 2 runs host C; hardware calculations use an explicitly idealized circuit; browser labs use Selenium against an actual local application.
+**Scope.** These exercises use synthetic devices, board data, and a local WebUI. No ABB production repository, device, Azure DevOps project, or proprietary document is required. Firmware lab 2 runs C inside the container; hardware calculations use an explicitly idealized circuit; browser labs use Selenium against an actual local application.
 
 **Acceptance status.** Technical and editorial checks are recorded at the end of this guide. Live Copilot Actions results are recorded in the release record. Codex access and a facilitated learner pilot remain separate checks. The readiness gates make those requirements explicit; this document does not claim an unperformed classroom acceptance.
 
-Start with the route on page 2. Extract the starter attachment before running any lab command.
+Start with the route on page 2. Unpack the Docker distribution or the starter attachment, then pass the readiness gate.
 <!-- PAGE -->
 # 1 Training route and responsibilities
 
-**Participant route:** setup -> readiness check -> shared method -> your team's first lab -> your team's second lab -> transfer comparison -> assessment. Read the shared prompts once; lab cards supply only the task-specific details. All relative commands start at the training root unless the card explicitly changes directory. Return there before starting the next card.
+**Participant route:** setup -> readiness check -> shared method -> your team's first lab -> your team's second lab -> transfer comparison -> assessment. Read the shared prompts once; lab cards supply only the task-specific details. Host commands start in the unpacked package folder. Exercise commands run inside the exact workspace printed on each card; use a fresh host terminal to enter another exercise.
 
 | Audience | Required reading and work |
 | --- | --- |
@@ -29,7 +29,7 @@ Start with the route on page 2. Extract the starter attachment before running an
 | Hardware | HW1 board-data reconciliation, then HW2 calculations and calibration |
 | Test | T1 dynamic WebUI automation, then T2 test effectiveness |
 | CI operator | Section 8: use the existing ABB-Training secret and validation workflow |
-| Facilitator | Sections 9-10 and the embedded instructor checks before delivery |
+| Facilitator | Sections 9-10 and the separate facilitator checks before delivery |
 
 **Roles.** The participant explains decisions and reviews generated work. The coding agent executes agreed operations and writes the extracted artifacts. The facilitator prepares the environment, controls reset copies, checks acceptance evidence, and resolves specification questions. No one should mark a result accepted because the agent says it is complete.
 
@@ -44,127 +44,76 @@ Start with the route on page 2. Extract the starter attachment before running an
 | Fresh-case replay and debrief | 30 |
 | Total | 245 |
 
-These are facilitation budgets, not measured completion times. Install software and rehearse the browser before the session. If a stage reaches its budget, record the unfinished requirement; do not skip verification to obtain a pass.
+These are facilitation budgets, not measured completion times. Build the locked image and rehearse the browser before the session. If a stage reaches its budget, record the unfinished requirement; do not skip verification to obtain a pass.
 
 **Agent choice.** Use Codex for the guided work and code generation. Every participant also completes the Copilot CLI smoke test. If the facilitator chooses Copilot as the lab agent, use it consistently through all four stages and both replay conditions, and record that choice. Do not treat a change of agent/model as an effect of adding code.
 <!-- PAGE -->
-# 2 Extract the included starter materials
+# 2 Obtain and start the Docker package
 
-The PDF contains one attachment, **ABB_Workflow_Training_Starters.zip**. Save this PDF as **ABB_Workflow_Training.pdf** in a new local training directory. Extract the attachment using a desktop PDF reader's Attachments panel, or use the commands below. Browser PDF previews may not expose attachments.
+Save this handbook and unpack the supplied learner distribution into a folder of your choice. The PDF also contains exactly one attachment, **ABB_Workflow_Training_Starters.zip**: extract it with a desktop PDF reader's Attachments panel if you need the clean Docker starter context. Browser previews may hide attachments. The standalone distribution additionally includes this PDF and its release manifest.
 
-**Command environment.** All commands in this guide use Bash on Linux. The reference preparation target is Ubuntu 24.04, including an Ubuntu WSL2 environment. Use the same environment for the terminal, Python, compiler, and browser. Native PowerShell syntax is outside this guide; choose the Bash environment before starting.
+Host requirements are Docker Engine/Desktop with Linux containers, Compose v2 or newer, network access for the build and approved accounts. Windows PowerShell and Linux host terminals use the same basic Docker commands. The initial image targets linux/amd64; ARM and Windows Docker Desktop require their own acceptance evidence.
 
-Install Python 3.12 with pip and venv, Git, and Node.js 22 or later through your organization's approved software channel. Firmware lab 2 additionally requires GCC. The test track additionally requires Chrome or Chromium and a compatible driver or working Selenium Manager downloads. These are required inputs, not assumed installed software.
+**Host terminal** — in the unpacked folder containing `Dockerfile` and `compose.yaml`:
 
-From the directory containing the PDF:
-```bash
-python3 --version
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install pypdf==6.10.0
-python - <<'PY'
-from pathlib import Path
-from pypdf import PdfReader
-name = 'ABB_Workflow_Training_Starters.zip'
-items = PdfReader('ABB_Workflow_Training.pdf').attachments[name]
-assert len(items) == 1, 'Expected exactly one starter attachment'
-out = Path(name)
-assert not out.exists(), 'Move the previous ZIP before extracting'
-out.write_bytes(items[0])
-print('Saved', out)
-PY
-python -m zipfile -e ABB_Workflow_Training_Starters.zip materials
+```text
+docker compose build training
+docker compose up -d training
+docker compose exec training abb doctor --offline
 ```
 
-**Directory contract.** The resulting root is `materials/`. Keep it as the clean source. Create participant workspaces under `work/`, beside `materials/`. Lab commands state their starting directory explicitly. Do not run an agent in `materials/`: instructor reference checks and starter baselines live there. This separation is a classroom convention, not a security boundary.
+Python, Node, GCC, browsers, drivers and both CLIs are installed in the image from locked dependencies. The shell starts at `/workspace`; `materials/` points to read-only clean sources. Prepared work lives under `/workspace/work`, run evidence under `/workspace/runs`, and exports under `/workspace/export`.
 
-**Before continuing:** confirm `materials/README.md`, `materials/firmware/`, `materials/hardware/`, and `materials/test_team/` exist. Missing attachment or missing files means setup is blocked; recover the original PDF rather than inventing a repository URL.
+Named volumes survive normal stop/start and rebuild. Each fresh preparation refuses an existing name. Resume existing work by re-entering its exact directory; do not prepare it again. The six exercise cards show their own entry commands.
 <!-- PAGE -->
-# 3 Configure and verify the coding agents
+# 3 Authenticate and verify the coding agents
 
-## GitHub Copilot CLI
-GitHub's npm installation requires Node.js 22 or later. An eligible Copilot account and enabled organization/enterprise CLI policy are required for this training route. Install the standalone `copilot` CLI, not the older `gh copilot` extension. [G1]
-```bash
-node --version
-npm --version
-npm install -g @github/copilot@1.0.97
-copilot --version
-copilot login
-```
-Complete the displayed browser or device-code flow using your intended account. Start `copilot`, enter `/user`, and confirm the identity. Exit the interactive session before returning to shell commands. Environment tokens can override a stored login; check their presence without printing their values. [G2]
-```bash
-python - <<'PY'
-import os
-for name in ('COPILOT_GITHUB_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN'):
-    print(name, 'set' if os.getenv(name) else 'unset')
-PY
+**Host terminal**, in the package folder:
+
+```text
+docker compose exec -it training abb login codex
+docker compose exec -it training abb login copilot
 ```
 
-Create a disposable smoke-test checkout from the training root:
-```bash
-mkdir -p work/agent-smoke
-cd work/agent-smoke
-git init
-printf 'training smoke test\n' > sample.txt
-copilot -p "Run exactly git status --short and explain its output." \
-  --no-ask-user --allow-tool='shell(git status --short)'
-```
-**Pass:** the transcript records the actual command and reports untracked `sample.txt`, with no authentication or tool-denial error. Inspect the tool event; an agent's claim alone is insufficient. `--no-ask-user` disables clarification questions; the separate allowance permits the named command. [G3]
+Complete each provider's displayed device-code flow with the intended approved account. Its own authentication volume persists separately. Accounts, model entitlement and organization CLI policy remain required. Do not place credentials in prompts, source, reports or exported work. Only authenticate again when the selected provider requires it.
 
-## Codex
-In the same smoke-test directory, install and authenticate using the approved account. [O1, O2]
-```bash
-npm install -g @openai/codex
-codex --version
-codex login
-codex login status
-codex
-```
-Ask: **Run `git status --short`, explain the output, and do not change files.** Review any permission request. Confirm actual execution and the same untracked file. A successful version command or login alone does not prove model access.
+**Host terminal** — prepare a disposable smoke workspace and start one selected agent:
 
-Record both CLI versions, the chosen lab agent/model, OS, and successful smoke-test evidence in `setup-record.md`. Keep normal approval controls; this training does not require unrestricted execution flags.
+```text
+docker compose exec training abb prepare fw1 demo --name agent-smoke
+docker compose exec -it training abb agent codex --workspace work/agent-smoke
+```
+
+Ask it to run `pwd` and `git status --short`, explain the actual output and change no files. Inspect the real tool event and any normal approval request. Codex requests `gpt-6.1-sol` with medium reasoning; unavailable model access is BLOCKED. Exit and run the corresponding Copilot smoke in the same workspace using `abb agent copilot --workspace work/agent-smoke` through `docker compose exec -it training`.
+
+Record CLI versions, the chosen lab provider/model, image identity where available, workspace and actual command evidence. Login and version commands alone do not prove account or tool readiness. Preserve the selected agent/model across all four teaching stages and both transfers.
 <!-- PAGE -->
-# 4 Pass the environment readiness gate
+# 4 Pass readiness, stop, resume and export
 
-Return to the training root and activate `.venv` in every new terminal. Check the tools required for your track:
-```bash
-python --version
-git --version
-node --version
-npm --version
-# Firmware parser lab only:
-gcc --version
-# Test track only:
-python -m pip install -r materials/test_team/scaffold/requirements.txt
+**Host terminal**:
+
+```text
+docker compose exec training abb doctor --offline
+docker compose stop training
+docker compose up -d training
 ```
 
-For the test track, prepare a disposable preflight workspace from the training root:
-```bash
-python materials/prepare_lab.py t1 demo work/browser-preflight
-cd work/browser-preflight
-python server.py --variant correct --port 8765 --state state.json
+The offline doctor checks non-root execution, locked tool versions, GCC execution, clean preparation, the normal Codex sandbox and actual sandboxed Selenium/Playwright browsers. It reports accounts as UNTESTED. Readiness requires both this tool evidence and the separate real provider smoke tests. `abb doctor` without `--offline` leaves unverified account access BLOCKED.
+
+Every exercise supplies its exact `docker compose exec --workdir ... training bash` entry. Run `pwd` before its commands. `exit` returns to the host without deleting work. Reopening a terminal means returning to the package folder and repeating that exercise's entry; preparation is only for a fresh workspace.
+
+For T1/T2, Terminal A runs the local server and Terminal B enters the same service and directory before bootstrap/tests. Stop only your Terminal A server with Ctrl-C before changing the workspace that owns port 8765. Optional host-browser preview uses the loopback-only override documented in README; ordinary exercises publish no ports.
+
+**Host terminal** — create a fresh sanitized submission export:
+
+```text
+docker compose exec training abb export --output /workspace/export/submission.zip
+docker compose cp training:/workspace/export/submission.zip ./submission.zip
 ```
-Leave that server running. In a second terminal at the training root:
-```bash
-source .venv/bin/activate
-cd work/browser-preflight
-python -m pytest browser_preflight.py -q
-```
-The check must launch a real browser and verify dynamic field visibility. If Chrome/driver discovery fails, provision matching executables and set CHROME_BINARY and CHROMEDRIVER to their actual absolute paths before rerunning. Stop the server with Ctrl-C when the check passes. HTTP-only checks do not satisfy this gate.
 
-| Gate | Evidence required before the first lab |
-| --- | --- |
-| Materials | Attachment extracted; chosen starter can be copied into a fresh workspace |
-| Agent access | Both CLI smoke tests completed; selected lab agent and model recorded |
-| Basic execution | Python and Git commands work in the same terminal used by the agent |
-| Firmware compiler | GCC compiles the supplied parser; intentional behavioral defects remain |
-| Hardware data | Both hardware fixtures generate into new directories; source files open successfully |
-| Test browser | Real-browser preflight passes; versions and server URL recorded |
-| Workspace | Participant writes only in its work directory; clean starter remains available |
+Exports exclude `.env`, `.auth`, provider stores, Git metadata and caches. Inspect code and evidence before submission. Keep FAIL and BLOCKED results meaningful: an intentional starter defect, a missing authority, unavailable account access and a failed browser launch are different findings.
 
-**Recovery:** use the failing command's actual error. Resolve missing executables or packages in this terminal; check account/token selection for authentication; check exact tool allowances for denied execution. For browser errors verify the binary, driver and download access, then repeat the real-browser preflight. Stop a previous owned server if port 8765 is occupied.
-
-**Gate decision:** READY only when every applicable row has evidence. Otherwise record BLOCKED, the failing command, and its error; resolve it before the lab. Account policies and software installation must be handled through the organization's normal support process.
+If the container is stopped, start it. If `pwd` is wrong, exit and repeat the stated entry command. If a sandbox or browser fails, retain its actual diagnostic and resolve host policy with the facilitator; readiness has not passed.
 <!-- PAGE -->
 # 5 The four-stage method
 
@@ -246,17 +195,34 @@ Do this after completing the two labs for your team. The facilitator selects at 
 
 **Task card.** Restore communication with the simulated device. Explain the cause using observations collected before the change, make one justified configuration change, and verify recovery. Do not repair the simulator's implementation.
 
-**Prepare from the training root**
-```bash
-python materials/prepare_lab.py fw1 demo work/fw1-demo
-cd work/fw1-demo
+**Fresh demonstration entry**
+**Host terminal** — in the unpacked package folder; fresh FW1 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 demo
+docker compose exec --workdir /workspace/work/fw1-demo training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw1-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
 Read `requirements.md`. Start the agent here and use the Stage 1 start prompt. The state is already initialized under `device/`. Reinitialization is unnecessary and refuses existing state.
 
 **Allowed changes:** device configuration through `fw1/device.py set`, plus the common workflow, automation, and evidence files. Do not edit `device/state.json`, the simulator, or `fw1/expected.json` directly.
 
 ## Stage 1 Guided operations
 Run these one at a time, explaining the question each answers:
+**Inside the container**:
+
 ```bash
 python fw1/device.py --workdir device read --field identity
 python fw1/device.py --workdir device read --field firmware
@@ -280,6 +246,9 @@ Use the tool's help to construct a single `set --parameter baud --value` operati
 <!-- PAGE -->
 # FW1 Extract the reusable operations
 
+Stay in the existing /workspace/work/fw1-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+
+
 ## Stage 2 Abstraction focus
 Inputs are the device tool path, state-directory path, expected-configuration path, and evidence destination. Resolve the expected settings from the observed identity. Do not carry the demo device ID or baud value into the reusable workflow.
 
@@ -297,11 +266,41 @@ The experiment operation must require a valid baseline for the same device and c
 
 **Required checks:** valid capture; missing/nonexistent state directory produces blocked; unknown identity cannot select a reference; experiment without a baseline is rejected; stale baseline is rejected; correct change restores the probe. Use disposable prepared cases for checks that mutate state.
 
-**Transfer preparation, from the training root**
-```bash
-python materials/prepare_lab.py fw1 transfer work/fw1-transfer-md
-python materials/prepare_lab.py fw1 transfer work/fw1-transfer-code
+**Fresh transfer entries after Stage 4**
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 transfer --name fw1-transfer-md
+docker compose exec --workdir /workspace/work/fw1-transfer-md training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw1-transfer-md
+```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 transfer --name fw1-transfer-code
+docker compose exec --workdir /workspace/work/fw1-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw1-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 Use the shared replay procedure. The transfer has a different identity and required baud. The learner's code must discover both from current evidence. Do not copy `device/` from the demo.
 
 **Assessment:** the facilitator checks actual before/after records, the device-matched reference, and a fresh successful probe. Automated starter smoke tests validate the fixture, not the learner's reasoning or baseline capture.
@@ -312,16 +311,33 @@ Use the shared replay procedure. The transfer has a different identity and requi
 
 **Task card.** Repair the supplied C parser to satisfy its signed-value and streaming requirements. Preserve its public interface. Demonstrate the failures, explain the repair, and extract a reusable build/reproduction/verification workflow.
 
-**Prepare from the training root**
-```bash
-python materials/prepare_lab.py fw2 demo work/fw2-demo
-cd work/fw2-demo
+**Fresh demonstration entry**
+**Host terminal** — in the unpacked package folder; fresh FW2 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 demo
+docker compose exec --workdir /workspace/work/fw2-demo training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
 Read `requirements.md` before editing. A packet is `A5 02 sequence low high checksum`; the value is signed 16-bit little-endian and checksum is XOR of the first five bytes. Each CLI argument is one receive chunk in the same stream. The complete contract defines noise, invalid length, checksum failure, and resynchronization. There is no timeout requirement in this fixture.
 
 **Allowed changes:** `fw2/parser.c`, plus common workflow/automation/evidence files. Preserve `parser.h`, `main.c`, and the specification. The compiled `fw2/parser` is a generated artifact.
 
 ## Stage 1 Guided operations
+**Inside the container**:
+
 ```bash
 gcc -std=c11 -Wall -Wextra -Werror \
   fw2/parser.c fw2/main.c -o fw2/parser
@@ -343,6 +359,9 @@ Make a focused repair. Rebuild and repeat the same reproductions. Then run a pos
 <!-- PAGE -->
 # FW2 Extract build and replay tooling
 
+Stay in the existing /workspace/work/fw2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+
+
 ## Stage 2 Abstraction focus
 Parameterize source directory, compiler command, executable path, packet fields, chunk schedule, and evidence destination. Preserve the six-byte packet format, signed range, checksum definition, and streaming semantics as specification invariants.
 
@@ -361,38 +380,91 @@ Represent compilation failure separately from an incorrect decode. A failed comp
 
 **Required checks:** whole/split equivalence; signed minimum and maximum; bad checksum rejected; incomplete tail emits nothing; valid frame after noise recovered; compilation failure cannot reuse a stale executable. Follow the exact resynchronization contract in requirements.md.
 
-**Transfer preparation, from the training root**
-```bash
-python materials/prepare_lab.py fw2 transfer work/fw2-transfer-md
-python materials/prepare_lab.py fw2 transfer work/fw2-transfer-code
+**Fresh transfer entries after Stage 4**
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 transfer --name fw2-transfer-md
+docker compose exec --workdir /workspace/work/fw2-transfer-md training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-transfer-md
+```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 transfer --name fw2-transfer-code
+docker compose exec --workdir /workspace/work/fw2-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 The fresh starters retain the defects. Use this new reproduction after building:
+**Inside the container**:
+
 ```bash
 ./fw2/parser a502 2a00 f875
 ```
 Expected result: sequence 42, value -2048. Transfer the workflow and helpers, not the repaired `parser.c` or old executable. The new agent must use the process to repair the fresh candidate.
 
 **Facilitator protocol check**, from the training root after a learner build:
-```bash
-python materials/firmware/instructor/smoke.py \
-  work/fw2-demo/fw2/parser
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/firmware/instructor/smoke.py /workspace/work/fw2-demo/fw2/parser
 ```
+
+The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
+
 Use the transfer executable path for a transfer submission. The checker evaluates 50 stream cases plus malformed input. Also review the explanation and automation; a protocol pass alone does not complete the training assessment.
 <!-- PAGE -->
 # HW1 Reconcile a board data package
 
 **Task card.** Reconcile a generated netlist with the approved BOM and schematic export. Preserve source authority, distinguish equivalent units from real discrepancies, and report every change with evidence.
 
-**Prepare from the training root**
-```bash
-python materials/prepare_lab.py hw1 demo work/hw1-demo
-cd work/hw1-demo
+**Fresh demonstration entry**
+**Host terminal** — in the unpacked package folder; fresh HW1 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw1 demo
+docker compose exec --workdir /workspace/work/hw1-demo training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/hw1-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
 **Inputs:** `source/approval.json` declares the expected board/revision; `source/bom.csv` is authoritative for component identity and value; `source/schematic.json` is authoritative for pin-to-net mapping and corroborates values. `derived/netlist.json` is an output to review, not an authority. Required source provenance must be present and consistent.
 
 **Allowed changes:** `derived/netlist.json`, `report.json`, and common workflow/automation/evidence files. Preserve source files and any supplied tools. Use the report contract in `REPORT_CONTRACT.md` supplied in the prepared workspace.
 
 ## Stage 1 Guided operations
+**Inside the container**:
+
 ```bash
 python -m json.tool source/approval.json
 cat source/bom.csv
@@ -414,6 +486,9 @@ Correct only demonstrable export errors. Re-read the result and create report.js
 <!-- PAGE -->
 # HW1 Extract source and consistency checks
 
+Stay in the existing /workspace/work/hw1-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+
+
 ## Stage 2 Abstraction focus
 Parameterize the package root, source-role paths, expected board/revision declaration, and output paths. Do not embed the demo's component references. Preserve the rule that an expected revision is not evidence for a missing revision on a source document.
 
@@ -432,18 +507,52 @@ Include functions for component indexing, dimensional normalization, pin compari
 
 **Required checks:** equivalent 100 nF and 0.1 uF; incorrect resistor value; incorrect pin map; reordered components; missing source revision; missing component. Keep report.json compatible with REPORT_CONTRACT.md.
 
-**Transfer preparation, from the training root**
-```bash
-python materials/prepare_lab.py hw1 transfer work/hw1-transfer-md
-python materials/prepare_lab.py hw1 transfer work/hw1-transfer-code
+**Fresh transfer entries after Stage 4**
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw1 transfer --name hw1-transfer-md
+docker compose exec --workdir /workspace/work/hw1-transfer-md training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/hw1-transfer-md
+```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw1 transfer --name hw1-transfer-code
+docker compose exec --workdir /workspace/work/hw1-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/hw1-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 The package changes board identity, component references/order, and omits one source revision. No recovery evidence is supplied. A correct transfer stops with a blocked assessment, requests an explicitly revisioned approved source, and leaves the derived netlist unchanged.
 
 **Facilitator check**, from the training root:
-```bash
-python materials/hardware/instructor/check.py \
-  --lab hw1 --case demo --workspace work/hw1-demo
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw1 --case demo --workspace /workspace/work/hw1-demo
 ```
+
+The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
+
 For transfer, change the case and workspace arguments. The instructor check accepts a faithful blocked report; that does not mean the board data has been verified.
 
 **Debrief:** did code remove comparison work while preserving the responsibility to establish source authority?
@@ -452,13 +561,33 @@ For transfer, change the case and workspace arguments. The instructor check acce
 
 **Task card.** Review an idealized voltage-divider input against its ADC voltage limit, then regenerate stale nominal calibration from the current inputs. Report the design assessment independently of whether the file generator ran successfully.
 
-**Prepare from the training root**
+**Fresh demonstration entry**
+**Host terminal** — in the unpacked package folder; fresh HW2 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw2 demo
+docker compose exec --workdir /workspace/work/hw2-demo training bash
+```
+
+**Inside the container**:
+
 ```bash
-python materials/prepare_lab.py hw2 demo work/hw2-demo
-cd work/hw2-demo
+pwd
+# Expected: /workspace/work/hw2-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+**Inside the container**:
+
+```bash
 python -m json.tool source/circuit.json
 python -m json.tool derived/calibration.json
 ```
+
 **Model contract:** ideal source; upper resistor Rt and lower resistor Rb; nominal capacitor C from divider node to ground; ideal high-impedance ADC. Independent resistor tolerances are +/-t. No ADC loading, sampling transient, leakage, temperature drift, or capacitor tolerance is included. Source values use SI units. These assumptions bound the exercise.
 
 **Allowed changes:** `derived/calibration.json`, `report.json`, and common artifacts. Preserve source/circuit.json and tools/. Use REPORT_CONTRACT.md for report fields and precision.
@@ -477,6 +606,8 @@ Calculate one quantity at a time in the terminal, explaining the equation before
 | ADC margin | ADC limit minus maximum ADC voltage |
 
 Explain why upper-resistor minimum and lower-resistor maximum maximize output. Compare the existing coefficient and provenance with current inputs. Then invoke the existing generator:
+**Inside the container**:
+
 ```bash
 python tools/generate_calibration.py --config source/circuit.json \
   --output derived/calibration.json --replace
@@ -484,6 +615,9 @@ python tools/generate_calibration.py --config source/circuit.json \
 **Demonstration complete:** all eight quantities recorded, voltage limit evaluated, calibration regenerated and checked, report.json written with assumptions and evidence. Now document the observed workflow.
 <!-- PAGE -->
 # HW2 Extract calculations and freshness checks
+
+Stay in the existing /workspace/work/hw2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+
 
 ## Stage 2 Abstraction focus
 All component values, tolerance, maximum input, ADC limit, and file paths are inputs. Equations and model assumptions remain explicit. Do not turn the demo's coefficient into a universal constant.
@@ -503,35 +637,104 @@ Validate freshness using the canonical source digest specified in REPORT_CONTRAC
 
 **Required checks:** valid demo; worst-case limit violation; invalid/missing input; changed input invalidates old calibration provenance; regeneration is repeatable for identical input. The source JSON must remain unchanged.
 
-**Transfer preparation, from the training root**
-```bash
-python materials/prepare_lab.py hw2 transfer work/hw2-transfer-md
-python materials/prepare_lab.py hw2 transfer work/hw2-transfer-code
+**Fresh transfer entries after Stage 4**
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw2 transfer --name hw2-transfer-md
+docker compose exec --workdir /workspace/work/hw2-transfer-md training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/hw2-transfer-md
+```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw2 transfer --name hw2-transfer-code
+docker compose exec --workdir /workspace/work/hw2-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/hw2-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 The upper resistor changes. Use current inputs for every calculation. Correct transfer behavior produces a design assessment of fail when the worst-case voltage exceeds the stated limit, while recording accurate recalculation and calibration provenance.
 
 **Facilitator check**, from the training root:
-```bash
-python materials/hardware/instructor/check.py \
-  --lab hw2 --case demo --workspace work/hw2-demo
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw2 --case demo --workspace /workspace/work/hw2-demo
 ```
+
+The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
+
 Change case/workspace for transfer. The check validates numerical results and artifact provenance; it does not certify physical hardware. Compare the documented assumptions and engineering explanation as part of assessment.
 
 **Debrief:** which parts of the calculation previously consumed model reasoning despite having a fully specified deterministic answer?
 <!-- PAGE -->
 # T1 Explore WebUI with Playwright MCP
 
-**Task card.** Use Copilot CLI with Playwright MCP to inspect a running dynamic form, then extend the existing Selenium Page Objects and pytest tests. This replaces terminal-driven Selenium inspection; Selenium remains the test execution framework.
+**Task card.** Use the chosen agent with Playwright MCP to inspect a running dynamic form, then extend the existing Selenium Page Objects and pytest tests. This replaces terminal-driven Selenium inspection; Selenium remains the test execution framework.
 
-**Prepare from the training root**
+**Fresh demonstration entry**
+**Host terminal** — in the unpacked package folder; fresh T1 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t1 demo
+docker compose exec --workdir /workspace/work/t1-demo training bash
+```
+
+**Inside the container**:
+
 ```bash
-python materials/prepare_lab.py t1 demo work/t1-demo
-cd work/t1-demo
+pwd
+# Expected: /workspace/work/t1-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+
+```bash
 python server.py --variant correct --port 8765 --state state.json
 ```
-Keep the server running. In terminal B, activate the training venv, enter work/t1-demo, and run `python -m pytest browser_preflight.py -q`, then `python -m pytest -q`. Expect a passing preflight, one smoke pass and one skipped placeholder. Browser startup failure is BLOCKED; the skip is unfinished coverage.
 
-**Session preparation.** Follow the next page before exploration. The supplied synthetic app has no login; use its no-login session bootstrap. To exercise authentication, the facilitator supplies an authorized test URL, account, approved login selectors and an authenticated readiness signal. Do not add login to the protected fixture. Use Copilot consistently in the demonstration and both transfer conditions; record versions and model.
+**Host terminal — Terminal B**, opened separately in the same package folder:
+
+```text
+docker compose exec --workdir /workspace/work/t1-demo training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-demo
+```
+
+Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
+
+Keep the server running. In terminal B, repeat the exact Terminal B container-entry command for /workspace/work/t1-demo, and run `python -m pytest browser_preflight.py -q`, then `python -m pytest -q`. Expect a passing preflight, one smoke pass and one skipped placeholder. Browser startup failure is BLOCKED; the skip is unfinished coverage.
+
+**Session preparation.** Follow the next page before exploration. The supplied synthetic app has no login; use its no-login session bootstrap. To exercise authentication, the facilitator supplies an authorized test URL, account, approved login selectors and an authenticated readiness signal. Do not add login to the protected fixture. Use the chosen agent consistently in the demonstration and both transfer conditions; record versions and model.
 
 **Allowed changes.** Extend pages/settings_page.py, tests/test_settings.py and workflow/automation/evidence files; add bootstrap and non-secret configuration files. Preserve server, BasePage, conftest.py, case.json and REQUIREMENTS.md. The fixture resets state before each test. For an external target, agree its independent requirements and adapter first; local graders do not validate that target.
 
@@ -539,7 +742,7 @@ Keep the server running. In terminal B, activate the training venv, enter work/t
 
 1. Read REQUIREMENTS.md, case.json, BasePage, SettingsPage and existing tests. Identify helpers to reuse. Explain the purpose of each action before running it.
 
-2. In Copilot, use Playwright MCP to open the target and inspect live snapshots; inspect DOM attributes when needed. Record action, resulting fields, visibility/enabled/required state, readiness signal and proposed Selenium locator. Separate observations from requirements. Snapshot references are temporary, not test locators.
+2. With the chosen agent, use Playwright MCP to open the target and inspect live snapshots; inspect DOM attributes when needed. Record action, resulting fields, visibility/enabled/required state, readiness signal and proposed Selenium locator. Separate observations from requirements. Snapshot references are temporary, not test locators.
 
 3. Switch Serial to TCP and back, and None to Password and back. Wait for each asynchronous transition. Check locator uniqueness in each relevant state; prefer stable IDs/test attributes or scoped semantic selectors supported by the existing framework.
 
@@ -551,7 +754,7 @@ Keep the server running. In terminal B, activate the training venv, enter work/t
 
 **Demonstration complete:** UI-01, UI-02, SAVE-01 and ASYNC-01 have assertions; both switch directions work; values survive reload; no required skips or fixed sleeps. Retain sanitized MCP observations and actual pytest results in evidence/session.md.
 <!-- PAGE -->
-# T1 Login bootstrap and Copilot handover
+# T1 Session bootstrap and agent handover
 
 **Replacement focus.** Replace generic browser-helper extraction with a deterministic local JavaScript bootstrap, authenticated-session handover and reusable execution/evidence helpers. The script runs in Node.js; never serve credentials in browser JavaScript.
 
@@ -564,23 +767,105 @@ Parameterize target URL, login selectors, authenticated readiness signal, case p
 !.env.example
 .auth/
 ```
-Check `git check-ignore .env .auth/storage-state.json` and `git ls-files -- .env .auth`. Ignored files must not already be tracked. Git ignore prevents accidental tracking; it does not hide files from the agent or protect local access. Restrict local permissions and exclude secrets/state from prompts, logs, screenshots and archives. Have the operator populate .env without showing its contents to Copilot.
+Check `git check-ignore .env .auth/state.json` and `git ls-files -- .env .auth`. Ignored files must not already be tracked. Git ignore prevents accidental tracking; it does not hide files from the agent or protect local access. Restrict local permissions and exclude secrets/state from prompts, logs, screenshots and archives. Have the operator populate .env without showing its contents to Copilot.
 
 ## Stage 3 Demonstrate the deterministic boundary
 
-With the facilitator's reviewed bootstrap first, demonstrate the path; after abstraction, implement/adapt it under automation/. The Node.js script loads .env at runtime, validates inputs, uses Playwright to log in and waits for the agreed authenticated signal. Save `context.storageState()` to `.auth/storage-state.json`, then close the bootstrap browser. No-login fixture mode opens the local form and exports session state without credentials. Do not claim this tests authentication.
+The prepared T1 workspace supplies the reviewed no-login bootstrap under `tools/`; it creates no learner `automation/` code. In Terminal B, with Terminal A's server running:
 
-Start Copilot without the login environment variables. In `/mcp add`, configure a local server: command `npx`; arguments `-y`, `@playwright/mcp@<reviewed-version>`, `--isolated`, and `--storage-state=<absolute-path>`. Replace both placeholders with real reviewed values; pin and record the version. The script's Playwright dependency must also be installed and recorded. Verify the MCP browser reaches the protected form before exploration. Saved state initializes a new context; it does not transfer an open tab. If the app needs sessionStorage or unsupported state, rehearse an attached-browser alternative before class. [M1, M2]
+**Inside the container**:
+
+```bash
+node tools/session_bootstrap.mjs --mode no-login --url http://127.0.0.1:8765 --state .auth/state.json --report evidence/bootstrap.json
+```
+
+The launcher configures actual stdio MCP from the baked tooling when you start `abb agent` in this workspace. It loads `.auth/state.json` into a fresh isolated context. For an authorized external login target, a reviewed adapter must be supplied separately; the supplied script returns BLOCKED in login mode. Do not treat no-login state as authentication. Learner automation is created only after the later abstraction and extraction stages.
+
+Start the chosen provider through `abb agent` after the state file exists. The launcher writes fresh workspace-scoped MCP configuration with the pinned baked Node entry point, sandboxed Chrome and isolated state loading. It performs no package download. Ask the actual MCP tools to reach the form before exploration. Saved state initializes a new context; it does not transfer an open tab, and the local no-login fixture does not prove authentication. Targets requiring other state need a separately reviewed adapter. [M1, M2]
 
 ## Stage 4 Implement and verify reuse
 
 Implement bootstrap and pytest execution/evidence helpers under automation/; retain the existing Selenium framework. Missing inputs, rejected login, expired state or unreachable URL must report BLOCKED without secrets. Keep assertions in tests. Record actual browser identity, URL, collected/skipped counts and outcomes; distinguish startup failures from assertion failures. Retain a sanitized intentional missing-element screenshot and error context in evidence/. Selenium tests use their own reviewed authentication fixture for external targets; Playwright state is not automatically a Selenium session.
 
-**Transfer preparation, from the training root**
-```bash
-python materials/prepare_lab.py t1 transfer work/t1-transfer-md
-python materials/prepare_lab.py t1 transfer work/t1-transfer-code
+**Fresh transfer entries after Stage 4**
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t1 transfer --name t1-transfer-md
+docker compose exec --workdir /workspace/work/t1-transfer-md training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-transfer-md
+```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t1-transfer-md training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-transfer-md
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t1 transfer --name t1-transfer-code
+docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-transfer-code
+```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-transfer-code
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 **Transfer and acceptance.** Follow Section 7. MD-only starts with clean Page Objects/tests plus extracted Markdown; code-assisted additionally copies only reusable automation and documented dependencies. Supply credentials locally and bootstrap a fresh session in each; never copy auth state, demo tests or finished Page Objects. Run one workspace at a time on port 8765. Verify both visibility directions and exact current-case persistence. Test successful handover, wrong URL, missing credentials in login mode, invalid/expired authentication and useful element-failure evidence. Mark unexercised login paths BLOCKED. T2 still checks defect detection. Prior CI results cover the Selenium baseline, not this new MCP/login route; rehearse it before delivery.
 
 **M1** https://github.com/microsoft/playwright-mcp
@@ -593,12 +878,47 @@ Stop the previous T1 or transfer server with Ctrl-C before starting this lab.
 
 **Task card.** Improve a passing but weak suite so that it detects a persistence defect and validates the specified port boundaries. Demonstrate both correct-app success and relevant defective-app failure.
 
-**Prepare from the training root**
+**Fresh demonstration entry**
+**Host terminal** — in the unpacked package folder; fresh T2 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t2 demo
+docker compose exec --workdir /workspace/work/t2-demo training bash
+```
+
+**Inside the container**:
+
 ```bash
-python materials/prepare_lab.py t2 demo work/t2-demo
-cd work/t2-demo
+pwd
+# Expected: /workspace/work/t2-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+
+```bash
 python server.py --variant correct --port 8765 --state state.json
 ```
+
+**Host terminal — Terminal B**, opened separately in the same package folder:
+
+```text
+docker compose exec --workdir /workspace/work/t2-demo training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-demo
+```
+
+Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
+
 Use terminal B in the same workspace with the training venv active. Run the browser preflight, then `python -m pytest -q`. The initial single smoke test is intentionally weak.
 
 **Allowed changes:** the same Page Object and test files as T1, plus common artifacts. Preserve the application and independent requirements. Use requirements to determine expected behavior; inspecting the server's fault-switch implementation is not part of the diagnosis.
@@ -608,6 +928,8 @@ Use terminal B in the same workspace with the training venv active. Run the brow
 2. Read SAVE-01, VAL-01, and ASYNC-01 in REQUIREMENTS.md. Map each to observable browser behavior.
 3. Show a valid save and browser reload on the correct app.
 4. Stop terminal A with Ctrl-C. With the server stopped, reset the local state and launch the demonstration defect:
+**Inside the container**:
+
 ```bash
 python -c "from pathlib import Path; Path('state.json').unlink(missing_ok=True)"
 python server.py --variant no-persist --port 8765 --state state.json
@@ -621,6 +943,9 @@ python server.py --variant no-persist --port 8765 --state state.json
 **Demonstration complete:** correct application passes; the no-persist variant fails because a saved value is not restored; evidence connects the failure to SAVE-01. A crash or unrelated timeout does not count as detecting the defect. Now document the process.
 <!-- PAGE -->
 # T2 Extract repeatable test effectiveness evaluation
+
+Stay in the existing /workspace/work/t2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+
 
 ## Stage 2 Abstraction focus
 Parameterize the test workspace, application command/variant, port, state path, case data, and evidence destination. Preserve the rule that the suite must pass a correct application before a defective-application failure earns credit.
@@ -640,11 +965,85 @@ Record the exact application variant, case, test files/digests, collected/skippe
 
 **Required checks:** correct app passes; known persistence defect detected; required skips rejected; occupied port or failed startup reported as infrastructure failure; test failures preserved in the final result rather than swallowed.
 
-**Transfer preparation, from the training root**
-```bash
-python materials/prepare_lab.py t2 transfer work/t2-transfer-md
-python materials/prepare_lab.py t2 transfer work/t2-transfer-code
+**Fresh transfer entries after Stage 4**
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t2 transfer --name t2-transfer-md
+docker compose exec --workdir /workspace/work/t2-transfer-md training bash
 ```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-transfer-md
+```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-transfer-md
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t2 transfer --name t2-transfer-code
+docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-transfer-code
+```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-transfer-code
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 Start with the correct application and case.json. Transfer input includes the valid endpoint 65535. The facilitator then restarts with `--variant bad-boundary`, using the same clean-state procedure. The agent must detect the requirement violation from test evidence.
 
 Transfer general runners/helpers, not a finished demo test file. Keep the variant label undisclosed until evaluation when feasible. The supplied source includes the variants for reproducibility; this is a classroom exercise, not an adversarially isolated benchmark.
@@ -653,38 +1052,15 @@ Transfer general runners/helpers, not a finished demo test file. Keep the varian
 
 **Debrief:** how did executable feedback expose a misleading green test result, and which parts of that evaluation still need human judgment?
 <!-- PAGE -->
-# 8 Use the verified ABB-Training CI setup
+# 8 Use the Docker CI image and separate grading
 
-**Repository:** StefanTyllo/ABB-Training. The existing **Copilot authentication test** uses repository secret **COPILOT**, mapped to **COPILOT_GITHUB_TOKEN**. It ran successfully on 14 October 2026. Its response was “Copilot authentication successful.” This proves authentication and prompt execution; tools are disabled in that test, so it does not prove code editing or test execution.
+The workflows build one locked facilitator image per run, save it as a checksummed artifact, and load that same immutable image ID in all six matrix jobs. The Actions runner performs checkout, Docker operations and artifact upload; training tools run inside the image.
 
-https://github.com/StefanTyllo/ABB-Training/actions/runs/38589531650
+Repository secret **COPILOT** is supplied only to the selected rehearsal container as a runtime token file. Its CLI imports the token through standard input. The rehearsal ends before a new credential-free, offline grader container reads the shared run volume. Provider state is not mounted into grading or published artifacts.
 
-**Rerun authentication:** open the repository's Actions tab, select Copilot authentication test, choose Run workflow on main, then inspect Test Copilot authentication and execution and the run summary. The existing workflow remains unchanged.
+Keep the 600-second stage timeout, 900-second T2 grading allowance and the real Copilot harness unchanged. Rehearsal exit alone does not mean acceptance. Always retain raw failures, assessments and engineering FAIL/BLOCKED outcomes. A prior host-based authentication response is historical evidence and does not verify the Docker candidate.
 
-## Credential and runner contract
-The lab validation workflow uses Ubuntu, Node.js 22, Python 3.12, and the verified Copilot CLI version 1.0.97. Its relevant setup is:
-```yaml
-- uses: actions/checkout@v6
-  with:
-    persist-credentials: false
-- uses: actions/setup-node@v4
-  with:
-    node-version: '22'
-- run: npm install -g @github/copilot@1.0.97
-- name: Run the lab rehearsal
-  env:
-    COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
-  run: python training_ci/run_lab.py fw1
-```
-The complete workflow supplies Python, browser dependencies, the six-lab matrix, independent grading, and artifact retention. Do not replace it with this excerpt. No interactive login is needed in CI. [G2, G3, G5]
-
-**Renew the existing credential only when necessary:** open the fine-grained token page below in the intended personal account; choose the personal Resource owner, name and expiration; add Permissions -> Account -> Copilot Requests; generate the token. Update repository Settings -> Secrets and variables -> Actions -> **COPILOT**. Do not rename the secret. Use a fine-grained `github_pat_` token; classic `ghp_` tokens are unsupported. Never commit or print the value.
-
-https://github.com/settings/personal-access-tokens/new
-
-**Troubleshooting:** missing COPILOT fails before the request; authentication rejection requires checking expiration, account entitlement and CLI policy; denied tools require checking the actual permission pattern. The authentication-only test's `--available-tools=''` must not be copied into the lab rehearsal, which needs tools. `--no-ask-user` grants no execution permission by itself.
-
-**Organization-token alternative:** for a separately configured organization-owned repository, an administrator can enable organization-billed Copilot CLI use and use `copilot-requests: write` with GITHUB_TOKEN. That is a different authentication route, not the configuration validated in this personal repository. Follow [G6] if adopting it.
+The full workflow and operator instructions are in COPILOT_ACTIONS_GUIDE.md in the facilitator package. Do not publish images, release artifacts or provider credentials while running local checks. Account entitlement and organization CLI policy remain requirements.
 <!-- PAGE -->
 # 8 Run and inspect the six-lab rehearsal
 
@@ -743,11 +1119,14 @@ The facilitator grades each lab using the same rubric. The engineering result an
 Before teaching, complete a full rehearsal on the participant environment. Run the same PDF extraction path, commands, account login, browser, and compiler used by learners. Record versions and outcomes. A checklist without the underlying run evidence is incomplete.
 
 **Starter checks, from the training root**
-```bash
-python materials/firmware/instructor/smoke.py
-python -m unittest discover -s materials/hardware/tests -v
-python materials/test_team/author_checks/check_server.py
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python -m pytest /opt/abb/repo/tests/container -q
 ```
+
+The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
+
 These verify supplied fixture behavior. They do not replace learner code review or the live browser/agent checks. The hardware README documents its report checker; firmware smoke also grades a submitted parser executable.
 
 | Release check | Required result |
@@ -761,15 +1140,15 @@ These verify supplied fixture behavior. They do not replace learner code review 
 | Pilot | One representative learner completes each team's first lab and understands the handoff to its second |
 | PDF | All pages readable; commands copy correctly; attachment extracts and matches its recorded digest |
 
-**Author verification for this edition.** All twelve clean lab/case preparations, firmware reference checks, hardware fixture checks and HTTP variants passed. Every PDF page was visually inspected and the embedded ZIP was extracted and exercised. Authenticated Copilot Actions rehearsals, real Chrome checks, and targeted refinements are recorded on the following page and in the attachment's VERIFICATION.md. Codex account access and a representative learner pilot were not performed by CI.
+**Historical verification before Docker.** All twelve clean lab/case preparations, firmware reference checks, hardware fixture checks and HTTP variants passed. Every PDF page was visually inspected and the embedded ZIP was extracted and exercised. Authenticated Copilot Actions rehearsals, real Chrome checks, and targeted refinements are recorded on the following page and in the attachment's VERIFICATION.md. Codex account access and a representative learner pilot were not performed by CI.
 
 **Release decision to complete locally:** READY / BLOCKED. Record date, environment, reviewer, evidence location, unresolved issue, and owner. Mark READY only after every applicable row passes. This keeps “training accepted” tied to observed readiness rather than the appearance of the document.
 
-**Known boundaries:** instructor material is separated by folders and preparation, not hardened isolation; the fixtures are single-user and sequential; source-format extraction, physical hardware, and live Azure DevOps are later extensions. Do not infer coverage of those integrations from these exercises.
+**Known boundaries:** the learner image, archive and PDF attachment omit assessment sources; the facilitator edition contains them, and the workshop remains a classroom assessment rather than an adversarial isolation benchmark; the fixtures are single-user and sequential; source-format extraction, physical hardware, and live Azure DevOps are later extensions. Do not infer coverage of those integrations from these exercises.
 <!-- PAGE -->
 # 10 Observed CI results and refinements
 
-**Environment:** GitHub-hosted Ubuntu; Node.js 22; Python 3.12.15; Copilot CLI 1.0.97; repository secret COPILOT. The CLI default model was used; its exact model identity was not pinned or captured. These are functional rehearsal results, not a controlled model-performance study.
+**Historical host-based environment (not Docker evidence):** GitHub-hosted Ubuntu; Node.js 22; Python 3.12.15; Copilot CLI 1.0.97; repository secret COPILOT. The CLI default model was used; its exact model identity was not pinned or captured. These are functional rehearsal results, not a controlled model-performance study.
 
 **Initial six-lab run:** commit `e36498d5e48667077444be81c6061a6dacd11bd6`. Four stage invocations and two fresh transfer invocations ran per lab. Independent graders executed separately without the Copilot token.
 
@@ -881,3 +1260,60 @@ https://arxiv.org/abs/2303.11366
 
 **R3** Theo X. Olausson et al. Is Self-Repair a Silver Bullet for Code Generation? ICLR 2024. Official proceedings:
 https://proceedings.iclr.cc/paper_files/paper/2024/hash/9ddc141bdbf9d1db510cefff56c586ad-Abstract-Conference.html
+
+<!-- PAGE -->
+# 13 Stochasticity: one prompt, several valid answers
+
+**Use before the four-stage method.** This supplement explains why we extract repeatable operations into code. Read it before Section 5 and revisit it when comparing fresh-case replays in Section 7.
+
+**What stochasticity means.** Language-model generation is probabilistic. For many prompts there is no single uniquely correct next token, so separate runs can choose different likely continuations and still satisfy the request. Wording, ordering, examples, level of detail, and sometimes conclusions can vary.
+
+**Same request, different useful answers**
+> Plan for me a trip to Thailand for a 2 week vacation, what do you recommend for sightseeing?
+
+| Run | Possible opening or structure |
+| --- | --- |
+| 1 | Bangkok first: Grand Palace and Wat Phra Kaew, then Wat Arun, northern cultural sites, and beaches. |
+| 2 | Starts by asking about interests, then groups recommendations by culture, temples, beaches, and islands. |
+| 3 | Bangkok, Chiang Mai / northern Thailand, then southern islands, presented as a day-by-day itinerary. |
+
+These are illustrative alternatives from the supplied training file, not measured runs or travel recommendations. Different wording or structure alone does not establish that an answer is wrong; check it against the request and evidence.
+
+## What this means for the ABB labs
+
+The following engineering examples adapt the source's principles to this training. Two runs may choose different troubleshooting hypotheses, test cases, or report structures. Judge each against the same requirements and observed results. An unsupported conclusion is still an error, even if the text sounds confident.
+
+**Demonstration.** Repeat the travel prompt in three fresh conversations using the same model and settings. Compare structure, assumptions, and coverage. Identify which differences are harmless and which would require clarification or verification. Treat the examples above as possibilities, not expected outputs.
+
+**Bridge to workflow extraction.** A Markdown workflow gives the model guidance, but leaves it to interpret and execute steps again. Move fully specified parsing, calculations, comparisons, and checks into reviewed code; keep uncertain diagnosis and engineering decisions with the model or engineer.
+
+**Source:** supplied `chatgpt-astra-training.html`, module "Stochasticity: One Prompt, Several Valid Answers". The three-run demonstration and ABB applications are adaptations for this handbook.
+<!-- PAGE -->
+# 13 Reduce unwanted variability
+
+**Aim.** Make required operations and acceptance checks repeatable while retaining useful model judgment. Clearer prompts reduce ambiguity; they do not guarantee identical answers or correct conclusions.
+
+| Technique from the source | How to use it in these labs |
+| --- | --- |
+| Atomic prompts | Ask for one bounded task at a time. First capture state; then compare it with the identity-matched reference; only then propose a change. |
+| Constrain the output | Specify inputs, authoritative sources, required fields, ordering, exclusions, and acceptance criteria. Example: report expected and observed values, evidence paths, and pass / fail / blocked. |
+| Separate deterministic and generative steps | Let the model propose a hypothesis. Use reviewed code for parsing, dates, totals, unit conversions, limit checks, and rule compliance when inputs and rules are fixed. |
+| Repeat and compare when stakes justify it | Run an analysis independently again, compare material differences, and verify them against authoritative evidence. Repeated agreement alone is not verification. |
+
+## Connect the techniques to the four stages
+
+**1. Demonstrate and document.** Use one bounded operation per prompt. Record the actual command, observation, reasoning, and recovery so a later answer cannot silently rewrite the history.
+
+**2. Abstract the workflow.** Define inputs, branches, source authority, missing-input behavior, and completion criteria. Replace case-specific values with explicit parameters.
+
+**3. Choose the deterministic boundary.** Separate operations with fully specified rules from diagnosis, ambiguous requirements, and decisions requiring human authority.
+
+**4. Implement and verify.** Turn those specified operations into readable helpers with explicit inputs, outputs, failures, and independent checks. The same code and fixed inputs should give repeatable results for these operations; devices, clocks, files, and other changing state still need to be controlled or recorded.
+
+**Example: HW2 calibration.** The model helps interpret the requirement and explain a failed limit. Reviewed code calculates the values, checks units and limits, and detects stale calibration from the actual source inputs. A fluent explanation cannot replace those checks.
+
+**Replay debrief.** Use the same model, task, and acceptance criteria for MD-only and code-assisted runs. Record actual helper use, changing inputs, repairs, and interventions. Compare evidence rather than prose similarity. A single successful pair does not establish a reliable success-rate difference.
+
+**Takeaway.** Use the model for interpretation and judgment; use verified deterministic operations wherever the rules and inputs are fully specified.
+
+**Source:** supplied `chatgpt-astra-training.html`, slide "Reduce Unwanted Variability". Lab examples and the four-stage mapping are handbook adaptations.

@@ -6,16 +6,8 @@
 
 ## Before starting
 
-Use the [handbook](ABB_Workflow_Training.pdf) for installation, account setup and attachment extraction. The **training root** contains `.venv/`, `materials/` and `work/`. Run preparation/facilitator commands there. Keep `materials/` unchanged and use fresh output directories.
+Use the Docker [handbook](ABB_Workflow_Training.pdf) setup and real readiness checks. Host commands start in the unpacked package folder. Each exercise below supplies its exact container entry, two fresh transfer paths and resume instructions. Use one selected agent/model throughout, and explain each operation before extraction.
 
-```bash
-source .venv/bin/activate
-python --version
-```
-
-Use Python 3.12, complete the handbook's live agent smoke tests, and record the agent/model and tool versions. Use the same agent/model in demonstration and both replay conditions. Start the agent inside the prepared workspace.
-
-**Guided-work prompt:** “Read the exercise, requirements and report contract. Guide one operation at a time. Before executing, explain the purpose and expected evidence. Wait for my engineering explanation between operations. Record actual commands, inputs, observations and recovery in `evidence/session.md`. Do not create reusable automation before the demonstration is complete.”
 
 ---
 
@@ -23,16 +15,36 @@ Use Python 3.12, complete the handbook's live agent smoke tests, and record the 
 
 ### 1. Prepare and establish which source owns each fact
 
-From the training root:
+Use the host-side entry below:
+
+**Host terminal** — in the unpacked package folder; fresh HW1 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw1 demo
+docker compose exec --workdir /workspace/work/hw1-demo training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py hw1 demo work/hw1-demo
-cd work/hw1-demo
+pwd
+# Expected: /workspace/work/hw1-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+**Inside the container**:
+
+```bash
 python -m json.tool source/approval.json
 cat source/bom.csv
 python -m json.tool source/schematic.json
 python -m json.tool derived/netlist.json
 ```
+
 
 - **What and why:** distinguish approved inputs from a generated output that may contain errors.
 - **How:** read `REPORT_CONTRACT.md`. Record the board identity, revision and required provenance on each source. Approval declares the expected board/revision; BOM owns component identity/value; schematic owns pin-to-net mapping and corroborates values. The derived netlist is the item being reviewed.
@@ -73,12 +85,42 @@ Keep authority disputes and future ambiguous drawings with the engineer. Impleme
 
 ### 5. Transfer to a package with missing authority
 
-Return to the training root:
+After Stage 4, use the host-side transfer entries below:
+
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw1 transfer --name hw1-transfer-md
+docker compose exec --workdir /workspace/work/hw1-transfer-md training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py hw1 transfer work/hw1-transfer-md
-python materials/prepare_lab.py hw1 transfer work/hw1-transfer-code
+pwd
+# Expected: /workspace/work/hw1-transfer-md
 ```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw1 transfer --name hw1-transfer-code
+docker compose exec --workdir /workspace/work/hw1-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/hw1-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 
 Follow the paired replay procedure below. This package changes board identity and component references/order and omits a required source revision. No recovery evidence is supplied.
 
@@ -86,10 +128,14 @@ Follow the paired replay procedure below. This package changes board identity an
 
 From the training root, the facilitator checks each submission:
 
-```bash
-python materials/hardware/instructor/check.py \
-  --lab hw1 --case demo --workspace work/hw1-demo
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw1 --case demo --workspace /workspace/work/hw1-demo
 ```
+
+The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
+
 
 Change case/workspace to `transfer` and the relevant transfer directory. A checker pass for a faithful blocked report means the participant handled the missing evidence correctly; it does not mean the board package was verified.
 
@@ -99,14 +145,34 @@ Change case/workspace to `transfer` and the relevant transfer directory. A check
 
 ### 1. Prepare and state the model assumptions
 
-From the training root:
+Use the host-side entry below:
+
+**Host terminal** — in the unpacked package folder; fresh HW2 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw2 demo
+docker compose exec --workdir /workspace/work/hw2-demo training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py hw2 demo work/hw2-demo
-cd work/hw2-demo
+pwd
+# Expected: /workspace/work/hw2-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+**Inside the container**:
+
+```bash
 python -m json.tool source/circuit.json
 python -m json.tool derived/calibration.json
 ```
+
 
 - **What and why:** calculate from current inputs using an explicitly bounded model.
 - **How:** read `REPORT_CONTRACT.md`. The model has an ideal source, upper resistor `Rt`, lower resistor `Rb`, shunt capacitor `C`, ideal high-impedance ADC and independent resistor tolerances `±t`. Source values use SI units. Record maximum input and ADC limit.
@@ -140,6 +206,8 @@ Read values from the actual source. Explain each equation before calculating it 
 - **What and why:** repair a stale derived coefficient while assessing the supplied circuit independently.
 - **How:** compare existing coefficient, source revision and digest with current inputs. Save the before state. Invoke the supplied generator:
 
+**Inside the container**:
+
 ```bash
 python tools/generate_calibration.py --config source/circuit.json \
   --output derived/calibration.json --replace
@@ -169,12 +237,42 @@ Use readable named equations and independent test fixtures. Verify a valid demo,
 
 ### 5. Transfer to a changed circuit
 
-From the training root:
+Use the host-side entry below:
+
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw2 transfer --name hw2-transfer-md
+docker compose exec --workdir /workspace/work/hw2-transfer-md training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py hw2 transfer work/hw2-transfer-md
-python materials/prepare_lab.py hw2 transfer work/hw2-transfer-code
+pwd
+# Expected: /workspace/work/hw2-transfer-md
 ```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare hw2 transfer --name hw2-transfer-code
+docker compose exec --workdir /workspace/work/hw2-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/hw2-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 
 Use the paired replay procedure. The upper resistor changes; recalculate every quantity from current source data. Do not copy demo calculations or calibration.
 
@@ -182,10 +280,14 @@ Use the paired replay procedure. The upper resistor changes; recalculate every q
 
 Facilitator command, from the training root:
 
-```bash
-python materials/hardware/instructor/check.py \
-  --lab hw2 --case demo --workspace work/hw2-demo
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw2 --case demo --workspace /workspace/work/hw2-demo
 ```
+
+The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
+
 
 Change case/workspace for each transfer. A checker pass can accept a correctly assessed design failure. It verifies report arithmetic/provenance, not physical hardware safety.
 

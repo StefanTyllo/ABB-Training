@@ -1,13 +1,23 @@
-# ABB workflow training starters
+# ABB workflow training materials
 
-This attachment accompanies ABB_Workflow_Training.pdf. The PDF is the canonical training sequence and contains the shared prompts. It is deliberately not copied into six different README files.
+Use the [Docker package README](../README.md), current handbook and your exercise's student guide. The host needs Docker and approved accounts; language, compiler and browser tools are installed in the image.
 
-Keep this extracted materials directory unchanged. From its parent directory prepare a fresh participant workspace:
+**Host terminal**, in the unpacked package folder:
 
-    python materials/prepare_lab.py fw1 demo work/fw1-demo
+```text
+docker compose up -d training
+docker compose exec training abb doctor --offline
+docker compose exec training abb prepare fw1 demo
+docker compose exec --workdir /workspace/work/fw1-demo training bash
+```
 
-Lab IDs: fw1, fw2, hw1, hw2, t1, t2. Cases: demo, transfer. Output must not already exist. Prepared workspaces include learner inputs, basic tools, and evidence/. They exclude instructor/ directories. hardware workspaces also contain REPORT_CONTRACT.md.
+**Inside the container**:
 
-Use the PDF lab card for actual walkthrough, abstraction, extraction, implementation, transfer and grading. The firmware/hardware/test_team README files are technical references. Instructor and author_checks folders validate the starters; they are not generated learner workflows.
+```bash
+pwd
+# Expected: /workspace/work/fw1-demo
+```
 
-All devices and data are synthetic. The local application has deliberately simple state and invented password values and must not be deployed as a real service. See VERIFICATION.md for the measured checks and outstanding live acceptance gates.
+Lab IDs are fw1, fw2, hw1, hw2, t1 and t2. Cases are demo and transfer. Each guide shows its own concrete entry and both fresh transfer paths. Preparation refuses an existing output; resume by re-entering it without preparation. Clean sources remain image-owned. Provider authentication is separate from entering this shell.
+
+The four teaching stages remain demonstration, Markdown abstraction, extraction decisions, then reusable code. Follow the PDF and student guide for allowed changes and acceptance. Instructor and solved validation sources ship only in the facilitator package. All devices and data are synthetic.

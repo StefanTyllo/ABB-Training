@@ -39,7 +39,7 @@ USER root
 COPY training_kit /build/source
 COPY docker/material_manifest.py /build/material_manifest.py
 RUN python /build/material_manifest.py /build/source /build/materials \
-    && chmod -R a-w /build/materials
+    && chmod -R go-w /build/materials
 
 FROM runtime AS materials
 USER root
@@ -52,5 +52,5 @@ FROM materials AS learner
 FROM materials AS facilitator
 USER root
 COPY . /opt/abb/repo
-RUN chmod -R a-w /opt/abb/repo
+RUN chmod -R go-w /opt/abb/repo
 USER learner

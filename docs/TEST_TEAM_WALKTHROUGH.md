@@ -6,20 +6,8 @@
 
 ## Before starting
 
-Use the [handbook](ABB_Workflow_Training.pdf#page=17) for installation, agent smoke tests and PDF attachment extraction. The **training root** contains `.venv/`, `materials/` and `work/`; preparation commands start there. Keep `materials/` unchanged. Activate the venv in each terminal:
+Use the Docker [handbook](ABB_Workflow_Training.pdf) setup and real readiness checks. Host commands start in the unpacked package folder. Each exercise below supplies its exact container entry, two fresh transfer paths and resume instructions. Use one selected agent/model throughout, and explain each operation before extraction.
 
-```bash
-source .venv/bin/activate
-python -m pip install -r materials/test_team/scaffold/requirements.txt
-```
-
-Use Python 3.12, Chrome/Chromium and a compatible driver or working Selenium Manager. For MCP/login work, the facilitator installs reviewed pinned Playwright MCP and Node.js Playwright dependencies and verifies Copilot access. Record versions and agent/model; use the same agent/model in demonstration and both replay conditions.
-
-**Two targets:** the supplied app has no login. It supports repeatable local form/testing exercises. An authenticated extension needs an authorized test URL/account, reviewed login selectors, an authenticated readiness signal and independent product requirements. The local graders do not validate that external target. Do not add login to the protected local fixture or invent a passing login result.
-
-The local form's None/Password selector represents simulated device configuration, not application login. Use invented passwords there; keep real login credentials in the separate local bootstrap configuration.
-
-**Guided-work prompt:** “Read the task, requirements, fixture and Page Objects. Guide one action at a time. Explain its purpose, expected evidence and allowed changes. Wait for my reasoning between actions. Record actual commands/tool calls, observations and recovery in `evidence/session.md`. Build reusable helpers only after demonstrating the process.”
 
 ---
 
@@ -27,15 +15,52 @@ The local form's None/Password selector represents simulated device configuratio
 
 ### 1. Prepare and establish the test oracle
 
-From the training root:
+Use the host-side entry below:
+
+**Host terminal** — in the unpacked package folder; fresh T1 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t1 demo
+docker compose exec --workdir /workspace/work/t1-demo training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py t1 demo work/t1-demo
-cd work/t1-demo
+pwd
+# Expected: /workspace/work/t1-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+
+```bash
 python server.py --variant correct --port 8765 --state state.json
 ```
 
-Leave terminal A running. In terminal B, activate the venv and enter the same workspace:
+**Host terminal — Terminal B**, opened separately in the same package folder:
+
+```text
+docker compose exec --workdir /workspace/work/t1-demo training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-demo
+```
+
+Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
+
+
+Leave terminal A running. In terminal B, repeat the exact host-side entry command into the same service and workspace:
+
+**Inside the container**:
 
 ```bash
 python -m pytest browser_preflight.py -q
@@ -60,14 +85,24 @@ python -m pytest -q
 .auth/
 ```
 
+**Inside the container**:
+
 ```bash
-git check-ignore .env .auth/storage-state.json
+git check-ignore .env .auth/state.json
 git ls-files -- .env .auth
 ```
 
 The ignore check should identify both paths; the tracked-file check should return no entries. Git ignore controls tracking, not agent/local access. Restrict access and exclude credentials/state from prompts, logs, screenshots and evidence archives. Do not display `.env` to the agent.
 
-- **How the bootstrap works:** demonstrate a facilitator-reviewed **Node.js** script that loads `.env`, validates inputs, uses Playwright to log in, waits for the agreed authenticated signal, saves `context.storageState()` under `.auth/`, then closes its browser. The script runs locally; do not serve credentials in browser JavaScript. No-login fixture mode opens the local form and exports session state without credentials.
+- **Supplied bootstrap:** run this in Terminal B after the preflight. It validates the no-login fixture and exports workspace-local Playwright state; it creates no learner automation. Login mode remains BLOCKED without a reviewed adapter.
+
+**Inside the container**:
+
+```bash
+node tools/session_bootstrap.mjs --mode no-login --url http://127.0.0.1:8765 --state .auth/state.json --report evidence/bootstrap.json
+```
+
+Start the chosen agent through `abb agent` in this workspace; it configures the baked stdio MCP and loads `.auth/state.json`. The fixture has no login. External credentials, selectors and readiness require a separate reviewed adapter.
 - **Failure and recovery:** missing values, rejected login, changed selectors or MFA must produce a clear blocked result/operator action. A written state file does not prove authentication.
 - **Code to extract later:** parameterized bootstrap with explicit readiness waits, bounded timeouts and sanitized failures. Prove protected-form access; mark login untested when using only the local fixture.
 - **Why it works when verified:** the helper checks the authenticated outcome after login rather than assuming submission succeeded.
@@ -75,7 +110,7 @@ The ignore check should identify both paths; the tracked-file check should retur
 ### 3. Hand state to Playwright MCP and verify access
 
 - **What and why:** make the prepared session available to Copilot's browser tools.
-- **How:** start Copilot without the login environment variables. Use `/mcp add`, local server command `npx`, and arguments `-y`, the reviewed pinned `@playwright/mcp` package version, `--isolated`, and `--storage-state=<absolute-path>`. Replace the path with the real state file. Ask MCP to open the target and verify the expected form before exploration.
+- **How:** start the chosen agent through `abb agent` in this workspace after bootstrap. Its generated configuration uses baked stdio MCP, sandboxed Chrome, an isolated context and `.auth/state.json`. Ask the actual tools to reach the form and verify current fields. No package installation or host browser is involved.
 - **Failure and recovery:** a wrong path, expired state or sessionStorage-dependent app may return to login. Validate the path and rerun bootstrap for expiry. If saved storage state cannot carry this app's session, rehearse an attached-browser method before class.
 - **Code to add later:** validate the state file and target; record an authenticated/no-login readiness outcome without exposing state contents.
 - **Evidence and explanation:** the MCP browser reaches the intended form. Storage state initializes a new context; starting Copilot alone does not hand over an existing browser tab.
@@ -117,12 +152,86 @@ Keep unfamiliar UI interpretation, expected behavior and assertion quality with 
 
 ### 7. Prepare fresh T1 replays
 
-Stop terminal A with Ctrl-C. Return to the training root:
+Stop terminal A with Ctrl-C. After Stage 4, use the host-side transfer entries below:
+
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t1 transfer --name t1-transfer-md
+docker compose exec --workdir /workspace/work/t1-transfer-md training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py t1 transfer work/t1-transfer-md
-python materials/prepare_lab.py t1 transfer work/t1-transfer-code
+pwd
+# Expected: /workspace/work/t1-transfer-md
 ```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t1-transfer-md training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-transfer-md
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t1 transfer --name t1-transfer-code
+docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-transfer-code
+```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t1-transfer-code
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 
 Use the paired replay procedure below. Start each workspace's `correct` server with the same server command from step 1, one at a time. Transfer targets Serial/Password with a different device value; test both reverse transitions too. Supply local credentials where needed and bootstrap fresh sessions. Copy no finished Page Objects, demo tests or authentication state.
 
@@ -134,15 +243,52 @@ Use the paired replay procedure below. Start each workspace's `correct` server w
 
 ### 1. Prepare the weak suite and explain its limited claim
 
-Stop the previous server before starting T2. From the training root:
+Stop the previous server before starting T2. Use the host-side entry below:
+
+**Host terminal** — in the unpacked package folder; fresh T2 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t2 demo
+docker compose exec --workdir /workspace/work/t2-demo training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py t2 demo work/t2-demo
-cd work/t2-demo
+pwd
+# Expected: /workspace/work/t2-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+
+```bash
 python server.py --variant correct --port 8765 --state state.json
 ```
 
-In terminal B, activate the venv, enter the same workspace and run:
+**Host terminal — Terminal B**, opened separately in the same package folder:
+
+```text
+docker compose exec --workdir /workspace/work/t2-demo training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-demo
+```
+
+Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
+
+
+In terminal B, repeat the exact host-side entry command into the same service and workspace and run:
+
+**Inside the container**:
 
 ```bash
 python -m pytest browser_preflight.py -q
@@ -158,6 +304,8 @@ python -m pytest -q
 ### 2. Show the weak test surviving a real defect
 
 Stop terminal A with Ctrl-C. With that server stopped, run in the same workspace:
+
+**Inside the container**:
 
 ```bash
 python -c "from pathlib import Path; Path('state.json').unlink(missing_ok=True)"
@@ -206,12 +354,86 @@ Use separate state files or clean resets and evaluate sequentially. Never kill a
 
 ### 5. Transfer and detect a boundary defect
 
-Stop the previous server. From the training root:
+Stop the previous server. Use the host-side entry below:
+
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t2 transfer --name t2-transfer-md
+docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py t2 transfer work/t2-transfer-md
-python materials/prepare_lab.py t2 transfer work/t2-transfer-code
+pwd
+# Expected: /workspace/work/t2-transfer-md
 ```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-transfer-md
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare t2 transfer --name t2-transfer-code
+docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-transfer-code
+```
+
+**Inside the container — Terminal A**:
+
+```bash
+python server.py --variant correct --port 8765 --state state.json
+```
+
+**Host terminal — Terminal B**:
+
+```text
+docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+```
+
+**Inside the container — Terminal B**:
+
+```bash
+pwd
+# Expected: /workspace/work/t2-transfer-code
+python -m pytest browser_preflight.py -q
+```
+
+Run this transfer's tests in Terminal B. Stop this Terminal A server before the next workspace; state from the demonstration is not transferred.
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 
 Use paired replay. Start each fresh workspace with `correct` and current `case.json`; it includes valid port 65535. The facilitator then stops/resets/restarts that workspace with `--variant bad-boundary`. Run the same improved suite. Keep the chosen variant undisclosed until evaluation where feasible; the fixture is a reproducible exercise, not a tamper-proof benchmark.
 

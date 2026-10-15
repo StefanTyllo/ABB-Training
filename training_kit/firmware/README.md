@@ -6,11 +6,128 @@ These synthetic fixtures require Python 3.12 and, for FW2, GCC with C11 support.
 
 The clean firmware directory is reference material. Work only in a prepared participant directory. Instructor checks and corrected reference logic are excluded by preparation. They are an assessment tool, not the learner's workflow automation.
 
-From the training root, the facilitator runs:
 
-```bash
-python materials/firmware/instructor/smoke.py
-python materials/firmware/instructor/smoke.py work/fw2-demo/fw2/parser
+## Container workspaces
+
+Use these commands from the unpacked Docker package folder. Provider login is separate; retain the chosen provider/model. Fresh transfers are performed only after Stage 4.
+
+
+### FW1
+
+**Host terminal** — in the unpacked package folder; fresh FW1 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 demo
+docker compose exec --workdir /workspace/work/fw1-demo training bash
 ```
 
-The first validates the fixtures and an isolated corrected reference without changing the starter. The second grades the participant executable and is expected to fail on the untouched parser. Use the transfer executable path when assessing transfer. See `instructor/README.md` for evaluation details.
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw1-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 transfer --name fw1-transfer-md
+docker compose exec --workdir /workspace/work/fw1-transfer-md training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw1-transfer-md
+```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 transfer --name fw1-transfer-code
+docker compose exec --workdir /workspace/work/fw1-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw1-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
+### FW2
+
+**Host terminal** — in the unpacked package folder; fresh FW2 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 demo
+docker compose exec --workdir /workspace/work/fw2-demo training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-demo
+```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 transfer --name fw2-transfer-md
+docker compose exec --workdir /workspace/work/fw2-transfer-md training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-transfer-md
+```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 transfer --name fw2-transfer-code
+docker compose exec --workdir /workspace/work/fw2-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
+## Facilitator assessment
+
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/firmware/instructor/smoke.py /workspace/work/fw2-demo/fw2/parser
+```
+
+Use each submission's actual executable path. The check exercises 50 stream cases plus malformed input and should fail on the untouched starter.

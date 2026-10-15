@@ -6,17 +6,8 @@
 
 ## Before starting
 
-Use the [handbook](ABB_Workflow_Training.pdf) for installation, account setup and PDF attachment extraction. The **training root** contains `.venv/`, `materials/` and `work/`. Run preparation and facilitator commands there. Keep `materials/` unchanged. Activate the venv in every terminal:
+Use the Docker [handbook](ABB_Workflow_Training.pdf) setup and real readiness checks. Host commands start in the unpacked package folder. Each exercise below supplies its exact container entry, two fresh transfer paths and resume instructions. Use one selected agent/model throughout, and explain each operation before extraction.
 
-```bash
-source .venv/bin/activate
-python --version
-gcc --version
-```
-
-Python 3.12 and GCC are required. Complete the handbook's live agent smoke tests. Use the same agent/model for demonstration and both replay conditions; record versions. Start the agent inside the prepared workspace. Do not reuse an output directory; preparation refuses to overwrite previous work.
-
-**How to work with the agent:** “Read the exercise and requirements. Guide one operation at a time. Explain its purpose, expected evidence and files it may change. Record actual commands, observations, decisions and recovery in `evidence/session.md`. Wait for my explanation between operations. Do not build reusable automation until the demonstration is complete.”
 
 ---
 
@@ -24,12 +15,27 @@ Python 3.12 and GCC are required. Complete the handbook's live agent smoke tests
 
 ### 1. Prepare a device case and understand the boundary
 
-From the training root:
+Use the host-side entry below:
+
+**Host terminal** — in the unpacked package folder; fresh FW1 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 demo
+docker compose exec --workdir /workspace/work/fw1-demo training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py fw1 demo work/fw1-demo
-cd work/fw1-demo
+pwd
+# Expected: /workspace/work/fw1-demo
 ```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
 
 - **What and why:** investigate a configuration-induced communication failure without changing the evidence first.
 - **How:** read `requirements.md`. Preparation already initializes `device/`; do not initialize it again. Allowed changes are configuration writes through the device tool and your workflow/automation/evidence files. Preserve the simulator, reference file and direct state JSON.
@@ -40,6 +46,8 @@ cd work/fw1-demo
 ### 2. Capture the baseline before any write
 
 Run these individually, retaining complete output, command, time and exit status for each:
+
+**Inside the container**:
 
 ```bash
 python fw1/device.py --workdir device read --field identity
@@ -84,12 +92,42 @@ Use descriptive functions, explicit values and actionable errors. Preserve origi
 
 ### 5. Replay on a different device
 
-Return to the training root:
+After Stage 4, use the host-side transfer entries below:
+
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 transfer --name fw1-transfer-md
+docker compose exec --workdir /workspace/work/fw1-transfer-md training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py fw1 transfer work/fw1-transfer-md
-python materials/prepare_lab.py fw1 transfer work/fw1-transfer-code
+pwd
+# Expected: /workspace/work/fw1-transfer-md
 ```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw1 transfer --name fw1-transfer-code
+docker compose exec --workdir /workspace/work/fw1-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw1-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
 
 Follow the paired replay instructions below. The transfer device identity and required baud differ. Copy no demo `device/`, captured results or finished solution. Each replay must discover the current identity and select its reference.
 
@@ -101,12 +139,27 @@ Follow the paired replay instructions below. The transfer device identity and re
 
 ### 1. Prepare and read the protocol before editing
 
-From the training root:
+Use the host-side entry below:
+
+**Host terminal** — in the unpacked package folder; fresh FW2 demonstration:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 demo
+docker compose exec --workdir /workspace/work/fw2-demo training bash
+```
+
+**Inside the container**:
 
 ```bash
-python materials/prepare_lab.py fw2 demo work/fw2-demo
-cd work/fw2-demo
+pwd
+# Expected: /workspace/work/fw2-demo
 ```
+
+This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+
+Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+
 
 - **What and why:** establish a protocol-based expected result before repairing C code.
 - **How:** read the FW2 section of `requirements.md`. A packet is `A5 02 sequence low high checksum`: unsigned 8-bit sequence, signed 16-bit little-endian value, XOR of the first five bytes. Each CLI argument is another chunk of the same stream.
@@ -115,6 +168,8 @@ cd work/fw2-demo
 - **Boundary:** edit only `fw2/parser.c` plus common artifacts. Preserve `parser.h`, `main.c` and requirements. The executable is generated output.
 
 ### 2. Reproduce whole-packet and split-packet failures
+
+**Inside the container**:
 
 ```bash
 gcc -std=c11 -Wall -Wextra -Werror \
@@ -154,14 +209,46 @@ Implement under `automation/`, with readable functions and independent fixtures 
 
 ### 5. Replay from a fresh faulty parser
 
-From the training root:
+Use the host-side entry below:
 
-```bash
-python materials/prepare_lab.py fw2 transfer work/fw2-transfer-md
-python materials/prepare_lab.py fw2 transfer work/fw2-transfer-code
+After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
+
+**Host terminal** — fresh instructions-only transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 transfer --name fw2-transfer-md
+docker compose exec --workdir /workspace/work/fw2-transfer-md training bash
 ```
 
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-transfer-md
+```
+
+**Host terminal** — fresh instructions-plus-code transfer:
+
+```text
+docker compose up -d training
+docker compose exec training abb prepare fw2 transfer --name fw2-transfer-code
+docker compose exec --workdir /workspace/work/fw2-transfer-code training bash
+```
+
+**Inside the container**:
+
+```bash
+pwd
+# Expected: /workspace/work/fw2-transfer-code
+```
+
+To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
+
+
 Use the paired replay procedure. Transfer no repaired `parser.c` or executable. After building in each new workspace, use this reproduction:
+
+**Inside the container**:
 
 ```bash
 ./fw2/parser a502 2a00 f875
@@ -171,10 +258,14 @@ Expected: sequence 42, value -2048. The new conversation must use the transferre
 
 From the training root, the facilitator independently checks each built submission, changing the executable path as needed:
 
-```bash
-python materials/firmware/instructor/smoke.py \
-  work/fw2-demo/fw2/parser
+**Host terminal — facilitator package only**:
+
+```text
+docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/firmware/instructor/smoke.py /workspace/work/fw2-demo/fw2/parser
 ```
+
+The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
+
 
 **Completion:** protocol checks pass, including the supplied 50-case/malformed-input evaluation; the explanation accounts for the repair; helper checks and actual replay evidence are retained. Compilation alone or one example alone is insufficient.
 
@@ -202,4 +293,4 @@ Conclude from recorded evidence: **goal → action → observed failure → code
 - **Level:** a concise guide for engineers who can run commands and read basic C/Python. Protocol facts, paths, mutation boundaries, failure branches and completion criteria are explicit; implementing the helpers remains learner work.
 - **Coverage:** both lab demonstrations, Markdown abstraction, deterministic extraction, helper failure checks, fresh-case replay and evidence review are included.
 - **Required local gate:** run the actual agent workflow and inspect learner artifacts. This document is instructions, not a claim of a completed classroom rehearsal.
-- **Review against:** [firmware exercise contracts](../training_kit/firmware/requirements.md), [instructor checks](../training_kit/firmware/instructor/README.md) and the handbook's shared method/rubric. Resolve any discrepancy using those contracts before proceeding.
+- **Review against:** [firmware exercise contracts](../training_kit/firmware/requirements.md), the independent checks supplied in the facilitator package and the handbook's shared method/rubric. Resolve any discrepancy using those contracts before proceeding.

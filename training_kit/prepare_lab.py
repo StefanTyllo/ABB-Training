@@ -45,7 +45,7 @@ def main():
     subprocess.run(['git', 'init', '--quiet', '--initial-branch=main', str(output)], check=True)
     ignore = output / '.gitignore'
     previous = ignore.read_text() if ignore.exists() else ''
-    ignore.write_text(previous + '\n.env\n.env.*\n.auth/\n.codex/\n.copilot/\n__pycache__/\n.pytest_cache/\n')
+    ignore.write_text(previous + '\n.env\n.env.*\n!.env.example\n.auth/\n.codex/\n.copilot/\n__pycache__/\n.pytest_cache/\n')
     (output/'evidence').mkdir(exist_ok=True)
     print('Prepared workspace:',output)
     print('Read the PDF lab card before starting the agent.')
