@@ -1,6 +1,8 @@
 """Disposable factual checks; never inspect or modify a completed learner task."""
 import json
 import os
+import re
+import platform
 from pathlib import Path
 import subprocess
 import sys
@@ -9,13 +11,27 @@ import tempfile
 
 def run_checks(offline: bool) -> dict:
     checks, versions = {}, {}
+    from auth import TOKEN_KEYS
+    check_env = {key: value for key, value in os.environ.items() if key not in TOKEN_KEYS}
+    check_env['COPILOT_AUTO_UPDATE'] = 'false'
+    def sanitized(message):
+        for key in TOKEN_KEYS:
+            value = os.environ.get(key)
+            if value:
+                message = message.replace(value, '[redacted]')
+        return re.sub(r'(?:sk-|github_pat_|gh[opsu]_)[A-Za-z0-9_-]+', '[redacted]', message)
+
     manifest = json.loads(Path('/opt/abb/runtime/runtime.lock.json').read_text())
     def check(name, command, expected=None, blocked=False, cwd=None):
         try:
-            run = subprocess.run(command, capture_output=True, text=True, timeout=60, cwd=cwd)
+            run = subprocess.run(command, capture_output=True, text=True, timeout=60, cwd=cwd, env=check_env)
             passed = run.returncode == 0 and (expected is None or expected in run.stdout)
             checks[name] = {'status': 'PASS' if passed else ('BLOCKED' if blocked else 'FAIL'),
                             'exit': run.returncode}
+            if not passed:
+                checks[name]['diagnostic'] = sanitized(run.stderr[-2000:]) or 'Command result did not match the locked runtime'
+                if blocked:
+                    checks[name]['hint'] = 'Retain docker version/info and check host namespace policy using the supplied seccomp profile'
             return run.stdout.strip() if passed else None
         except (OSError, subprocess.TimeoutExpired) as error:
             checks[name] = {'status': 'BLOCKED' if blocked else 'FAIL', 'reason': type(error).__name__}
@@ -37,6 +53,8 @@ def run_checks(offline: bool) -> dict:
         check('preparation', [sys.executable, '/opt/abb/materials/prepare_lab.py',
                               'fw1', 'demo', str(temp/'clean-work')])
         browser_script = '''import os
+import re
+import platform
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 o=webdriver.ChromeOptions(); o.binary_location=os.environ['CHROME_BINARY']; o.add_argument('--headless=new')
@@ -58,4 +76,5 @@ if(!(await p.locator('body').innerText()).includes('You are adequately sandboxed
     statuses = [v['status'] for v in checks.values()]
     status = 'FAIL' if 'FAIL' in statuses else 'BLOCKED' if 'BLOCKED' in statuses else 'PASS'
     return {'status': status, 'checks': checks, 'versions': versions, 'workspace': '/workspace',
+            'kernel': platform.release(),
             'image': {'id': os.environ.get('ABB_IMAGE_ID', 'unrecorded'), 'runtime': manifest}}

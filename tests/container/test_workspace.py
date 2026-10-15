@@ -63,3 +63,23 @@ def test_doctor_offline_distinguishes_accounts():
     report = json.loads(result.stdout)
     assert report['status'] == 'PASS'
     assert report['checks']['accounts']['status'] == 'UNTESTED'
+
+
+def test_doctor_reports_sanitized_sandbox_diagnostic(tmp_path, monkeypatch):
+    import os
+    import sys
+    sys.path.insert(0, '/opt/abb/runtime')
+    from doctor import run_checks
+    binary = tmp_path/'codex'
+    binary.write_text('''#!/bin/sh
+if [ "$1" = "--version" ]; then exec /opt/abb/node/node_modules/.bin/codex "$@"; fi
+printf 'bwrap: mount denied %s\\n' "$OPENAI_API_KEY" >&2
+exit 1
+''')
+    binary.chmod(0o755)
+    monkeypatch.setenv('PATH', str(tmp_path)+os.pathsep+os.environ['PATH'])
+    monkeypatch.setenv('OPENAI_API_KEY', 'SYNTHETIC_DOCTOR_SECRET')
+    report = run_checks(True)
+    assert report['status'] == 'BLOCKED'
+    assert 'mount denied' in report['checks']['codex_sandbox']['diagnostic']
+    assert 'SYNTHETIC_DOCTOR_SECRET' not in str(report)

@@ -68,3 +68,27 @@ def test_mcp_configuration_refuses_symlink_escape(tmp_path):
     with pytest.raises(ValueError):
         auth.configure_mcp(workspace)
     assert marker.read_text() == 'keep-original'
+
+
+def test_codex_launch_configuration_runs_normal_sandbox_without_model_access():
+    auth = auth_module()
+    name = 'abb-test-config-' + uuid.uuid4().hex
+    result = subprocess.run(['abb', 'prepare', 'fw1', 'demo', '--name', name],
+                            capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    workspace = Path('/workspace/work', name)
+    credentials = Path('/home/learner/.codex/auth.json')
+    assert not credentials.exists(), 'This offline test requires a credential-free container'
+    try:
+        credentials.write_text(json.dumps({'OPENAI_API_KEY': 'SYNTHETIC_NOT_A_PROVIDER_KEY'}))
+        command, env = auth.prepare_agent_process('codex', workspace)
+        # The debug sandbox executes a local shell; this never invokes a model.
+        run = subprocess.run([*command, 'sandbox', '--', 'sh', '-c', 'printf configured-sandbox-ok'],
+                             cwd=workspace, env=env, capture_output=True, text=True, timeout=30)
+        assert run.returncode == 0, run.stderr
+        assert run.stdout == 'configured-sandbox-ok'
+        assert json.loads((workspace/'evidence/agent-launch.json').read_text())['account_tool_call'] == 'UNTESTED'
+    finally:
+        credentials.unlink(missing_ok=True)
+        import shutil
+        shutil.rmtree(workspace)
