@@ -1,0 +1,269 @@
+{
+  "source_revision": "569f5bb43863ef9666b3959aa127337fb71fae67",
+  "facilitator_image_id": "sha256:b96aab6ccbab5bc53e7cbde383d0207070dde5d21172914f594f55e0fec16a84",
+  "learner_image_id": "sha256:5e49aaf714eccd6bf2aefd5cfd0132486919834dd6ef066b9107debd1d41c5ce",
+  "kernel": "6.6.114.1-microsoft-standard-WSL2",
+  "docker_server": {
+    "Platform": {
+      "Name": "Docker Engine - Community"
+    },
+    "Version": "29.6.2",
+    "ApiVersion": "1.55",
+    "MinAPIVersion": "1.40",
+    "Os": "linux",
+    "Arch": "amd64",
+    "Components": [
+      {
+        "Name": "Engine",
+        "Version": "29.6.2",
+        "Details": {
+          "ApiVersion": "1.55",
+          "Arch": "amd64",
+          "BuildTime": "Thu Jul 16 16:12:21 2026",
+          "Experimental": "false",
+          "GitCommit": "3d80467",
+          "GoVersion": "go1.26.5",
+          "KernelVersion": "6.6.114.1-microsoft-standard-WSL2",
+          "MinAPIVersion": "1.40",
+          "Module": "github.com/moby/moby/v2",
+          "ModuleVersion": "v2.0.0+unknown",
+          "Os": "linux"
+        }
+      },
+      {
+        "Name": "containerd",
+        "Version": "v2.2.6",
+        "Details": {
+          "GitCommit": "11ce9d5f3c68c941867e82890e93e815c1304f1b"
+        }
+      },
+      {
+        "Name": "runc",
+        "Version": "1.3.6",
+        "Details": {
+          "GitCommit": "v1.3.6-0-g491b69ba"
+        }
+      },
+      {
+        "Name": "docker-init",
+        "Version": "0.19.0",
+        "Details": {
+          "GitCommit": "de40ad0"
+        }
+      }
+    ],
+    "GitCommit": "3d80467",
+    "GoVersion": "go1.26.5",
+    "KernelVersion": "6.6.114.1-microsoft-standard-WSL2",
+    "BuildTime": "2026-07-16T16:12:21.000000000+00:00"
+  },
+  "engine_os": "Ubuntu 26.04 LTS",
+  "compose": "Docker Compose version v5.3.1",
+  "runtime_lock": {
+    "platform": "linux/amd64",
+    "python": {
+      "version": "3.12.15",
+      "image": "python:3.12.15-slim-bookworm@sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d"
+    },
+    "debian_snapshot": "20261014T000000Z",
+    "node": {
+      "version": "22.23.3",
+      "url": "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-x64.tar.xz",
+      "sha256": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de"
+    },
+    "chrome": {
+      "version": "155.0.8059.79",
+      "chrome": {
+        "url": "https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.79/linux64/chrome-linux64.zip",
+        "sha256": "bcd9a79130d7e44d70f93be87042e9bcee7fe0f0b3898e06b8c9bed5fb619dcd"
+      },
+      "chromedriver": {
+        "url": "https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.79/linux64/chromedriver-linux64.zip",
+        "sha256": "876f0ea4095237bb3e93321d95758d38c9195989935d7bdc9f51d8e26bc6a3a1"
+      }
+    },
+    "seccomp": {
+      "source": "https://raw.githubusercontent.com/microsoft/playwright/main/utils/docker/seccomp_profile.json",
+      "sha256": "10ad104f6484daba6a0706a960366677eba3ccc60bf153d41383a3763db97948",
+      "upstream_sha256": "cc3e61cabda6bbc1e53e54d27ba4d55a9d3be829b6dd1a596f4a7b31b1cc7849",
+      "additional_syscalls": [
+        "mount",
+        "umount2",
+        "pivot_root"
+      ]
+    },
+    "javascript": {
+      "codex": "0.162.1",
+      "copilot": "1.0.97",
+      "playwright": "1.64.1",
+      "playwright_mcp": "0.0.83"
+    },
+    "python_packages": {
+      "pytest": "8.3.5",
+      "selenium": "4.29.0",
+      "pypdf": "6.10.0"
+    }
+  },
+  "lock_hashes": {
+    "docker/runtime.lock.json": "384718d137c815dbc3d771efef0a9bf22921aaa3a260fd02e5bae95b6bd3dff9",
+    "docker/requirements.lock": "3c58c3f275bab120f23b1cdfa10c0298136e57e887bd9aa64e33ceceaa666d73",
+    "docker/package-lock.json": "f01266d4874524ba80baa000b26a3f5bc23dcd3bd58ece960115a293ef84d360",
+    "docker/os-packages.lock": "ac64ea7678e1844eff38f7815a4016f04e01ae125f40248c1c2c321d3766e595",
+    "docker/seccomp.json": "10ad104f6484daba6a0706a960366677eba3ccc60bf153d41383a3763db97948"
+  },
+  "seed_regression_image": {
+    "source_revision": "157a41c81eb1b78b6c4baef202124b1b29cee563",
+    "facilitator_image_id": "sha256:0000e8bfa7cfe253e16985bbc264df7feeccfb6bbf7df703a9d65ab6a7771138",
+    "learner_image_id": "sha256:9b686fd3755daa36fbf62cd84b3d26742294ca617e7b7bb806587288ec17c259",
+    "kernel": "6.6.114.1-microsoft-standard-WSL2",
+    "docker_server": {
+      "Platform": {
+        "Name": "Docker Engine - Community"
+      },
+      "Version": "29.6.2",
+      "ApiVersion": "1.55",
+      "MinAPIVersion": "1.40",
+      "Os": "linux",
+      "Arch": "amd64",
+      "Components": [
+        {
+          "Name": "Engine",
+          "Version": "29.6.2",
+          "Details": {
+            "ApiVersion": "1.55",
+            "Arch": "amd64",
+            "BuildTime": "Thu Jul 16 16:12:21 2026",
+            "Experimental": "false",
+            "GitCommit": "3d80467",
+            "GoVersion": "go1.26.5",
+            "KernelVersion": "6.6.114.1-microsoft-standard-WSL2",
+            "MinAPIVersion": "1.40",
+            "Module": "github.com/moby/moby/v2",
+            "ModuleVersion": "v2.0.0+unknown",
+            "Os": "linux"
+          }
+        },
+        {
+          "Name": "containerd",
+          "Version": "v2.2.6",
+          "Details": {
+            "GitCommit": "11ce9d5f3c68c941867e82890e93e815c1304f1b"
+          }
+        },
+        {
+          "Name": "runc",
+          "Version": "1.3.6",
+          "Details": {
+            "GitCommit": "v1.3.6-0-g491b69ba"
+          }
+        },
+        {
+          "Name": "docker-init",
+          "Version": "0.19.0",
+          "Details": {
+            "GitCommit": "de40ad0"
+          }
+        }
+      ],
+      "GitCommit": "3d80467",
+      "GoVersion": "go1.26.5",
+      "KernelVersion": "6.6.114.1-microsoft-standard-WSL2",
+      "BuildTime": "2026-07-16T16:12:21.000000000+00:00"
+    },
+    "engine_os": "Ubuntu 26.04 LTS",
+    "compose": "Docker Compose version v5.3.1",
+    "runtime_lock": {
+      "platform": "linux/amd64",
+      "python": {
+        "version": "3.12.15",
+        "image": "python:3.12.15-slim-bookworm@sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d"
+      },
+      "debian_snapshot": "20261014T000000Z",
+      "node": {
+        "version": "22.23.3",
+        "url": "https://nodejs.org/dist/v22.23.3/node-v22.23.3-linux-x64.tar.xz",
+        "sha256": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de"
+      },
+      "chrome": {
+        "version": "155.0.8059.79",
+        "chrome": {
+          "url": "https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.79/linux64/chrome-linux64.zip",
+          "sha256": "bcd9a79130d7e44d70f93be87042e9bcee7fe0f0b3898e06b8c9bed5fb619dcd"
+        },
+        "chromedriver": {
+          "url": "https://storage.googleapis.com/chrome-for-testing-public/155.0.8059.79/linux64/chromedriver-linux64.zip",
+          "sha256": "876f0ea4095237bb3e93321d95758d38c9195989935d7bdc9f51d8e26bc6a3a1"
+        }
+      },
+      "seccomp": {
+        "source": "https://raw.githubusercontent.com/microsoft/playwright/main/utils/docker/seccomp_profile.json",
+        "sha256": "10ad104f6484daba6a0706a960366677eba3ccc60bf153d41383a3763db97948",
+        "upstream_sha256": "cc3e61cabda6bbc1e53e54d27ba4d55a9d3be829b6dd1a596f4a7b31b1cc7849",
+        "additional_syscalls": [
+          "mount",
+          "umount2",
+          "pivot_root"
+        ]
+      },
+      "javascript": {
+        "codex": "0.162.1",
+        "copilot": "1.0.97",
+        "playwright": "1.64.1",
+        "playwright_mcp": "0.0.83"
+      },
+      "python_packages": {
+        "pytest": "8.3.5",
+        "selenium": "4.29.0",
+        "pypdf": "6.10.0"
+      }
+    },
+    "lock_hashes": {
+      "docker/runtime.lock.json": "384718d137c815dbc3d771efef0a9bf22921aaa3a260fd02e5bae95b6bd3dff9",
+      "docker/requirements.lock": "3c58c3f275bab120f23b1cdfa10c0298136e57e887bd9aa64e33ceceaa666d73",
+      "docker/package-lock.json": "f01266d4874524ba80baa000b26a3f5bc23dcd3bd58ece960115a293ef84d360",
+      "docker/os-packages.lock": "ac64ea7678e1844eff38f7815a4016f04e01ae125f40248c1c2c321d3766e595",
+      "docker/seccomp.json": "10ad104f6484daba6a0706a960366677eba3ccc60bf153d41383a3763db97948"
+    }
+  },
+  "changes_since_seed_regression": [
+    ".github/workflows/build-training-image.yml",
+    "tests/container/test_ci.py"
+  ],
+  "live_provider_rehearsals": {
+    "status": "BLOCKED",
+    "reason": "No approved provider credentials available",
+    "accepted_submissions": null,
+    "target": 18,
+    "actual_model": null
+  },
+  "windows_docker_desktop": {
+    "status": "BLOCKED",
+    "reason": "desktop-linux engine named pipe absent"
+  },
+  "arm": {
+    "status": "UNTESTED"
+  },
+  "pdf": {
+    "output": "/workspace/export/ABB_Workflow_Training.pdf",
+    "pages": 43,
+    "source_sha256": "30ea8af80ec47a2f96fcb4d9a6ada77486ea9c24b4f78f9edc92e393e86d2654",
+    "attachment_sha256": "9ed75f9358c3d8558d90fa4a13002a49be8995df8f8dde15b95a24c999543588",
+    "pdf_sha256": "6fff1f03fe42ef2d66bb1814da2b663ef7a04485ef1edb9f036d2f5b5a1aa507"
+  },
+  "offline_suite": {
+    "passed": 59,
+    "failed": 0,
+    "exit": 0,
+    "seconds": 59.4
+  },
+  "reference_packages": {
+    "t1": "passed",
+    "t2": "passed",
+    "image": "sha256:0000e8bfa7cfe253e16985bbc264df7feeccfb6bbf7df703a9d65ab6a7771138"
+  },
+  "review": {
+    "method": "author self-review",
+    "subagents": false,
+    "independent_reviewer": false
+  }
+}

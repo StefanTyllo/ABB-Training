@@ -1,0 +1,4 @@
+Instructor files recoverable from learner layers: ['opt/abb/materials/firmware/instructor/README.md', 'opt/abb/materials/firmware/instructor/smoke.py', 'opt/abb/materials/hardware/instructor/check.py', 'opt/abb/materials/hardware/instructor/expected.json', 'opt/abb/materials/test_team/author_checks/check_server.py']
+Traceback (most recent call last):
+  File "<string>", line 6, in <module>
+AssertionError: Instructor files must never enter learner image layers

@@ -1,0 +1,168 @@
+ Network abb-test-persistence-73878_default Creating 
+ Network abb-test-persistence-73878_default Created 
+ Volume abb-test-persistence-73878_export Creating 
+ Volume abb-test-persistence-73878_export Created 
+ Volume abb-test-persistence-73878_codex-auth Creating 
+ Volume abb-test-persistence-73878_codex-auth Created 
+ Volume abb-test-persistence-73878_copilot-auth Creating 
+ Volume abb-test-persistence-73878_copilot-auth Created 
+ Volume abb-test-persistence-73878_work Creating 
+ Volume abb-test-persistence-73878_work Created 
+ Volume abb-test-persistence-73878_runs Creating 
+ Volume abb-test-persistence-73878_runs Created 
+ Container abb-test-persistence-73878-training-1 Creating 
+ Container abb-test-persistence-73878-training-1 Created 
+ Container abb-test-persistence-73878-training-1 Starting 
+ Container abb-test-persistence-73878-training-1 Started 
+ Network abb-test-isolation-73878_default Creating 
+ Network abb-test-isolation-73878_default Created 
+ Volume abb-test-isolation-73878_copilot-auth Creating 
+ Volume abb-test-isolation-73878_copilot-auth Created 
+ Volume abb-test-isolation-73878_work Creating 
+ Volume abb-test-isolation-73878_work Created 
+ Volume abb-test-isolation-73878_runs Creating 
+ Volume abb-test-isolation-73878_runs Created 
+ Volume abb-test-isolation-73878_export Creating 
+ Volume abb-test-isolation-73878_export Created 
+ Volume abb-test-isolation-73878_codex-auth Creating 
+ Volume abb-test-isolation-73878_codex-auth Created 
+ Container abb-test-isolation-73878-training-1 Creating 
+ Container abb-test-isolation-73878-training-1 Created 
+ Container abb-test-isolation-73878-training-1 Starting 
+ Container abb-test-isolation-73878-training-1 Started 
+{"initialized": true, "case": "demo"}
+Prepared workspace: /workspace/work/work with spaces
+Read the PDF lab card before starting the agent.
+ Container abb-test-persistence-73878-training-1 Stopping 
+ Container abb-test-persistence-73878-training-1 Stopped 
+ Container abb-test-persistence-73878-training-1 Starting 
+ Container abb-test-persistence-73878-training-1 Started 
+ Image abb-training:dev Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 834B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.87kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12.15-slim-bookworm@sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d
+#3 DONE 0.1s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 258B done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [runtime  1/13] FROM docker.io/library/python:3.12.15-slim-bookworm@sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d
+#6 resolve docker.io/library/python:3.12.15-slim-bookworm@sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d 0.0s done
+#6 DONE 0.1s
+
+#5 [internal] load build context
+#5 transferring context: 4.89kB 0.0s done
+#5 DONE 0.0s
+
+#7 [clean-materials 2/3] COPY docker/material_manifest.py /build/material_manifest.py
+#7 CACHED
+
+#8 [runtime 10/13] COPY docker/collect.py docker/ci.py docker/launcher.py docker/doctor.py docker/export.py /opt/abb/runtime/
+#8 CACHED
+
+#9 [runtime 13/13] WORKDIR /workspace
+#9 CACHED
+
+#10 [runtime  5/13] COPY docker/requirements.lock /opt/abb/runtime/
+#10 CACHED
+
+#11 [clean-materials 3/3] RUN python /build/material_manifest.py /build/source /build/materials     && chmod -R go-w /build/materials
+#11 CACHED
+
+#12 [materials 1/2] COPY --from=clean-materials /build/materials /opt/abb/materials
+#12 CACHED
+
+#13 [runtime  2/13] RUN rm /etc/apt/sources.list.d/debian.sources && printf '%s\n'     'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20261014T000000Z bookworm main'     'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/20261014T000000Z bookworm-security main'     > /etc/apt/sources.list && apt-get update && apt-get install -y --no-install-recommends     bash ca-certificates git gcc libc6-dev unzip xz-utils util-linux     libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2     libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1     libasound2 libpango-1.0-0 libcairo2 fonts-liberation libglib2.0-0     && mkdir -p /opt/abb/runtime && dpkg-query -W > /opt/abb/runtime/os-packages.lock     && rm -rf /var/lib/apt/lists/*
+#13 CACHED
+
+#14 [runtime  7/13] COPY docker/package.json docker/package-lock.json /opt/abb/node/
+#14 CACHED
+
+#15 [clean-materials 1/3] COPY training_kit /build/source
+#15 CACHED
+
+#16 [runtime  3/13] COPY docker/runtime.lock.json docker/download.py /opt/abb/runtime/
+#16 CACHED
+
+#17 [runtime  6/13] RUN pip install --no-cache-dir --require-hashes -r /opt/abb/runtime/requirements.lock
+#17 CACHED
+
+#18 [runtime 12/13] RUN chmod 755 /usr/local/bin/abb && useradd --create-home --uid 1000 --shell /bin/bash learner     && mkdir -p /workspace/work /workspace/runs /workspace/export     && mkdir -p /home/learner/.codex /home/learner/.copilot     && chown -R learner:learner /workspace /home/learner
+#18 CACHED
+
+#19 [runtime  8/13] RUN cd /opt/abb/node && npm ci --no-audit --no-fund && npm cache clean --force
+#19 CACHED
+
+#20 [runtime  9/13] COPY docker/playwright.json docker/codex.toml docker/copilot-mcp.json docker/auth.py /opt/abb/runtime/
+#20 CACHED
+
+#21 [runtime 11/13] COPY docker/abb /usr/local/bin/abb
+#21 CACHED
+
+#22 [runtime  4/13] RUN python /opt/abb/runtime/download.py
+#22 CACHED
+
+#23 [materials 2/2] RUN ln -s /opt/abb/materials /workspace/materials
+#23 CACHED
+
+#24 exporting to image
+#24 exporting layers 0.0s done
+#24 exporting manifest sha256:e47f5bf58fe886bb117291e6159a384da2cf5aceae34b58739141f4010e054c7 0.1s done
+#24 exporting config sha256:5e59ad9cf2f8456150e8aef6794980f1424513af5eed22c5c8ccfab665243a94 0.1s done
+#24 exporting attestation manifest sha256:7884fd9402af0eb37016baaefbf28bf52d72100335a41196e62760f81c870261 0.1s done
+#24 exporting manifest list sha256:adf5d732b2c42909ed74329bbf124be0770120f27bf7b30d1a09e06cf828a37b
+#24 exporting manifest list sha256:adf5d732b2c42909ed74329bbf124be0770120f27bf7b30d1a09e06cf828a37b 0.1s done
+#24 naming to docker.io/library/abb-training:dev 0.0s done
+#24 unpacking to docker.io/library/abb-training:dev 0.0s done
+#24 DONE 0.5s
+
+#25 resolving provenance for metadata file
+#25 DONE 0.0s
+ Image abb-training:dev Built 
+ Container abb-test-persistence-73878-training-1 Recreate 
+ Container abb-test-persistence-73878-training-1 Recreated 
+ Container abb-test-persistence-73878-training-1 Starting 
+ Container abb-test-persistence-73878-training-1 Started 
+{"status": "PASS", "output": "/workspace/export/smoke.zip", "files": 7}
+ Container abb-test-persistence-73878-training-1 Stopping 
+ Container abb-test-persistence-73878-training-1 Stopped 
+ Container abb-test-persistence-73878-training-1 Removing 
+ Container abb-test-persistence-73878-training-1 Removed 
+ Volume abb-test-persistence-73878_work Removing 
+ Volume abb-test-persistence-73878_export Removing 
+ Volume abb-test-persistence-73878_codex-auth Removing 
+ Volume abb-test-persistence-73878_copilot-auth Removing 
+ Volume abb-test-persistence-73878_runs Removing 
+ Network abb-test-persistence-73878_default Removing 
+ Volume abb-test-persistence-73878_export Removed 
+ Volume abb-test-persistence-73878_runs Removed 
+ Volume abb-test-persistence-73878_work Removed 
+ Volume abb-test-persistence-73878_codex-auth Removed 
+ Volume abb-test-persistence-73878_copilot-auth Removed 
+ Network abb-test-persistence-73878_default Removed 
+ Container abb-test-isolation-73878-training-1 Stopping 
+ Container abb-test-isolation-73878-training-1 Stopped 
+ Container abb-test-isolation-73878-training-1 Removing 
+ Container abb-test-isolation-73878-training-1 Removed 
+ Volume abb-test-isolation-73878_codex-auth Removing 
+ Volume abb-test-isolation-73878_export Removing 
+ Volume abb-test-isolation-73878_runs Removing 
+ Volume abb-test-isolation-73878_work Removing 
+ Volume abb-test-isolation-73878_copilot-auth Removing 
+ Network abb-test-isolation-73878_default Removing 
+ Volume abb-test-isolation-73878_export Removed 
+ Volume abb-test-isolation-73878_codex-auth Removed 
+ Volume abb-test-isolation-73878_copilot-auth Removed 
+ Volume abb-test-isolation-73878_work Removed 
+ Volume abb-test-isolation-73878_runs Removed 
+ Network abb-test-isolation-73878_default Removed 

@@ -1,0 +1,6 @@
+guardrails: cwd=/workspace/runs/t2-regraded command=['/usr/local/bin/python', '-m', 'pytest', 'tests', '-q', '-ra', '--junitxml=/workspace/runs/t2-regraded/evidence/variants/correct/junit.xml']
+............                                                             [100%]
+- generated xml file: /workspace/runs/t2-regraded/evidence/variants/correct/junit.xml -
+12 passed in 41.79s
+guardrails: pytest exit code 0
+guardrails: PASS: expected all tests to pass, observed tests=12 passed=12 failed=0 errors=0 skipped=0

@@ -1,0 +1,1 @@
+{"connection": "tcp", "device": "COM1", "host": "baseline.example.test", "port": "1502", "auth": "none", "password": ""}

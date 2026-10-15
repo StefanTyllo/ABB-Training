@@ -1,0 +1,16 @@
+[
+  {
+    "file": "abb-training-8752d204fd39.zip",
+    "sha256": "f0d19e18bd0ff08553a84becce856d6e7a9b6ed40e9330de3e534ad3fee45710",
+    "audience": "learner",
+    "revision": "8752d204fd39ceeab32b7c675964ce9b0908505f8da2ba94eae33e9445d7cbac",
+    "manifest_entries": 82
+  },
+  {
+    "file": "abb-training-facilitator-b46b6e7ac1c7.zip",
+    "sha256": "22bb6cea7e21a4c0ca848506e7cfb47c47387a4b0f56be76ab226bb805fd0e06",
+    "audience": "facilitator",
+    "revision": "b46b6e7ac1c7b3dceece04af01c7751fd6ab597a21d222fd6a04e615ef1fb816",
+    "manifest_entries": 213
+  }
+]

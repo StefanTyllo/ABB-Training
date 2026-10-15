@@ -1,0 +1,156 @@
+.FF...FFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+______________ test_port_boundary_valid_accepted_and_restored[1] _______________
+
+page = <pages.settings_page.SettingsPage object at 0x7176119b53d0>, port = '1'
+
+    @pytest.mark.requirement("VAL-01")
+    @pytest.mark.parametrize("port", ["1", "65535"])
+    def test_port_boundary_valid_accepted_and_restored(page, port):
+        status = page.save_tcp("lab.example.test", port)
+        assert status == "Saved", f"VAL-01: valid port {port} must be accepted, status was {status!r}"
+        page.reload()
+>       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:23: AssertionError
+____________ test_port_boundary_valid_accepted_and_restored[65535] _____________
+
+page = <pages.settings_page.SettingsPage object at 0x7176119b5280>
+port = '65535'
+
+    @pytest.mark.requirement("VAL-01")
+    @pytest.mark.parametrize("port", ["1", "65535"])
+    def test_port_boundary_valid_accepted_and_restored(page, port):
+        status = page.save_tcp("lab.example.test", port)
+        assert status == "Saved", f"VAL-01: valid port {port} must be accepted, status was {status!r}"
+        page.reload()
+>       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:23: AssertionError
+__________ test_save_reload_tcp_values_survive[lab.example.test-1502] __________
+
+page = <pages.settings_page.SettingsPage object at 0x7176111514f0>
+host = 'lab.example.test', port = '1502'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("host,port", TCP_CONFIGS)
+    def test_save_reload_tcp_values_survive(page, host, port):
+        assert page.save_tcp(host, port) == "Saved"
+        page.reload()
+>       assert page.selected("connection") == "tcp", "SAVE-01: saved connection must be restored"
+E       AssertionError: SAVE-01: saved connection must be restored
+E       assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:39: AssertionError
+_____________ test_save_reload_tcp_values_survive[10.1.2.3-65535] ______________
+
+page = <pages.settings_page.SettingsPage object at 0x717611150fb0>
+host = '10.1.2.3', port = '65535'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("host,port", TCP_CONFIGS)
+    def test_save_reload_tcp_values_survive(page, host, port):
+        assert page.save_tcp(host, port) == "Saved"
+        page.reload()
+>       assert page.selected("connection") == "tcp", "SAVE-01: saved connection must be restored"
+E       AssertionError: SAVE-01: saved connection must be restored
+E       assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:39: AssertionError
+_____________________ test_save_reload_case_with_password ______________________
+
+page = <pages.settings_page.SettingsPage object at 0x7176111517f0>
+case = {'auth': 'password', 'case': 'transfer', 'connection': 'tcp', 'device': 'COM9', ...}
+
+    @pytest.mark.requirement("SAVE-01")
+    def test_save_reload_case_with_password(page, case):
+        page.choose_connection(case["connection"])
+        page.fill("host", case["host"])
+        page.fill("port", case["port"])
+        page.choose_auth(case["auth"])
+        page.fill("password", case["password"])
+        assert page.save() == "Saved"
+        page.reload()
+>       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:53: AssertionError
+___________________ test_invalid_save_preserves_baseline[0] ____________________
+
+page = <pages.settings_page.SettingsPage object at 0x7176111533b0>
+bad_port = '0'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("bad_port", ["0", "65536", "abc"])
+    def test_invalid_save_preserves_baseline(page, bad_port):
+        assert page.save_tcp("baseline.example.test", "1502") == "Saved"
+        page.reload()
+>       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:65: AssertionError
+_________________ test_invalid_save_preserves_baseline[65536] __________________
+
+page = <pages.settings_page.SettingsPage object at 0x717611154980>
+bad_port = '65536'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("bad_port", ["0", "65536", "abc"])
+    def test_invalid_save_preserves_baseline(page, bad_port):
+        assert page.save_tcp("baseline.example.test", "1502") == "Saved"
+        page.reload()
+>       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:65: AssertionError
+__________________ test_invalid_save_preserves_baseline[abc] ___________________
+
+page = <pages.settings_page.SettingsPage object at 0x717611154260>
+bad_port = 'abc'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("bad_port", ["0", "65536", "abc"])
+    def test_invalid_save_preserves_baseline(page, bad_port):
+        assert page.save_tcp("baseline.example.test", "1502") == "Saved"
+        page.reload()
+>       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:65: AssertionError
+-- generated xml file: /workspace/runs/t2-regraded/evidence/ci/no-persist.xml --
+=========================== short test summary info ============================
+FAILED tests/test_settings.py::test_port_boundary_valid_accepted_and_restored[1]
+FAILED tests/test_settings.py::test_port_boundary_valid_accepted_and_restored[65535]
+FAILED tests/test_settings.py::test_save_reload_tcp_values_survive[lab.example.test-1502]
+FAILED tests/test_settings.py::test_save_reload_tcp_values_survive[10.1.2.3-65535]
+FAILED tests/test_settings.py::test_save_reload_case_with_password - Assertio...
+FAILED tests/test_settings.py::test_invalid_save_preserves_baseline[0] - Asse...
+FAILED tests/test_settings.py::test_invalid_save_preserves_baseline[65536] - ...
+FAILED tests/test_settings.py::test_invalid_save_preserves_baseline[abc] - As...
+8 failed, 4 passed in 38.31s

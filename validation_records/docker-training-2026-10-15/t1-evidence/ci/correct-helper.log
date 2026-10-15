@@ -1,0 +1,9 @@
+[guardrails] command: ['/usr/local/bin/python', '-m', 'pytest', 'tests', '-q', '-ra', '--junitxml=/workspace/runs/t1-refined/evidence/ci/correct-helper.xml'] (cwd=/workspace/runs/t1-refined)
+........                                                                 [100%]
+- generated xml file: /workspace/runs/t1-refined/evidence/ci/correct-helper.xml -
+8 passed in 35.74s
+[guardrails] browser: {'browser': 'chrome', 'version': '155.0.8059.79'}
+[guardrails] expected: pytest exit 0 with no skips/errors at http://127.0.0.1:34819
+[guardrails] observed: status=PASSED pytest_exit=0 counts={'collected': 8, 'passed': 8, 'failed': 0, 'skipped': 0, 'errors': 0}
+[guardrails] reason: 8 passed, none skipped -> all executed tests passed
+[guardrails] evidence: /workspace/runs/t1-refined/evidence/ci/correct-helper.xml , /workspace/runs/t1-refined/evidence/ci/correct-helper-summary.json

@@ -1,0 +1,37 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________ test_mcp_configuration_refuses_symlink_escape _________________
+
+tmp_path = PosixPath('/tmp/pytest-of-learner/pytest-0/test_mcp_configuration_refuses0')
+
+    def test_mcp_configuration_refuses_symlink_escape(tmp_path):
+        auth = auth_module()
+        workspace, outside = tmp_path/'workspace', tmp_path/'outside'
+        workspace.mkdir(); outside.mkdir()
+        marker = outside/'playwright.json'
+        marker.write_text('keep-original')
+        (workspace/'.abb').symlink_to(outside, target_is_directory=True)
+>       with pytest.raises(ValueError):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+/opt/abb/repo/tests/container/test_agents.py:68: Failed
+____________ test_empty_evidence_still_creates_collection_directory ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-learner/pytest-0/test_empty_evidence_still_crea0')
+
+    def test_empty_evidence_still_creates_collection_directory(tmp_path):
+        sys.path.insert(0, '/opt/abb/runtime')
+        from collect import collect_evidence
+        root = tmp_path/'runs'
+        root.mkdir()
+        collect_evidence(root, tmp_path/'retained')
+>       assert (tmp_path/'retained').is_dir()
+E       AssertionError: assert False
+E        +  where False = is_dir()
+E        +    where is_dir = (PosixPath('/tmp/pytest-of-learner/pytest-0/test_empty_evidence_still_crea0') / 'retained').is_dir
+
+/opt/abb/repo/tests/container/test_ci.py:73: AssertionError
+=========================== short test summary info ============================
+FAILED ../opt/abb/repo/tests/container/test_agents.py::test_mcp_configuration_refuses_symlink_escape
+FAILED ../opt/abb/repo/tests/container/test_ci.py::test_empty_evidence_still_creates_collection_directory
+2 failed, 12 deselected in 0.06s

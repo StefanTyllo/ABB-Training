@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="12" time="36.516" timestamp="2026-10-15T21:17:02.112446+00:00" hostname="cc07cce98774"><testcase classname="tests.test_settings" name="test_weak_save_smoke" time="2.594" /><testcase classname="tests.test_settings" name="test_port_boundary_valid_accepted_and_restored[1]" time="3.189"><failure message="AssertionError: assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74b97e540&gt;, port = '1'
+
+    @pytest.mark.requirement("VAL-01")
+    @pytest.mark.parametrize("port", ["1", "65535"])
+    def test_port_boundary_valid_accepted_and_restored(page, port):
+        status = page.save_tcp("lab.example.test", port)
+        assert status == "Saved", f"VAL-01: valid port {port} must be accepted, status was {status!r}"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:23: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_port_boundary_valid_accepted_and_restored[65535]" time="3.224"><failure message="AssertionError: assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74b97b500&gt;
+port = '65535'
+
+    @pytest.mark.requirement("VAL-01")
+    @pytest.mark.parametrize("port", ["1", "65535"])
+    def test_port_boundary_valid_accepted_and_restored(page, port):
+        status = page.save_tcp("lab.example.test", port)
+        assert status == "Saved", f"VAL-01: valid port {port} must be accepted, status was {status!r}"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:23: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_port_boundary_invalid_rejected[0]" time="2.575" /><testcase classname="tests.test_settings" name="test_port_boundary_invalid_rejected[65536]" time="2.566" /><testcase classname="tests.test_settings" name="test_port_boundary_invalid_rejected[abc]" time="2.519" /><testcase classname="tests.test_settings" name="test_save_reload_tcp_values_survive[lab.example.test-1502]" time="3.158"><failure message="AssertionError: SAVE-01: saved connection must be restored&#10;assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74ba32900&gt;
+host = 'lab.example.test', port = '1502'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("host,port", TCP_CONFIGS)
+    def test_save_reload_tcp_values_survive(page, host, port):
+        assert page.save_tcp(host, port) == "Saved"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp", "SAVE-01: saved connection must be restored"
+E       AssertionError: SAVE-01: saved connection must be restored
+E       assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:39: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_save_reload_tcp_values_survive[10.1.2.3-65535]" time="3.154"><failure message="AssertionError: SAVE-01: saved connection must be restored&#10;assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74b981ca0&gt;
+host = '10.1.2.3', port = '65535'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("host,port", TCP_CONFIGS)
+    def test_save_reload_tcp_values_survive(page, host, port):
+        assert page.save_tcp(host, port) == "Saved"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp", "SAVE-01: saved connection must be restored"
+E       AssertionError: SAVE-01: saved connection must be restored
+E       assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:39: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_save_reload_case_with_password" time="3.883"><failure message="AssertionError: assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74b97d280&gt;
+case = {'auth': 'password', 'case': 'transfer', 'connection': 'tcp', 'device': 'COM9', ...}
+
+    @pytest.mark.requirement("SAVE-01")
+    def test_save_reload_case_with_password(page, case):
+        page.choose_connection(case["connection"])
+        page.fill("host", case["host"])
+        page.fill("port", case["port"])
+        page.choose_auth(case["auth"])
+        page.fill("password", case["password"])
+        assert page.save() == "Saved"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:53: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_invalid_save_preserves_baseline[0]" time="3.184"><failure message="AssertionError: assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74b11cce0&gt;
+bad_port = '0'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("bad_port", ["0", "65536", "abc"])
+    def test_invalid_save_preserves_baseline(page, bad_port):
+        assert page.save_tcp("baseline.example.test", "1502") == "Saved"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:65: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_invalid_save_preserves_baseline[65536]" time="3.189"><failure message="AssertionError: assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74b11ebd0&gt;
+bad_port = '65536'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("bad_port", ["0", "65536", "abc"])
+    def test_invalid_save_preserves_baseline(page, bad_port):
+        assert page.save_tcp("baseline.example.test", "1502") == "Saved"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:65: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_invalid_save_preserves_baseline[abc]" time="3.213"><failure message="AssertionError: assert 'serial' == 'tcp'&#10;  &#10;  - tcp&#10;  + serial">page = &lt;pages.settings_page.SettingsPage object at 0x74c74b11d9a0&gt;
+bad_port = 'abc'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("bad_port", ["0", "65536", "abc"])
+    def test_invalid_save_preserves_baseline(page, bad_port):
+        assert page.save_tcp("baseline.example.test", "1502") == "Saved"
+        page.reload()
+&gt;       assert page.selected("connection") == "tcp"
+E       AssertionError: assert 'serial' == 'tcp'
+E         
+E         - tcp
+E         + serial
+
+tests/test_settings.py:65: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,4 @@
+[capture] browser: {'browser': 'chrome', 'version': '155.0.8059.79'}
+[capture] expected failure caught: TimeoutException
+[capture] evidence: /workspace/runs/t1-refined/evidence/intentional-missing-element/missing_element.png (25099 bytes), /workspace/runs/t1-refined/evidence/intentional-missing-element/missing_element.txt
+

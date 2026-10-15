@@ -1,0 +1,8 @@
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 4.776s
+
+OK
+HTTP contracts verified: correct
+HTTP contracts verified: no-persist
+HTTP contracts verified: bad-boundary

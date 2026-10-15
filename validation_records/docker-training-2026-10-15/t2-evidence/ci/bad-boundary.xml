@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="12" time="39.431" timestamp="2026-10-15T21:15:37.385515+00:00" hostname="cc07cce98774"><testcase classname="tests.test_settings" name="test_weak_save_smoke" time="2.616" /><testcase classname="tests.test_settings" name="test_port_boundary_valid_accepted_and_restored[1]" time="3.332" /><testcase classname="tests.test_settings" name="test_port_boundary_valid_accepted_and_restored[65535]" time="2.557"><failure message="AssertionError: VAL-01: valid port 65535 must be accepted, status was 'Port must be 1..65535'&#10;assert 'Port must be 1..65535' == 'Saved'&#10;  &#10;  - Saved&#10;  + Port must be 1..65535">page = &lt;pages.settings_page.SettingsPage object at 0x7671e5c88140&gt;
+port = '65535'
+
+    @pytest.mark.requirement("VAL-01")
+    @pytest.mark.parametrize("port", ["1", "65535"])
+    def test_port_boundary_valid_accepted_and_restored(page, port):
+        status = page.save_tcp("lab.example.test", port)
+&gt;       assert status == "Saved", f"VAL-01: valid port {port} must be accepted, status was {status!r}"
+E       AssertionError: VAL-01: valid port 65535 must be accepted, status was 'Port must be 1..65535'
+E       assert 'Port must be 1..65535' == 'Saved'
+E         
+E         - Saved
+E         + Port must be 1..65535
+
+tests/test_settings.py:21: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_port_boundary_invalid_rejected[0]" time="2.534" /><testcase classname="tests.test_settings" name="test_port_boundary_invalid_rejected[65536]" time="2.613" /><testcase classname="tests.test_settings" name="test_port_boundary_invalid_rejected[abc]" time="2.585" /><testcase classname="tests.test_settings" name="test_save_reload_tcp_values_survive[lab.example.test-1502]" time="3.278" /><testcase classname="tests.test_settings" name="test_save_reload_tcp_values_survive[10.1.2.3-65535]" time="2.572"><failure message="AssertionError: assert 'Port must be 1..65535' == 'Saved'&#10;  &#10;  - Saved&#10;  + Port must be 1..65535">page = &lt;pages.settings_page.SettingsPage object at 0x7671e5420380&gt;
+host = '10.1.2.3', port = '65535'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("host,port", TCP_CONFIGS)
+    def test_save_reload_tcp_values_survive(page, host, port):
+&gt;       assert page.save_tcp(host, port) == "Saved"
+E       AssertionError: assert 'Port must be 1..65535' == 'Saved'
+E         
+E         - Saved
+E         + Port must be 1..65535
+
+tests/test_settings.py:37: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_save_reload_case_with_password" time="3.285"><failure message="AssertionError: assert 'Port must be 1..65535' == 'Saved'&#10;  &#10;  - Saved&#10;  + Port must be 1..65535">page = &lt;pages.settings_page.SettingsPage object at 0x7671e5c82ed0&gt;
+case = {'auth': 'password', 'case': 'transfer', 'connection': 'tcp', 'device': 'COM9', ...}
+
+    @pytest.mark.requirement("SAVE-01")
+    def test_save_reload_case_with_password(page, case):
+        page.choose_connection(case["connection"])
+        page.fill("host", case["host"])
+        page.fill("port", case["port"])
+        page.choose_auth(case["auth"])
+        page.fill("password", case["password"])
+&gt;       assert page.save() == "Saved"
+E       AssertionError: assert 'Port must be 1..65535' == 'Saved'
+E         
+E         - Saved
+E         + Port must be 1..65535
+
+tests/test_settings.py:51: AssertionError</failure></testcase><testcase classname="tests.test_settings" name="test_invalid_save_preserves_baseline[0]" time="4.678" /><testcase classname="tests.test_settings" name="test_invalid_save_preserves_baseline[65536]" time="4.638" /><testcase classname="tests.test_settings" name="test_invalid_save_preserves_baseline[abc]" time="4.682" /></testsuite></testsuites>

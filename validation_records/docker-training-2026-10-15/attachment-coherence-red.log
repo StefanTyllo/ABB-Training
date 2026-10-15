@@ -1,0 +1,32 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_handbook_attachment_is_executable_and_clean _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-learner/pytest-0/test_handbook_attachment_is_ex0')
+
+    def test_handbook_attachment_is_executable_and_clean(tmp_path):
+        from pypdf import PdfReader
+        reader = PdfReader(ROOT/'docs/ABB_Workflow_Training.pdf')
+        assert list(reader.attachments) == ['ABB_Workflow_Training_Starters.zip']
+        attachments = reader.attachments['ABB_Workflow_Training_Starters.zip']
+        assert len(attachments) == 1
+        import io
+        with zipfile.ZipFile(io.BytesIO(attachments[0])) as archive:
+            assert 'Dockerfile' in archive.namelist()
+            assert not any('/instructor/' in n or '/author_checks/' in n or n.startswith('validation_') for n in archive.namelist())
+            for name in archive.namelist():
+                if name == 'release-manifest.json':
+                    continue
+                current = ROOT/('compose.learner.yaml' if name == 'compose.yaml' else name)
+                assert current.is_file(), 'Removed file remains in PDF starter: '+name
+>               assert archive.read(name) == current.read_bytes(), 'Stale PDF starter file: '+name
+E               AssertionError: Stale PDF starter file: Dockerfile
+E               assert b'FROM python...SER learner\n' == b'FROM python...SER learner\n'
+E                 
+E                 At index 2510 diff: b'a' != b'g'
+E                 Use -v to get more diff
+
+/opt/abb/repo/tests/container/test_package.py:59: AssertionError
+=========================== short test summary info ============================
+FAILED ../opt/abb/repo/tests/container/test_package.py::test_handbook_attachment_is_executable_and_clean
+1 failed, 8 deselected in 0.11s

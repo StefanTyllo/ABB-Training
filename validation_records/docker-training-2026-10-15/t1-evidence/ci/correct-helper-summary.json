@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-10-15T21:15:06+00:00",
+  "status": "PASSED",
+  "reason": "8 passed, none skipped",
+  "url": "http://127.0.0.1:34819",
+  "browser": {
+    "browser": "chrome",
+    "version": "155.0.8059.79"
+  },
+  "counts": {
+    "collected": 8,
+    "passed": 8,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0
+  },
+  "cases": [
+    {
+      "name": "test_connection_visibility_both_directions",
+      "outcome": "passed"
+    },
+    {
+      "name": "test_auth_visibility_both_directions",
+      "outcome": "passed"
+    },
+    {
+      "name": "test_save_reload_password[serial]",
+      "outcome": "passed"
+    },
+    {
+      "name": "test_save_reload_password[tcp]",
+      "outcome": "passed"
+    },
+    {
+      "name": "test_save_reload_none_auth[serial]",
+      "outcome": "passed"
+    },
+    {
+      "name": "test_save_reload_none_auth[tcp]",
+      "outcome": "passed"
+    },
+    {
+      "name": "test_empty_password_rejected",
+      "outcome": "passed"
+    },
+    {
+      "name": "test_invalid_save_preserves_previous_values",
+      "outcome": "passed"
+    }
+  ],
+  "artifacts": {
+    "junit": "/workspace/runs/t1-refined/evidence/ci/correct-helper.xml",
+    "workspace": "/workspace/runs/t1-refined",
+    "pytest_returncode": 0
+  }
+}

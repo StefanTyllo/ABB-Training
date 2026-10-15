@@ -1,0 +1,123 @@
+ Network abb-test-guides-73865_default Creating 
+ Network abb-test-guides-73865_default Created 
+ Volume abb-test-guides-73865_copilot-auth Creating 
+ Volume abb-test-guides-73865_copilot-auth Created 
+ Volume abb-test-guides-73865_work Creating 
+ Volume abb-test-guides-73865_work Created 
+ Volume abb-test-guides-73865_runs Creating 
+ Volume abb-test-guides-73865_runs Created 
+ Volume abb-test-guides-73865_export Creating 
+ Volume abb-test-guides-73865_export Created 
+ Volume abb-test-guides-73865_codex-auth Creating 
+ Volume abb-test-guides-73865_codex-auth Created 
+ Container abb-test-guides-73865-training-1 Creating 
+ Container abb-test-guides-73865-training-1 Created 
+ Container abb-test-guides-73865-training-1 Starting 
+ Container abb-test-guides-73865-training-1 Started 
+{"initialized": true, "case": "demo"}
+Prepared workspace: /workspace/work/fw1-demo
+Read the PDF lab card before starting the agent.
+/workspace/work/fw1-demo
+{"initialized": true, "case": "transfer"}
+Prepared workspace: /workspace/work/fw1-transfer-md
+Read the PDF lab card before starting the agent.
+/workspace/work/fw1-transfer-md
+{"initialized": true, "case": "transfer"}
+Prepared workspace: /workspace/work/fw1-transfer-code
+Read the PDF lab card before starting the agent.
+/workspace/work/fw1-transfer-code
+Prepared workspace: /workspace/work/fw2-demo
+Read the PDF lab card before starting the agent.
+/workspace/work/fw2-demo
+Prepared workspace: /workspace/work/fw2-transfer-md
+Read the PDF lab card before starting the agent.
+/workspace/work/fw2-transfer-md
+Prepared workspace: /workspace/work/fw2-transfer-code
+Read the PDF lab card before starting the agent.
+/workspace/work/fw2-transfer-code
+Prepared hw1/demo at /workspace/work/hw1-demo
+Prepared workspace: /workspace/work/hw1-demo
+Read the PDF lab card before starting the agent.
+/workspace/work/hw1-demo
+Prepared hw1/transfer at /workspace/work/hw1-transfer-md
+Prepared workspace: /workspace/work/hw1-transfer-md
+Read the PDF lab card before starting the agent.
+/workspace/work/hw1-transfer-md
+Prepared hw1/transfer at /workspace/work/hw1-transfer-code
+Prepared workspace: /workspace/work/hw1-transfer-code
+Read the PDF lab card before starting the agent.
+/workspace/work/hw1-transfer-code
+Prepared hw2/demo at /workspace/work/hw2-demo
+Prepared workspace: /workspace/work/hw2-demo
+Read the PDF lab card before starting the agent.
+/workspace/work/hw2-demo
+Prepared hw2/transfer at /workspace/work/hw2-transfer-md
+Prepared workspace: /workspace/work/hw2-transfer-md
+Read the PDF lab card before starting the agent.
+/workspace/work/hw2-transfer-md
+Prepared hw2/transfer at /workspace/work/hw2-transfer-code
+Prepared workspace: /workspace/work/hw2-transfer-code
+Read the PDF lab card before starting the agent.
+/workspace/work/hw2-transfer-code
+Prepared t1/demo: /workspace/work/t1-demo
+Prepared workspace: /workspace/work/t1-demo
+Read the PDF lab card before starting the agent.
+/workspace/work/t1-demo
+.                                                                        [100%]
+1 passed in 2.63s
+PASS: no-login fixture validated; state does not authenticate Selenium
+Prepared t1/transfer: /workspace/work/t1-transfer-md
+Prepared workspace: /workspace/work/t1-transfer-md
+Read the PDF lab card before starting the agent.
+/workspace/work/t1-transfer-md
+.                                                                        [100%]
+1 passed in 2.81s
+PASS: no-login fixture validated; state does not authenticate Selenium
+Prepared t1/transfer: /workspace/work/t1-transfer-code
+Prepared workspace: /workspace/work/t1-transfer-code
+Read the PDF lab card before starting the agent.
+/workspace/work/t1-transfer-code
+.                                                                        [100%]
+1 passed in 2.58s
+PASS: no-login fixture validated; state does not authenticate Selenium
+Prepared t2/demo: /workspace/work/t2-demo
+Prepared workspace: /workspace/work/t2-demo
+Read the PDF lab card before starting the agent.
+/workspace/work/t2-demo
+.                                                                        [100%]
+1 passed in 2.53s
+Prepared t2/transfer: /workspace/work/t2-transfer-md
+Prepared workspace: /workspace/work/t2-transfer-md
+Read the PDF lab card before starting the agent.
+/workspace/work/t2-transfer-md
+.                                                                        [100%]
+1 passed in 2.49s
+Prepared t2/transfer: /workspace/work/t2-transfer-code
+Prepared workspace: /workspace/work/t2-transfer-code
+Read the PDF lab card before starting the agent.
+/workspace/work/t2-transfer-code
+.                                                                        [100%]
+1 passed in 2.46s
+ Container abb-test-guides-73865-training-1 Stopping 
+ Container abb-test-guides-73865-training-1 Stopped 
+ Container abb-test-guides-73865-training-1 Recreate 
+ Container abb-test-guides-73865-training-1 Recreated 
+ Container abb-test-guides-73865-training-1 Starting 
+ Container abb-test-guides-73865-training-1 Started 
+{"status": "PASS", "output": "/workspace/export/guide-submission.zip", "files": 165}
+ Container abb-test-guides-73865-training-1 Stopping 
+ Container abb-test-guides-73865-training-1 Stopped 
+ Container abb-test-guides-73865-training-1 Removing 
+ Container abb-test-guides-73865-training-1 Removed 
+ Volume abb-test-guides-73865_export Removing 
+ Network abb-test-guides-73865_default Removing 
+ Volume abb-test-guides-73865_copilot-auth Removing 
+ Volume abb-test-guides-73865_codex-auth Removing 
+ Volume abb-test-guides-73865_work Removing 
+ Volume abb-test-guides-73865_runs Removing 
+ Volume abb-test-guides-73865_export Removed 
+ Volume abb-test-guides-73865_runs Removed 
+ Volume abb-test-guides-73865_copilot-auth Removed 
+ Volume abb-test-guides-73865_codex-auth Removed 
+ Volume abb-test-guides-73865_work Removed 
+ Network abb-test-guides-73865_default Removed 

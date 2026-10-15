@@ -1,0 +1,15 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_artifact_collection_excludes_state_and_retains_failed_evidence ______
+
+tmp_path = PosixPath('/tmp/pytest-of-learner/pytest-0/test_artifact_collection_exclu0')
+
+    def test_artifact_collection_excludes_state_and_retains_failed_evidence(tmp_path):
+        sys.path.insert(0, '/opt/abb/runtime')
+>       from collect import collect_evidence
+E       ModuleNotFoundError: No module named 'collect'
+
+/opt/abb/repo/tests/container/test_ci.py:53: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED ../opt/abb/repo/tests/container/test_ci.py::test_artifact_collection_excludes_state_and_retains_failed_evidence
+1 failed, 8 deselected in 0.03s

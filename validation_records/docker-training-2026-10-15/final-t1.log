@@ -1,0 +1,61 @@
+.............                                                            [100%]
+- generated xml file: /workspace/runs/t1-refined/evidence/automation-self-tests.xml -
+13 passed in 10.97s
+
+
+[capture] browser: {'browser': 'chrome', 'version': '155.0.8059.79'}
+[capture] expected failure caught: TimeoutException
+[capture] evidence: /workspace/runs/t1-refined/evidence/intentional-missing-element/missing_element.png (25099 bytes), /workspace/runs/t1-refined/evidence/intentional-missing-element/missing_element.txt
+
+
+{
+  "lab": "t1",
+  "mode": "code",
+  "workspace": "/workspace/runs/t1-refined",
+  "results": {
+    "correct": {
+      "tests": 8,
+      "failures": 0,
+      "names": [
+        "test_connection_visibility_both_directions",
+        "test_auth_visibility_both_directions",
+        "test_save_reload_password[serial]",
+        "test_save_reload_password[tcp]",
+        "test_save_reload_none_auth[serial]",
+        "test_save_reload_none_auth[tcp]",
+        "test_empty_password_rejected",
+        "test_invalid_save_preserves_previous_values"
+      ],
+      "returncode": 0
+    }
+  },
+  "suite_sha256": {
+    "tests/test_settings.py": "bd52ef641b02ec8c143e20db510bacaa0235618564fb5e28bb01eaa376e4b4a6"
+  },
+  "semantic": {
+    "status": "passed",
+    "cases": [
+      "tcp-password",
+      "serial-password",
+      "none-reload"
+    ],
+    "browser": "155.0.8059.79"
+  },
+  "helper": {
+    "tests": 8,
+    "failures": 0,
+    "names": [
+      "test_connection_visibility_both_directions",
+      "test_auth_visibility_both_directions",
+      "test_save_reload_password[serial]",
+      "test_save_reload_password[tcp]",
+      "test_save_reload_none_auth[serial]",
+      "test_save_reload_none_auth[tcp]",
+      "test_empty_password_rejected",
+      "test_invalid_save_preserves_previous_values"
+    ],
+    "returncode": 0
+  },
+  "status": "passed"
+}
+Complete T1 package: automation self-tests, real-browser suite, semantic oracle and retained evidence accepted.

@@ -1,0 +1,30 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_doctor_reports_sanitized_sandbox_diagnostic _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-learner/pytest-0/test_doctor_reports_sanitized_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x71c1cb5f64b0>
+
+    def test_doctor_reports_sanitized_sandbox_diagnostic(tmp_path, monkeypatch):
+        import os
+        import sys
+        sys.path.insert(0, '/opt/abb/runtime')
+        from doctor import run_checks
+        binary = tmp_path/'codex'
+        binary.write_text('''#!/bin/sh
+    if [ "$1" = "--version" ]; then exec /opt/abb/node/node_modules/.bin/codex "$@"; fi
+    printf 'bwrap: mount denied %s\\n' "$OPENAI_API_KEY" >&2
+    exit 1
+    ''')
+        binary.chmod(0o755)
+        monkeypatch.setenv('PATH', str(tmp_path)+os.pathsep+os.environ['PATH'])
+        monkeypatch.setenv('OPENAI_API_KEY', 'SYNTHETIC_DOCTOR_SECRET')
+        report = run_checks(True)
+        assert report['status'] == 'BLOCKED'
+>       assert 'mount denied' in report['checks']['codex_sandbox']['diagnostic']
+E       KeyError: 'diagnostic'
+
+/opt/abb/repo/tests/container/test_workspace.py:84: KeyError
+=========================== short test summary info ============================
+FAILED ../opt/abb/repo/tests/container/test_workspace.py::test_doctor_reports_sanitized_sandbox_diagnostic
+1 failed, 4 deselected in 4.22s

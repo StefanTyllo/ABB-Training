@@ -1,0 +1,62 @@
+guardrails: cwd=/workspace/runs/t2-regraded command=['/usr/local/bin/python', '-m', 'pytest', 'tests', '-q', '-ra', '--junitxml=/workspace/runs/t2-regraded/evidence/variants/bad-boundary/junit.xml']
+..F....FF...                                                             [100%]
+=================================== FAILURES ===================================
+____________ test_port_boundary_valid_accepted_and_restored[65535] _____________
+
+page = <pages.settings_page.SettingsPage object at 0x77decb721b80>
+port = '65535'
+
+    @pytest.mark.requirement("VAL-01")
+    @pytest.mark.parametrize("port", ["1", "65535"])
+    def test_port_boundary_valid_accepted_and_restored(page, port):
+        status = page.save_tcp("lab.example.test", port)
+>       assert status == "Saved", f"VAL-01: valid port {port} must be accepted, status was {status!r}"
+E       AssertionError: VAL-01: valid port 65535 must be accepted, status was 'Port must be 1..65535'
+E       assert 'Port must be 1..65535' == 'Saved'
+E         
+E         - Saved
+E         + Port must be 1..65535
+
+tests/test_settings.py:21: AssertionError
+_____________ test_save_reload_tcp_values_survive[10.1.2.3-65535] ______________
+
+page = <pages.settings_page.SettingsPage object at 0x77decb725e50>
+host = '10.1.2.3', port = '65535'
+
+    @pytest.mark.requirement("SAVE-01")
+    @pytest.mark.parametrize("host,port", TCP_CONFIGS)
+    def test_save_reload_tcp_values_survive(page, host, port):
+>       assert page.save_tcp(host, port) == "Saved"
+E       AssertionError: assert 'Port must be 1..65535' == 'Saved'
+E         
+E         - Saved
+E         + Port must be 1..65535
+
+tests/test_settings.py:37: AssertionError
+_____________________ test_save_reload_case_with_password ______________________
+
+page = <pages.settings_page.SettingsPage object at 0x77decb724dd0>
+case = {'auth': 'password', 'case': 'transfer', 'connection': 'tcp', 'device': 'COM9', ...}
+
+    @pytest.mark.requirement("SAVE-01")
+    def test_save_reload_case_with_password(page, case):
+        page.choose_connection(case["connection"])
+        page.fill("host", case["host"])
+        page.fill("port", case["port"])
+        page.choose_auth(case["auth"])
+        page.fill("password", case["password"])
+>       assert page.save() == "Saved"
+E       AssertionError: assert 'Port must be 1..65535' == 'Saved'
+E         
+E         - Saved
+E         + Port must be 1..65535
+
+tests/test_settings.py:51: AssertionError
+- generated xml file: /workspace/runs/t2-regraded/evidence/variants/bad-boundary/junit.xml -
+=========================== short test summary info ============================
+FAILED tests/test_settings.py::test_port_boundary_valid_accepted_and_restored[65535]
+FAILED tests/test_settings.py::test_save_reload_tcp_values_survive[10.1.2.3-65535]
+FAILED tests/test_settings.py::test_save_reload_case_with_password - Assertio...
+3 failed, 9 passed in 39.06s
+guardrails: pytest exit code 1
+guardrails: ASSERTION FAILURE: 3 test(s) failed an assertion: test_port_boundary_valid_accepted_and_restored[65535], test_save_reload_tcp_values_survive[10.1.2.3-65535], test_save_reload_case_with_password; tests=12 passed=9 failed=3 errors=0 skipped=0

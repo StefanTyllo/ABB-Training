@@ -1,0 +1,27 @@
+label: missing_element
+captured_at: 2026-10-15T21:13:37+00:00
+error: TimeoutException: Message: 
+Stacktrace:
+#0 0x5e50dabcf64a <unknown>
+#1 0x5e50da4eb7d9 <unknown>
+#2 0x5e50da5427bf <unknown>
+#3 0x5e50da542a41 <unknown>
+#4 0x5e50da593ca4 <unknown>
+#5 0x5e50da590f1e <unknown>
+#6 0x5e50da5354a8 <unknown>
+#7 0x5e50da536281 <unknown>
+#8 0x5e50dab921ec <unknown>
+#9 0x5e50dab90a05 <unknown>
+#10 0x5e50dab7b8e5 <unknown>
+#11 0x5e50dab9165a <unknown>
+#12 0x5e50dab63f09 <unknown>
+#13 0x5e50dabb9b18 <unknown>
+#14 0x5e50dabb9cb5 <unknown>
+#15 0x5e50dabcdfd3 <unknown>
+#16 0x7fd1dcfa01f5 <unknown>
+
+url: http://127.0.0.1:8765/
+title: Device settings lab
+aria-busy: false
+visibility: {"connection": true, "device": true, "host": false, "port": false, "auth": true, "password": false, "save": true, "status": false}
+screenshot: /workspace/runs/t1-refined/evidence/intentional-missing-element/missing_element.png

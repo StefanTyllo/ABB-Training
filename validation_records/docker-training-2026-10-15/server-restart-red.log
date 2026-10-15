@@ -1,0 +1,53 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_rehearsal_restarts_after_owned_server_stops _______________
+
+workspace = PosixPath('/tmp/pytest-of-learner/pytest-0/test_rehearsal_restarts_after_0/second')
+
+    def server_start(workspace):
+        with socket.socket() as probe:
+            try:
+>               probe.bind(('127.0.0.1', 8765))
+E               OSError: [Errno 98] Address already in use
+
+/opt/abb/repo/training_ci/run_lab.py:85: OSError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/tmp/pytest-of-learner/pytest-0/test_rehearsal_restarts_after_0')
+
+    def test_rehearsal_restarts_after_owned_server_stops(tmp_path):
+        import urllib.request
+        sys.path.insert(0, str(ROOT))
+        from training_ci.run_lab import server_start
+        for name in ['first', 'second']:
+            subprocess.run([sys.executable, str(MATERIALS/'prepare_lab.py'), 't1', 'demo',
+                            str(tmp_path/name)], check=True, capture_output=True)
+        first = server_start(tmp_path/'first')
+        try:
+            urllib.request.urlopen('http://127.0.0.1:8765', timeout=2).read()
+        finally:
+            first[0].terminate(); first[0].wait(timeout=10); first[1].close()
+        # The actual HTTPServer supports reuse after TIME_WAIT; this is not an occupied listener.
+        with socket.socket() as available:
+            available.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            available.bind(('127.0.0.1', 8765))
+>       second = server_start(tmp_path/'second')
+
+/opt/abb/repo/tests/container/test_portability.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+workspace = PosixPath('/tmp/pytest-of-learner/pytest-0/test_rehearsal_restarts_after_0/second')
+
+    def server_start(workspace):
+        with socket.socket() as probe:
+            try:
+                probe.bind(('127.0.0.1', 8765))
+            except OSError as error:
+>               raise RuntimeError('Application port 8765 is occupied; stop its owner first') from error
+E               RuntimeError: Application port 8765 is occupied; stop its owner first
+
+/opt/abb/repo/training_ci/run_lab.py:87: RuntimeError
+=========================== short test summary info ============================
+FAILED ../opt/abb/repo/tests/container/test_portability.py::test_rehearsal_restarts_after_owned_server_stops
+1 failed, 15 deselected in 1.04s

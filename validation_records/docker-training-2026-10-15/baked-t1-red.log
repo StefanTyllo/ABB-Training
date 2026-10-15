@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/opt/abb/repo/validation_t1_package/check.py", line 16, in <module>
+    (WORK/'evidence').mkdir()
+  File "/usr/local/lib/python3.12/pathlib.py", line 1311, in mkdir
+    os.mkdir(self, mode)
+PermissionError: [Errno 13] Permission denied: '/workspace/runs/t1-refined/evidence'

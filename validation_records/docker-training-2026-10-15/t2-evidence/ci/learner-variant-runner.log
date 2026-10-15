@@ -1,0 +1,7 @@
+== variant correct: starting owned server
+   status=ok reason=suite executed and JUnit parsed rc=0 (expected 0) counts={'passed': 12, 'failed': 0, 'error': 0, 'skipped': 0, 'tests': 12}
+== variant no-persist: starting owned server
+   status=ok reason=suite executed and JUnit parsed rc=1 (expected 1) counts={'passed': 4, 'failed': 8, 'error': 0, 'skipped': 0, 'tests': 12}
+== variant bad-boundary: starting owned server
+   status=ok reason=suite executed and JUnit parsed rc=1 (expected 1) counts={'passed': 9, 'failed': 3, 'error': 0, 'skipped': 0, 'tests': 12}
+RESULT: PASSED - report /workspace/runs/t2-regraded/evidence/variant-evaluation.json

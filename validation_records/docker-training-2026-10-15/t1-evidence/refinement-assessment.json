@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "method": "targeted scripted refinement; not a fresh MD/code comparison",
+  "browser": {
+    "browser": "chrome",
+    "version": "155.0.8059.79"
+  },
+  "screenshots": [
+    "evidence/intentional-missing-element/missing_element.png"
+  ]
+}

@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_shared_build_gates_offline_acceptance_before_image_export ________
+
+    def test_shared_build_gates_offline_acceptance_before_image_export():
+        import yaml
+        workflow = yaml.load((ROOT/'.github/workflows/build-training-image.yml').read_text(), Loader=yaml.BaseLoader)
+        steps = workflow['jobs']['build']['steps']
+        gates = [index for index, step in enumerate(steps)
+                 if 'docker run' in step.get('run', '') and 'pytest' in step.get('run', '')]
+>       assert gates, 'Shared image build must run offline acceptance before paid rehearsals'
+E       AssertionError: Shared image build must run offline acceptance before paid rehearsals
+E       assert []
+
+/opt/abb/repo/tests/container/test_ci.py:82: AssertionError
+=========================== short test summary info ============================
+FAILED ../opt/abb/repo/tests/container/test_ci.py::test_shared_build_gates_offline_acceptance_before_image_export
+1 failed, 10 deselected in 0.05s

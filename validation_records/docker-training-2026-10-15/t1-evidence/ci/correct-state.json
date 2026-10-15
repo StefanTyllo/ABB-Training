@@ -1,0 +1,1 @@
+{"connection": "tcp", "device": "COM1", "host": "lab.example.test", "port": "65535", "auth": "password", "password": "transfer-only"}

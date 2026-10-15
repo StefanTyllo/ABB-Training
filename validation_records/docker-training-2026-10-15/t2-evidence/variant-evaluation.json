@@ -1,0 +1,327 @@
+{
+  "status": "passed",
+  "generated_at": "2026-10-15T21:16:17.239588+00:00",
+  "workspace": "/workspace/runs/t2-regraded",
+  "problems": [],
+  "variants": {
+    "correct": {
+      "variant": "correct",
+      "port": 48923,
+      "base_url": "http://127.0.0.1:48923",
+      "state_path": "/workspace/runs/t2-regraded/evidence/variants/correct/state.json",
+      "junit_path": "/workspace/runs/t2-regraded/evidence/variants/correct/junit.xml",
+      "server_log": "/workspace/runs/t2-regraded/evidence/variants/correct/server.log",
+      "pytest_log": "/workspace/runs/t2-regraded/evidence/variants/correct/pytest.log",
+      "status": "ok",
+      "status_reason": "suite executed and JUnit parsed",
+      "pytest_returncode": 0,
+      "expected_pytest_returncode": 0,
+      "counts": {
+        "passed": 12,
+        "failed": 0,
+        "error": 0,
+        "skipped": 0,
+        "tests": 12
+      },
+      "failures": [],
+      "coverage": {
+        "present": [
+          "save_reload",
+          "port_boundary",
+          "invalid_save",
+          "port=1",
+          "port=65535",
+          "port=0",
+          "port=65536",
+          "port=abc"
+        ],
+        "missing": [],
+        "executed_count": 12
+      },
+      "owned_server_stopped": {
+        "stopped": true,
+        "forced": false
+      },
+      "server_command": [
+        "/usr/local/bin/python",
+        "server.py",
+        "--variant",
+        "correct",
+        "--port",
+        "48923",
+        "--state",
+        "/workspace/runs/t2-regraded/evidence/variants/correct/state.json"
+      ],
+      "readiness": {
+        "ready": true,
+        "elapsed_s": 0.451,
+        "error": null
+      }
+    },
+    "no-persist": {
+      "variant": "no-persist",
+      "port": 51839,
+      "base_url": "http://127.0.0.1:51839",
+      "state_path": "/workspace/runs/t2-regraded/evidence/variants/no-persist/state.json",
+      "junit_path": "/workspace/runs/t2-regraded/evidence/variants/no-persist/junit.xml",
+      "server_log": "/workspace/runs/t2-regraded/evidence/variants/no-persist/server.log",
+      "pytest_log": "/workspace/runs/t2-regraded/evidence/variants/no-persist/pytest.log",
+      "status": "ok",
+      "status_reason": "suite executed and JUnit parsed",
+      "pytest_returncode": 1,
+      "expected_pytest_returncode": 1,
+      "counts": {
+        "passed": 4,
+        "failed": 8,
+        "error": 0,
+        "skipped": 0,
+        "tests": 12
+      },
+      "failures": [
+        {
+          "name": "test_port_boundary_valid_accepted_and_restored[1]",
+          "status": "failed",
+          "message": "AssertionError: assert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "VAL-01"
+        },
+        {
+          "name": "test_port_boundary_valid_accepted_and_restored[65535]",
+          "status": "failed",
+          "message": "AssertionError: assert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "VAL-01"
+        },
+        {
+          "name": "test_save_reload_tcp_values_survive[lab.example.test-1502]",
+          "status": "failed",
+          "message": "AssertionError: SAVE-01: saved connection must be restored\nassert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        },
+        {
+          "name": "test_save_reload_tcp_values_survive[10.1.2.3-65535]",
+          "status": "failed",
+          "message": "AssertionError: SAVE-01: saved connection must be restored\nassert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        },
+        {
+          "name": "test_save_reload_case_with_password",
+          "status": "failed",
+          "message": "AssertionError: assert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        },
+        {
+          "name": "test_invalid_save_preserves_baseline[0]",
+          "status": "failed",
+          "message": "AssertionError: assert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        },
+        {
+          "name": "test_invalid_save_preserves_baseline[65536]",
+          "status": "failed",
+          "message": "AssertionError: assert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        },
+        {
+          "name": "test_invalid_save_preserves_baseline[abc]",
+          "status": "failed",
+          "message": "AssertionError: assert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        }
+      ],
+      "coverage": {
+        "present": [
+          "save_reload",
+          "port_boundary",
+          "invalid_save",
+          "port=1",
+          "port=65535",
+          "port=0",
+          "port=65536",
+          "port=abc"
+        ],
+        "missing": [],
+        "executed_count": 12
+      },
+      "owned_server_stopped": {
+        "stopped": true,
+        "forced": false
+      },
+      "server_command": [
+        "/usr/local/bin/python",
+        "server.py",
+        "--variant",
+        "no-persist",
+        "--port",
+        "51839",
+        "--state",
+        "/workspace/runs/t2-regraded/evidence/variants/no-persist/state.json"
+      ],
+      "readiness": {
+        "ready": true,
+        "elapsed_s": 0.404,
+        "error": null
+      }
+    },
+    "bad-boundary": {
+      "variant": "bad-boundary",
+      "port": 44439,
+      "base_url": "http://127.0.0.1:44439",
+      "state_path": "/workspace/runs/t2-regraded/evidence/variants/bad-boundary/state.json",
+      "junit_path": "/workspace/runs/t2-regraded/evidence/variants/bad-boundary/junit.xml",
+      "server_log": "/workspace/runs/t2-regraded/evidence/variants/bad-boundary/server.log",
+      "pytest_log": "/workspace/runs/t2-regraded/evidence/variants/bad-boundary/pytest.log",
+      "status": "ok",
+      "status_reason": "suite executed and JUnit parsed",
+      "pytest_returncode": 1,
+      "expected_pytest_returncode": 1,
+      "counts": {
+        "passed": 9,
+        "failed": 3,
+        "error": 0,
+        "skipped": 0,
+        "tests": 12
+      },
+      "failures": [
+        {
+          "name": "test_port_boundary_valid_accepted_and_restored[65535]",
+          "status": "failed",
+          "message": "AssertionError: VAL-01: valid port 65535 must be accepted, status was 'Port must be 1..65535'\nassert 'Port must be 1..65535' == 'Saved'\n  \n  - Saved\n  + Port must be 1..65535",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "VAL-01"
+        },
+        {
+          "name": "test_save_reload_tcp_values_survive[10.1.2.3-65535]",
+          "status": "failed",
+          "message": "AssertionError: assert 'Port must be 1..65535' == 'Saved'\n  \n  - Saved\n  + Port must be 1..65535",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        },
+        {
+          "name": "test_save_reload_case_with_password",
+          "status": "failed",
+          "message": "AssertionError: assert 'Port must be 1..65535' == 'Saved'\n  \n  - Saved\n  + Port must be 1..65535",
+          "exc_type": "AssertionError",
+          "class": "assertion",
+          "requirement_id": "SAVE-01"
+        }
+      ],
+      "coverage": {
+        "present": [
+          "save_reload",
+          "port_boundary",
+          "invalid_save",
+          "port=1",
+          "port=65535",
+          "port=0",
+          "port=65536",
+          "port=abc"
+        ],
+        "missing": [],
+        "executed_count": 12
+      },
+      "owned_server_stopped": {
+        "stopped": true,
+        "forced": false
+      },
+      "server_command": [
+        "/usr/local/bin/python",
+        "server.py",
+        "--variant",
+        "bad-boundary",
+        "--port",
+        "44439",
+        "--state",
+        "/workspace/runs/t2-regraded/evidence/variants/bad-boundary/state.json"
+      ],
+      "readiness": {
+        "ready": true,
+        "elapsed_s": 0.405,
+        "error": null
+      }
+    }
+  },
+  "verdicts": {
+    "no-persist": {
+      "verdict": "detected",
+      "reasons": [
+        "3 assertion failure(s) in 'save_reload' family"
+      ]
+    },
+    "bad-boundary": {
+      "verdict": "detected",
+      "reasons": [
+        "1 assertion failure(s) in 'port_boundary' family"
+      ]
+    }
+  },
+  "review_required": [
+    {
+      "test": "test_save_reload_tcp_values_survive[lab.example.test-1502]",
+      "requirement_id": "SAVE-01",
+      "observed": "'serial'",
+      "expected": "'tcp'",
+      "phase": "after_reload",
+      "phase_is_heuristic": true,
+      "message": "AssertionError: SAVE-01: saved connection must be restored\nassert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+      "needs_review": true
+    },
+    {
+      "test": "test_save_reload_tcp_values_survive[10.1.2.3-65535]",
+      "requirement_id": "SAVE-01",
+      "observed": "'serial'",
+      "expected": "'tcp'",
+      "phase": "after_reload",
+      "phase_is_heuristic": true,
+      "message": "AssertionError: SAVE-01: saved connection must be restored\nassert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+      "needs_review": true
+    },
+    {
+      "test": "test_save_reload_case_with_password",
+      "requirement_id": "SAVE-01",
+      "observed": "'serial'",
+      "expected": "'tcp'",
+      "phase": "after_reload",
+      "phase_is_heuristic": true,
+      "message": "AssertionError: assert 'serial' == 'tcp'\n  \n  - tcp\n  + serial",
+      "needs_review": true
+    },
+    {
+      "test": "test_port_boundary_valid_accepted_and_restored[65535]",
+      "requirement_id": "VAL-01",
+      "observed": "'Port must be 1..65535'",
+      "expected": "'Saved'",
+      "phase": "before_reload",
+      "phase_is_heuristic": true,
+      "message": "AssertionError: VAL-01: valid port 65535 must be accepted, status was 'Port must be 1..65535'\nassert 'Port must be 1..65535' == 'Saved'\n  \n  - Saved\n  + Port must be 1..65535",
+      "needs_review": true
+    }
+  ],
+  "digests": {
+    "tests/test_settings.py": "9665211f84533e4e2f0536ea04d87a46fb350dd04758e718a406cd21fc17b150",
+    "pages/settings_page.py": "3ee9084e4b8f5c7b5b8f6536b901173e6cf22df3831d78695ffe32a2f84a161d",
+    "pages/base_page.py": "7ec370d0756e0b19f79634515a42b84ba00d7845d62385c9f661e0ff0672022a",
+    "conftest.py": "c0e3b10945c8efc1b402a13dc6be19eee0f238eb807158d5e6d5caefe3f24bc4",
+    "case.json": "636e3ddc67e7a54e6c821ee09e3b8a6a65795b2adcdafc187ec28b19a8b181e6",
+    "REQUIREMENTS.md": "4355ab78256fdce8f1decc4bade51b4f99003d2db32caf71cb89fbbe8a5e6e6f",
+    "pytest.ini": "8e9c6ce0799112493ca94483cad5ef352428db1bfb0ea1ff4009361c31764803",
+    "server.py": "fcd86fc47ac26972fd4ff3390f236924ad34437dd1d81b919acd47fd38bb39f1"
+  },
+  "not_run": []
+}
