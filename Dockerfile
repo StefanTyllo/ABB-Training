@@ -34,12 +34,17 @@ WORKDIR /workspace
 USER learner
 CMD ["sleep", "infinity"]
 
+FROM runtime AS clean-materials
+USER root
+COPY training_kit /build/source
+COPY docker/material_manifest.py /build/material_manifest.py
+RUN python /build/material_manifest.py /build/source /build/materials \
+    && chmod -R a-w /build/materials
+
 FROM runtime AS materials
 USER root
-COPY training_kit /opt/abb/materials
-RUN rm -rf /opt/abb/materials/firmware/instructor /opt/abb/materials/hardware/instructor \
-    /opt/abb/materials/test_team/author_checks /opt/abb/materials/hardware/tests \
-    && chmod -R a-w /opt/abb/materials && ln -s /opt/abb/materials /workspace/materials
+COPY --from=clean-materials /build/materials /opt/abb/materials
+RUN ln -s /opt/abb/materials /workspace/materials
 USER learner
 
 FROM materials AS learner
