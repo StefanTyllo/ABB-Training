@@ -78,3 +78,29 @@ const config = require('/opt/abb/runtime/playwright.json');
 """
     result = run("node", "-e", script)
     assert result.returncode == 0, result.stderr
+
+
+def test_image_owned_materials_and_os_lock():
+    assert not os.access('/opt/abb/materials', os.W_OK)
+    assert not os.access('/opt/abb/repo', os.W_OK)
+    assert not os.access('/opt/abb/materials/firmware/fw1/expected.json', os.W_OK)
+    assert os.access('/workspace/work', os.W_OK)
+    for relative in ['firmware/instructor', 'hardware/instructor', 'hardware/tests', 'test_team/author_checks']:
+        assert not Path('/opt/abb/materials', relative).exists()
+    installed = run('dpkg-query', '-W')
+    assert installed.returncode == 0
+    assert installed.stdout == Path('/opt/abb/repo/docker/os-packages.lock').read_text()
+
+
+def test_retained_fixture_checks_in_disposable_writable_copy(tmp_path):
+    import shutil
+    root = tmp_path/'materials'
+    shutil.copytree('/opt/abb/repo/training_kit', root)
+    for path in [root, *root.rglob('*')]:
+        if not path.is_symlink():
+            path.chmod(path.stat().st_mode | 0o200)
+    import sys
+    for relative in ['hardware/tests/test_starters.py', 'firmware/instructor/smoke.py',
+                     'test_team/author_checks/check_server.py']:
+        result = run(sys.executable, str(root/relative))
+        assert result.returncode == 0, result.stdout+result.stderr
