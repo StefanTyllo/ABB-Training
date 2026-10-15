@@ -1,0 +1,23 @@
+name: abb-training
+x-runtime: &runtime
+  platform: linux/amd64
+  init: true
+  shm_size: 1gb
+  security_opt:
+    - seccomp=./docker/seccomp.json
+  volumes:
+    - work:/workspace/work
+    - runs:/workspace/runs
+    - export:/workspace/export
+services:
+  training:
+    <<: *runtime
+    image: abb-training:dev
+    build:
+      context: .
+      target: learner
+
+volumes:
+  work:
+  runs:
+  export:

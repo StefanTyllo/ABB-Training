@@ -1,0 +1,17 @@
+.git
+.superpowers
+**/.env*
+!**/.env.example
+**/.auth
+**/.codex
+**/.copilot
+**/__pycache__
+**/.pytest_cache
+**/node_modules
+work
+runs
+export
+exports
+dist
+validation_records
+**/*.zip
