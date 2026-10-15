@@ -71,3 +71,16 @@ def test_empty_evidence_still_creates_collection_directory(tmp_path):
     root.mkdir()
     collect_evidence(root, tmp_path/'retained')
     assert (tmp_path/'retained').is_dir()
+
+
+def test_shared_build_gates_offline_acceptance_before_image_export():
+    import yaml
+    workflow = yaml.load((ROOT/'.github/workflows/build-training-image.yml').read_text(), Loader=yaml.BaseLoader)
+    steps = workflow['jobs']['build']['steps']
+    gates = [index for index, step in enumerate(steps)
+             if 'docker run' in step.get('run', '') and 'pytest' in step.get('run', '')]
+    assert gates, 'Shared image build must run offline acceptance before paid rehearsals'
+    export = next(index for index, step in enumerate(steps) if 'docker save' in step.get('run', ''))
+    assert gates[0] < export
+    assert '--network none' in steps[gates[0]]['run']
+    assert not steps[gates[0]].get('env')

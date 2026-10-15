@@ -19,6 +19,8 @@ jobs:
         persist-credentials: false
     - name: Build without provider credentials
       run: docker compose --profile facilitator build facilitator
+    - name: Offline runtime acceptance
+      run: docker run --rm --init --network none --security-opt seccomp=docker/seccomp.json --shm-size=1g abb-training-facilitator:dev python -m pytest /opt/abb/repo/tests/container -q -p no:cacheprovider
     - name: Record immutable image identity
       id: identity
       run: |
