@@ -1,51 +1,78 @@
 name: Refine T1 browser feedback
-on:
+'on':
+  workflow_dispatch: {}
   push:
-    branches: ['training/workflow-labs']
     paths:
-      - 'validation_browser/**'
-      - '.github/workflows/refine-browser-feedback.yml'
-  workflow_dispatch:
+    - validation_browser/**
+    - training_ci/**
+    - training_author/**
+    - Dockerfile
+    - compose*.yaml
+    - docker/**
+    - tests/container/**
+    - .github/workflows/refine-browser-feedback.yml
+    - .github/workflows/build-training-image.yml
+    branches:
+    - training/workflow-labs
 permissions:
   contents: read
 jobs:
+  image:
+    uses: ./.github/workflows/build-training-image.yml
   refine:
+    needs:
+    - image
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install pinned Copilot
-        run: npm install -g @github/copilot@1.0.97
-      - name: Install Selenium requirements
-        run: python -m pip install -r validation_browser/seed/requirements.txt
-      - name: Confirm runner Chrome
-        run: google-chrome --version
-      - name: Prepare clean seeded workspace
-        run: python validation_browser/refine.py prepare
-      - name: Targeted Copilot refinement
-        env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
-        run: python validation_browser/refine.py agent
-      - name: Independent token-free grading
-        if: always()
-        run: |
-          git diff --exit-code -- training_kit training_ci validation_browser
-          python validation_browser/refine.py verify
-      - name: Retain all measured evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: t1-refined
-          retention-days: 14
-          path: |
-            runs/t1-refined/
-            runs/t1-refined-protected.json
-          if-no-files-found: error
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - uses: actions/download-artifact@v4
+      with:
+        name: training-runtime
+    - name: Load and verify immutable image
+      run: |
+        sha256sum -c training-image.tar.sha256
+        docker load --input training-image.tar
+        test "$(docker image inspect ${{ needs.image.outputs.image_id }} --format '{{.Id}}')" = "${{ needs.image.outputs.image_id }}"
+        docker volume create "abb-${{ github.run_id }}-${{ github.run_attempt }}-refine-browser-feedback"
+        echo "ABB_CI_VOLUME=abb-${{ github.run_id }}-${{ github.run_attempt }}-refine-browser-feedback" >> "$GITHUB_ENV"
+    - name: Prepare clean seeded workspace
+      run: |
+        docker run --rm --init --network none --security-opt seccomp=docker/seccomp.json --shm-size=1g -v "$ABB_CI_VOLUME:/workspace/runs" -e ABB_IMAGE_ID="${{ needs.image.outputs.image_id }}" "${{ needs.image.outputs.image_id }}" python /opt/abb/repo/validation_browser/refine.py prepare
+    - name: Targeted Copilot refinement
+      env:
+        COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+      run: |
+        test -n "$COPILOT_GITHUB_TOKEN" || { echo '::error::COPILOT secret missing'; exit 1; }
+        umask 077
+        mkdir -p "$RUNNER_TEMP/abb-auth"
+        chmod 700 "$RUNNER_TEMP/abb-auth"
+        printf '%s' "$COPILOT_GITHUB_TOKEN" > "$RUNNER_TEMP/abb-auth/copilot-token"
+        # The private host directory protects the readable, provider-only bind-mounted file.
+        chmod 444 "$RUNNER_TEMP/abb-auth/copilot-token"
+        docker run --rm --init --security-opt seccomp=docker/seccomp.json --shm-size=1g -v "$ABB_CI_VOLUME:/workspace/runs" --mount "type=bind,src=$RUNNER_TEMP/abb-auth/copilot-token,dst=/run/secrets/copilot_token,readonly" -e ABB_IMAGE_ID="${{ needs.image.outputs.image_id }}" "${{ needs.image.outputs.image_id }}" python /opt/abb/runtime/ci.py --provider copilot -- python /opt/abb/repo/validation_browser/refine.py agent
+    - name: Independent credential-free grading
+      if: always()
+      run: |
+        git diff --exit-code -- training_kit training_ci validation_browser
+        docker run --rm --init --network none --security-opt seccomp=docker/seccomp.json --shm-size=1g -v "$ABB_CI_VOLUME:/workspace/runs" -e ABB_IMAGE_ID="${{ needs.image.outputs.image_id }}" "${{ needs.image.outputs.image_id }}" python /opt/abb/repo/validation_browser/refine.py verify
+    - name: Extract runtime evidence
+      if: always()
+      run: |
+        docker run --name abb-evidence --network none -v "$ABB_CI_VOLUME:/workspace/runs" "${{ needs.image.outputs.image_id }}" true
+        docker cp abb-evidence:/workspace/runs/. runs/
+        docker rm abb-evidence
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: t1-refined
+        path: runs/
+        retention-days: 14
+        if-no-files-found: error
+    - name: Clean disposable runtime state
+      if: always()
+      run: |
+        rm -f "$RUNNER_TEMP/abb-auth/copilot-token"
+        if [ -n "${ABB_CI_VOLUME:-}" ]; then docker volume rm "$ABB_CI_VOLUME"; fi

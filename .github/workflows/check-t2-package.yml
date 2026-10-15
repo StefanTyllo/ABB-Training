@@ -1,30 +1,61 @@
 name: Validate unchanged T2 package
-on:
+'on':
+  workflow_dispatch: {}
   push:
-    branches: ['training/workflow-labs']
     paths:
-      - 'validation_t2_package/**'
-      - '.github/workflows/check-t2-package.yml'
-  workflow_dispatch:
+    - validation_t2_package/**
+    - training_ci/**
+    - training_author/**
+    - Dockerfile
+    - compose*.yaml
+    - docker/**
+    - tests/container/**
+    - .github/workflows/check-t2-package.yml
+    - .github/workflows/build-training-image.yml
+    branches:
+    - training/workflow-labs
 permissions:
   contents: read
 jobs:
+  image:
+    uses: ./.github/workflows/build-training-image.yml
   package:
+    needs:
+    - image
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v6
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m pip install -r validation_t2_package/seed/requirements.txt
-      - name: Regrade unchanged generated package without an AI token
-        run: python validation_t2_package/check.py
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: t2-complete-package
-          path: runs/t2-regraded/
-          retention-days: 14
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - uses: actions/download-artifact@v4
+      with:
+        name: training-runtime
+    - name: Load and verify immutable image
+      run: |
+        sha256sum -c training-image.tar.sha256
+        docker load --input training-image.tar
+        test "$(docker image inspect ${{ needs.image.outputs.image_id }} --format '{{.Id}}')" = "${{ needs.image.outputs.image_id }}"
+        docker volume create "abb-${{ github.run_id }}-${{ github.run_attempt }}-check-t2-package"
+        echo "ABB_CI_VOLUME=abb-${{ github.run_id }}-${{ github.run_attempt }}-check-t2-package" >> "$GITHUB_ENV"
+    - name: Independent credential-free grading
+      run: |
+        docker run --rm --init --network none --security-opt seccomp=docker/seccomp.json --shm-size=1g -v "$ABB_CI_VOLUME:/workspace/runs" -e ABB_IMAGE_ID="${{ needs.image.outputs.image_id }}" "${{ needs.image.outputs.image_id }}" python /opt/abb/repo/validation_t2_package/check.py
+    - name: Extract runtime evidence
+      if: always()
+      run: |
+        docker run --name abb-evidence --network none -v "$ABB_CI_VOLUME:/workspace/runs" "${{ needs.image.outputs.image_id }}" true
+        docker cp abb-evidence:/workspace/runs/. runs/
+        docker rm abb-evidence
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: t2-complete-package
+        path: runs/
+        retention-days: 14
+        if-no-files-found: error
+    - name: Clean disposable runtime state
+      if: always()
+      run: |
+        rm -f "$RUNNER_TEMP/abb-auth/copilot-token"
+        if [ -n "${ABB_CI_VOLUME:-}" ]; then docker volume rm "$ABB_CI_VOLUME"; fi

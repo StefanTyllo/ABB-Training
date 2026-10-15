@@ -1,0 +1,36 @@
+name: Build locked training image
+'on':
+  workflow_call:
+    outputs:
+      image_id:
+        description: Immutable runtime image ID
+        value: ${{ jobs.build.outputs.image_id }}
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      image_id: ${{ steps.identity.outputs.image_id }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - name: Build without provider credentials
+      run: docker compose --profile facilitator build facilitator
+    - name: Record immutable image identity
+      id: identity
+      run: |
+        image_id=$(docker image inspect abb-training-facilitator:dev --format '{{.Id}}')
+        echo "image_id=$image_id" >> "$GITHUB_OUTPUT"
+        docker save --output training-image.tar "$image_id"
+        sha256sum training-image.tar > training-image.tar.sha256
+    - uses: actions/upload-artifact@v4
+      with:
+        name: training-runtime
+        path: |-
+          training-image.tar
+          training-image.tar.sha256
+        retention-days: 1
+        if-no-files-found: error
