@@ -44,8 +44,8 @@ jobs:
     - name: Extract runtime evidence
       if: always()
       run: |
-        docker run --name abb-evidence --network none -v "$ABB_CI_VOLUME:/workspace/runs" "${{ needs.image.outputs.image_id }}" true
-        docker cp abb-evidence:/workspace/runs/. runs/
+        docker run --name abb-evidence --network none -v "$ABB_CI_VOLUME:/workspace/runs" "${{ needs.image.outputs.image_id }}" python /opt/abb/runtime/collect.py
+        docker cp abb-evidence:/tmp/abb-evidence/. runs/
         docker rm abb-evidence
     - uses: actions/upload-artifact@v4
       if: always()

@@ -24,7 +24,7 @@ COPY docker/package.json docker/package-lock.json /opt/abb/node/
 RUN cd /opt/abb/node && npm ci --no-audit --no-fund && npm cache clean --force
 ENV COPILOT_AUTO_UPDATE=false
 COPY docker/playwright.json docker/codex.toml docker/copilot-mcp.json docker/auth.py /opt/abb/runtime/
-COPY docker/ci.py docker/launcher.py docker/doctor.py docker/export.py /opt/abb/runtime/
+COPY docker/collect.py docker/ci.py docker/launcher.py docker/doctor.py docker/export.py /opt/abb/runtime/
 COPY docker/abb /usr/local/bin/abb
 RUN chmod 755 /usr/local/bin/abb && useradd --create-home --uid 1000 --shell /bin/bash learner \
     && mkdir -p /workspace/work /workspace/runs /workspace/export \

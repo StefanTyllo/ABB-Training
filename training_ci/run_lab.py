@@ -81,6 +81,7 @@ or blocked results must remain visible. This is a scripted rehearsal, not a huma
 
 def server_start(workspace):
     with socket.socket() as probe:
+        probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             probe.bind(('127.0.0.1', 8765))
         except OSError as error:

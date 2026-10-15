@@ -28,7 +28,15 @@ def provider_environment(provider: str) -> dict[str, str]:
 def configure_mcp(workspace: Path) -> dict:
     workspace = workspace.resolve(strict=True)
     config_dir = workspace/'.abb'
+    if config_dir.is_symlink():
+        raise ValueError('MCP configuration must remain inside this workspace')
     config_dir.mkdir(exist_ok=True)
+    for name in ['playwright.json', 'copilot-mcp.json']:
+        if (config_dir/name).is_symlink():
+            raise ValueError('MCP configuration file must not be a symlink')
+    state = workspace/'.auth/state.json'
+    if not state.resolve().is_relative_to(workspace):
+        raise ValueError('MCP state must remain inside this workspace')
     browser = json.loads(Path('/opt/abb/runtime/playwright.json').read_text())
     browser['browser']['isolated'] = True
     (config_dir/'playwright.json').write_text(json.dumps(browser, indent=2)+'\n')

@@ -3,7 +3,7 @@ from pathlib import Path
 import zipfile
 
 EXCLUDED = {'.auth', '.codex', '.copilot', '.git', '.cache', '__pycache__',
-            '.pytest_cache', 'node_modules', '.venv', 'auth.json', 'credentials.json',
+            '.pytest_cache', '.npm', 'node_modules', '.venv', 'auth.json', 'credentials.json',
             'tokens.json'}
 
 

@@ -105,3 +105,26 @@ def test_rehearsal_refuses_caller_owned_port(tmp_path):
         if owned:
             owned[0].terminate(); owned[0].wait(timeout=10); owned[1].close()
         server.shutdown(); server.server_close(); thread.join(timeout=5)
+
+
+def test_rehearsal_restarts_after_owned_server_stops(tmp_path):
+    import urllib.request
+    sys.path.insert(0, str(ROOT))
+    from training_ci.run_lab import server_start
+    for name in ['first', 'second']:
+        subprocess.run([sys.executable, str(MATERIALS/'prepare_lab.py'), 't1', 'demo',
+                        str(tmp_path/name)], check=True, capture_output=True)
+    first = server_start(tmp_path/'first')
+    try:
+        urllib.request.urlopen('http://127.0.0.1:8765', timeout=2).read()
+    finally:
+        first[0].terminate(); first[0].wait(timeout=10); first[1].close()
+    # The actual HTTPServer supports reuse after TIME_WAIT; this is not an occupied listener.
+    with socket.socket() as available:
+        available.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        available.bind(('127.0.0.1', 8765))
+    second = server_start(tmp_path/'second')
+    try:
+        assert urllib.request.urlopen('http://127.0.0.1:8765', timeout=2).status == 200
+    finally:
+        second[0].terminate(); second[0].wait(timeout=10); second[1].close()

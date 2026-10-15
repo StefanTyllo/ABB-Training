@@ -46,3 +46,28 @@ def test_ci_wrapper_preserves_child_exit():
     result = subprocess.run([sys.executable, '/opt/abb/runtime/ci.py', '--',
                              sys.executable, '-c', 'raise SystemExit(7)'], capture_output=True, text=True)
     assert result.returncode == 7, result.stderr
+
+
+def test_artifact_collection_excludes_state_and_retains_failed_evidence(tmp_path):
+    sys.path.insert(0, '/opt/abb/runtime')
+    from collect import collect_evidence
+    root = tmp_path/'runs'
+    (root/'t1/demo/.auth').mkdir(parents=True)
+    (root/'t1/demo/evidence').mkdir()
+    (root/'t1/demo/.auth/state.json').write_text('SYNTHETIC-STATE')
+    (root/'t1/demo/.env').write_text('SYNTHETIC-TOKEN')
+    (root/'t1/demo/evidence/failure.json').write_text('{"status":"FAIL"}')
+    output = tmp_path/'retained'
+    collect_evidence(root, output)
+    assert (output/'t1/demo/evidence/failure.json').read_text() == '{"status":"FAIL"}'
+    assert not (output/'t1/demo/.auth').exists()
+    assert not (output/'t1/demo/.env').exists()
+
+
+def test_empty_evidence_still_creates_collection_directory(tmp_path):
+    sys.path.insert(0, '/opt/abb/runtime')
+    from collect import collect_evidence
+    root = tmp_path/'runs'
+    root.mkdir()
+    collect_evidence(root, tmp_path/'retained')
+    assert (tmp_path/'retained').is_dir()

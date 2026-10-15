@@ -56,3 +56,15 @@ def test_absent_credentials_report_blocked_without_secrets():
     finally:
         import shutil
         shutil.rmtree(Path('/workspace/work', name))
+
+
+def test_mcp_configuration_refuses_symlink_escape(tmp_path):
+    auth = auth_module()
+    workspace, outside = tmp_path/'workspace', tmp_path/'outside'
+    workspace.mkdir(); outside.mkdir()
+    marker = outside/'playwright.json'
+    marker.write_text('keep-original')
+    (workspace/'.abb').symlink_to(outside, target_is_directory=True)
+    with pytest.raises(ValueError):
+        auth.configure_mcp(workspace)
+    assert marker.read_text() == 'keep-original'
