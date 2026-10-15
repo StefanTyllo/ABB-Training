@@ -25,3 +25,7 @@ if args.case == "transfer":
     data.update(connection="serial" if args.lab == "t1" else "tcp", port="65535", device="COM9", password="transfer-only")
 (args.output / "case.json").write_text(json.dumps(data, indent=2) + "\n")
 print(f"Prepared {args.lab}/{args.case}: {args.output.resolve()}")
+
+if args.lab == "t1":
+    (args.output / "tools").mkdir(exist_ok=True)
+    shutil.copyfile(root / "support/session_bootstrap.mjs", args.output / "tools/session_bootstrap.mjs")

@@ -79,7 +79,11 @@ def main(argv: list[str]) -> int:
             if args.command == 'login':
                 return auth.login(args.provider)
             workspace = workspace_path(args.workspace)
-            command, env = auth.prepare_agent_process(args.provider, workspace)
+            try:
+                command, env = auth.prepare_agent_process(args.provider, workspace)
+            except auth.ProviderBlocked as error:
+                print('BLOCKED: ' + str(error), file=sys.stderr)
+                return 3
             return subprocess.run(command, cwd=workspace, env=env).returncode
     except (ValueError, OSError) as error:
         print(str(error), file=sys.stderr)

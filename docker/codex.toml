@@ -1,0 +1,8 @@
+model = "gpt-6.1-sol"
+model_reasoning_effort = "medium"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+check_for_update_on_startup = false
+
+[shell_environment_policy]
+exclude = ["OPENAI_API_KEY", "CODEX_API_KEY", "CODEX_ACCESS_TOKEN", "COPILOT_GITHUB_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"]

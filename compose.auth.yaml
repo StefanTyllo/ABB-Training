@@ -1,0 +1,32 @@
+# Opt-in unattended services mount exactly one provider secret, never both.
+# Host: docker compose -f compose.yaml -f compose.auth.yaml --profile auth run --rm codex-auth abb login codex
+services:
+  codex-auth:
+    image: abb-training-facilitator:dev
+    platform: linux/amd64
+    profiles: [auth]
+    init: true
+    shm_size: 1gb
+    security_opt: ["seccomp=./docker/seccomp.json"]
+    volumes:
+      - work:/workspace/work
+      - runs:/workspace/runs
+      - codex-auth:/home/learner/.codex
+    secrets: [codex_api_key]
+  copilot-auth:
+    image: abb-training-facilitator:dev
+    platform: linux/amd64
+    profiles: [auth]
+    init: true
+    shm_size: 1gb
+    security_opt: ["seccomp=./docker/seccomp.json"]
+    volumes:
+      - work:/workspace/work
+      - runs:/workspace/runs
+      - copilot-auth:/home/learner/.copilot
+    secrets: [copilot_token]
+secrets:
+  codex_api_key:
+    file: ${ABB_CODEX_SECRET_FILE:-./.auth/codex-api-key}
+  copilot_token:
+    file: ${ABB_COPILOT_SECRET_FILE:-./.auth/copilot-token}
