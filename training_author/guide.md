@@ -5,22 +5,22 @@ Firmware, hardware, and test teams | 15 October 2026 | Docker edition
 **Outcome.** Complete a real task with a coding agent, explain your decisions, extract a reusable Markdown workflow, and implement its repeatable activities as clear deterministic code. Prove that the extracted workflow works on a fresh case.
 
 **Your four steps**
-1. Walk through the task in the terminal with Codex, explaining why. After completion, ask it to document the workflow.
+1. Walk through the task in the terminal with GitHub Copilot CLI, explaining why. After completion, ask it to document the workflow.
 2. Review and abstract the workflow. Replace incident-specific references with inputs; preserve genuine engineering constraints.
 3. Identify operations that do not need an LLM and can become deterministic code.
-4. Ask Codex to implement highly verbose, readable code for those operations; verify it and update the workflow.
+4. Ask GitHub Copilot CLI to implement highly verbose, readable code for those operations; verify it and update the workflow.
 
 **What is included.** Six lab guides, shared prompts, in-container Copilot CLI and Codex setup, containerized CI and labeled historical Actions results, an assessment rubric, and an embedded ZIP containing runnable synthetic starters. Starter tools provide basic access to data and systems. Participants create the reusable workflow automation during the labs.
 
 **Scope.** These exercises use synthetic devices, board data, and a local WebUI. No ABB production repository, device, Azure DevOps project, or proprietary document is required. Firmware lab 2 runs C inside the container; hardware calculations use an explicitly idealized circuit; browser labs use Selenium against an actual local application.
 
-**Acceptance status.** Technical and editorial checks are recorded at the end of this guide. Live Copilot Actions results are recorded in the release record. Codex access and a facilitated learner pilot remain separate checks. The readiness gates make those requirements explicit; this document does not claim an unperformed classroom acceptance.
+**Acceptance status.** Technical and editorial checks are recorded at the end of this guide. Live Copilot Actions results are recorded in the release record. Local Copilot access and a facilitated learner pilot remain separate checks. The readiness gates make those requirements explicit; this document does not claim an unperformed classroom acceptance.
 
 Start with the route on page 2. Unpack the Docker distribution or the starter attachment, then pass the readiness gate.
 <!-- PAGE -->
 # 1 Training route and responsibilities
 
-**Participant route:** setup -> readiness check -> shared method -> your team's first lab -> your team's second lab -> transfer comparison -> assessment. Read the shared prompts once; lab cards supply only the task-specific details. Host commands start in the unpacked package folder. Exercise commands run inside the exact workspace printed on each card; use a fresh host terminal to enter another exercise.
+**Participant route:** setup -> readiness check -> shared method -> your team's first lab -> your team's second lab -> transfer comparison -> assessment. Read the shared prompts once; lab cards supply only the task-specific details. Host commands start in the unpacked package folder. Each prepared workspace includes its complete current task-card.md. Exercise commands run inside the exact workspace printed on each card; use a fresh host terminal to enter another exercise.
 
 | Audience | Required reading and work |
 | --- | --- |
@@ -46,7 +46,7 @@ Start with the route on page 2. Unpack the Docker distribution or the starter at
 
 These are facilitation budgets, not measured completion times. Build the locked image and rehearse the browser before the session. If a stage reaches its budget, record the unfinished requirement; do not skip verification to obtain a pass.
 
-**Agent choice.** Use Codex for the guided work and code generation. Every participant also completes the Copilot CLI smoke test. If the facilitator chooses Copilot as the lab agent, use it consistently through all four stages and both replay conditions, and record that choice. Do not treat a change of agent/model as an effect of adding code.
+**Agent choice.** Use GitHub Copilot CLI for guided work, workflow extraction and code generation. Keep the selected Copilot model consistent through all four stages and both replay conditions, and record it with the CLI version. A change of agent/model is a separate intervention, not an effect of adding deterministic code.
 <!-- PAGE -->
 # 2 Obtain and start the Docker package
 
@@ -86,6 +86,8 @@ docker compose exec -it training abb agent codex --workspace work/agent-smoke
 
 Ask it to run `pwd` and `git status --short`, explain the actual output and change no files. Inspect the real tool event and any normal approval request. Codex requests `gpt-6.1-sol` with medium reasoning; unavailable model access is BLOCKED. Exit and run the corresponding Copilot smoke in the same workspace using `abb agent copilot --workspace work/agent-smoke` through `docker compose exec -it training`.
 
+**Focused context.** Deliver the current stage and named inputs while retaining the full task card and acceptance contracts as authority. Scripted CI saves exact prompt/context snapshots and delivery hashes, uses an ephemeral Copilot profile, disables personal custom instructions and skill retrieval, and supplies explicit browser MCP configuration. Classroom work keeps normal approvals and pauses for participant explanation.
+
 Record CLI versions, the chosen lab provider/model, image identity where available, workspace and actual command evidence. Login and version commands alone do not prove account or tool readiness. Preserve the selected agent/model across all four teaching stages and both transfers.
 <!-- PAGE -->
 # 4 Pass readiness, stop, resume and export
@@ -117,35 +119,39 @@ If the container is stopped, start it. If `pwd` is wrong, exit and repeat the st
 <!-- PAGE -->
 # 5 The four-stage method
 
-Use one agent conversation for the guided demonstration and extraction. Start a new conversation for the later transfer task.
+Use GitHub Copilot CLI for every stage. Keep the guided demonstration in its own conversation, then start a fresh invocation/conversation for abstraction, extraction and implementation. Pass the saved workflow, map and named evidence each stage needs; do not paste the entire prior transcript. Start separate fresh conversations for both transfer conditions. Stage 1 still pauses for the participant's explanation.
 
 ## Stage 1 Demonstrate and document
-First read the lab's task card. Tell the agent the goal and allowed files. Guide one operation at a time. Before execution, explain purpose and expected observation; after execution, interpret the actual result. Include failed attempts and recovery. Do not ask the agent to solve the entire task autonomously or write the reusable automation yet.
+First read the current lab card section and its named inputs. Keep the complete task card and acceptance contract available for unresolved requirements. Tell the agent the goal and allowed files. Guide one operation at a time. Before execution, explain purpose and expected observation; after execution, interpret the actual result. Include failed attempts and recovery. Do not ask the agent to solve the entire task autonomously or write the reusable automation yet.
 
 **Start prompt**
-> We will complete this lab together, one terminal operation at a time. Read the task and requirements. For each operation, state its purpose, proposed command, expected evidence, and files it may change. Wait for my engineering explanation before continuing to the next operation. Record actual commands, outputs, decisions, and recovery steps in evidence/session.md. Do not create reusable automation yet. Existing low-level starter tools are allowed.
+> We will complete this lab together, one terminal operation at a time. Read the task and requirements. For each operation, state its purpose, proposed command, expected evidence, and files it may change. Wait for my engineering explanation before continuing to the next operation. Record actual commands, outputs, decisions, and recovery steps in evidence/session.md. Do not create automation/ at all before Stage 4, even for fixtures or placeholders. Put disposable early fixtures under evidence/stage1-fixtures/. Existing low-level starter tools are allowed. Keep the decision ledger concise and link raw evidence.
 
 Explain reasoning as you work: “I am capturing configuration before changing it so that we can establish what changed.” This explanation becomes part of the material from which the workflow is extracted.
 
 **After the task's acceptance checks pass, use the documentation prompt**
 > Reconstruct the process we actually executed in this conversation. Write workflow.md with its goal, prerequisites, ordered steps, decision branches, expected evidence, failure handling, and completion criteria. Reference evidence/session.md. Distinguish executed operations from ideas we never tried. Do not invent missing steps or claim unobserved results.
 
+**Evidence ownership.** Original baselines, raw captures and source authorities are immutable. `evidence/session.md` is an append-only journal: preserve previous entries, but allow later entries without invalidating an otherwise valid read-only replay. Host-generated `context/` changes between stages and must not be frozen as an original capture.
+
 **Stage 1 exit:** the task is completed or explicitly blocked; the record distinguishes commands from intentions; the workflow explains why the operations were performed. If blocked, the facilitator resolves the environment or requirement before the class continues. Do not extract a successful workflow from an incomplete incident.
 
 ## Stage 2 Abstract the workflow
-> Review workflow.md for reuse on another case of this same task. Replace incident-specific paths, IDs, versions, and values with named inputs. Keep genuine protocol constants, engineering limits, source-authority rules, and acceptance criteria. Define every input, its source, validation, and missing-input behavior. Preserve observed branches; label untested branches. Remove anecdotes and duplicate instructions. Save the reviewed result as workflow.md and make an unchanged checkpoint copy named workflow-md-only.md.
+> Review workflow.md for reuse on another case of this same task. Replace incident-specific paths, IDs, versions, and values with named inputs. Keep genuine protocol constants, engineering limits, source-authority rules, and acceptance criteria. Define every input, its source, validation, and missing-input behavior. Preserve observed branches; label untested branches. Remove anecdotes and duplicate instructions. Save the reviewed result as workflow.md and make a byte-identical checkpoint named workflow-md-only.md. Only refine these documents and stage-required non-secret configuration; do not rerun completed experiments, change task artifacts or create automation/. Carry later implementation obligations forward without implementing them now.
 
 **Stage 2 exit:** another engineer can identify all required inputs and completion conditions without the original conversation. A concrete limit is either a justified invariant or an explicit input; it is never silently deleted.
 <!-- PAGE -->
 # 6 Convert the repeatable operations into code
 
 ## Stage 3 Make the extraction decisions
-> Review each step in workflow.md. Write extraction-map.md with columns: purpose, inputs, operation, expected output, failure condition, and disposition. Disposition is deterministic code, model judgment, or human decision. Prioritize collection, parsing, calculations, comparisons, validation, and factual reporting. Explain which preconditions code can check. Do not propose code that merely asks another LLM to perform the same operation.
+> Review each step in workflow.md. Write extraction-map.md with columns: purpose, inputs, operation, expected output, failure condition, and disposition. Disposition is deterministic code, model judgment, or human decision. Prioritize collection, parsing, calculations, comparisons, validation, and factual reporting. Explain which preconditions code can check. Do not propose code that merely asks another LLM to perform the same operation. Only write the extraction map at this stage; do not rerun the demonstration or implement preservation utilities/automation yet.
 
 **Stage 3 exit:** every proposed function has a defined input/output contract and a meaningful failure condition. Keep hypotheses, ambiguous requirements, and interpretation of unfamiliar evidence with the model or engineer.
 
 ## Stage 4 Implement highly verbose code
 > Implement the deterministic activities in extraction-map.md under automation/. Use descriptive function and variable names, small functions, type hints where useful, docstrings, explicit intermediate values, and comments explaining engineering intent. Log steps and expected/observed results. Make failures actionable. Do not silently default missing observations or swallow exceptions. Return machine-readable results and meaningful exit codes. Implement feasible prerequisites in code. Keep source-of-truth inputs and instructor checks unchanged. Add checks for the observed defect, a valid case, and the lab's failure branch. Build self-contained fixtures under automation/tests/; their expected values must not depend on which task case is active. Preserve prepared authoritative sources. Run them, inspect the results, and revise until the stated criteria pass. Update workflow.md to call the new entry points and interpret their output; preserve workflow-md-only.md unchanged. Document the exact commands in automation/README.md.
+
+**Delivery and repeat-run checks.** Complete mandatory entry points, documentation and checks before optional hardening. Keep helper-owned logs/metadata in unique run directories; stdout/stderr redirection belongs to the caller, whose console log may already be open. Never reserve or overwrite an inferred sibling .log file. Run the documented entry point with caller redirection and again with a fresh requested report path. Verify a completed demo without repeating its mutation or rebuilding missing history. Preserve workflow-md-only.md and original captures; later journal entries may append.
 
 **Operation-log envelope for learner-created automation**
 ```json
@@ -188,6 +194,8 @@ Do this after completing the two labs for your team. The facilitator selects at 
 | Claims | Any completion claim unsupported by the recorded evidence |
 
 **Interpretation.** This is a learning exercise about transferring a demonstrated process. One pair of runs does not establish statistical superiority. If the MD-only agent independently writes useful scripts, record that behavior; do not prohibit it to force a desired result.
+
+**Fresh execution boundary.** Each replay uses only its current workspace and the supplied workflow/helper package. Repair its fresh parser/POM/tests; do not copy demo implementations, results or assessments. Code-assisted replay must actually invoke the supplied helpers and retain their feedback. A faithfully reported FAIL/BLOCKED engineering outcome remains valid when the task requires it.
 
 **Required submission per lab:** workflow-md-only.md, workflow.md, extraction-map.md, automation/ with its checks and README, and evidence/ containing the actual demonstration and verification records. A blocked transfer can be the correct outcome when the task deliberately omits required authority.
 <!-- PAGE -->
@@ -263,6 +271,8 @@ Inputs are the device tool path, state-directory path, expected-configuration pa
 Create `automation/capture_state.py` and a controlled experiment entry point with documented arguments. Capture must invoke the low-level tool and retain complete raw outputs, commands, exit status, timestamps and input identity by default. Save the before-capture before any mutation; failed evidence persistence blocks the write. It must fail if any required read fails; a partial capture cannot become a baseline marked complete.
 
 The experiment operation must require a valid baseline for the same device and compare the current configuration with that baseline before writing. If they differ, return blocked and request a new capture. It must apply at most one allowed parameter change, then capture and compare again. Preserve original before/after and mutation records on repeat runs. This is enforcement inside the learner's entry point; direct simulator access remains available in this teaching fixture.
+
+**Journal check:** append a legitimate session entry, rerun read-only verification and confirm original captures and old journal entries remain intact. Do not freeze the whole growing journal hash.
 
 **Required checks:** valid capture; missing/nonexistent state directory produces blocked; unknown identity cannot select a reference; experiment without a baseline is rejected; stale baseline is rejected; correct change restores the probe. Use disposable prepared cases for checks that mutate state.
 
@@ -963,7 +973,9 @@ Implement a serial evaluation runner that owns only its child server process, wa
 
 Record the exact application variant, case, test files/digests, collected/skipped counts, browser startup outcome, and assertion details. A failed startup is blocked. A suite that fails the correct app cannot receive a successful detection score. Require review of the assertion that detected each defect.
 
-**Required checks:** correct app passes; known persistence defect detected; required skips rejected; occupied port or failed startup reported as infrastructure failure; test failures preserved in the final result rather than swallowed.
+**Output ownership:** the caller owns its console capture; helper-owned logs use fresh run directories. An already-open caller log is not missing/invalid input. Preserve the real pytest status and JUnit output.
+
+**Required checks:** correct app passes; both required mutants fail through relevant assertions; required skips rejected; occupied port or failed startup reported as infrastructure failure; test failures preserved in the final result rather than swallowed.
 
 **Fresh transfer entries after Stage 4**
 After Stage 4, stop any owned app server and use two fresh transfer workspaces. Prepare each once. Copy only the workflow or reusable automation specified by the exercise, keeping the demonstration evidence in its original workspace.
@@ -1074,7 +1086,7 @@ https://github.com/StefanTyllo/ABB-Training/actions/runs/38592278866
 
 ## What each job does
 1. Prepare three isolated workspaces: demonstration, fresh MD-only transfer, and fresh MD-plus-code transfer.
-2. Invoke Copilot in four ordered stages. Each stage reads the previous saved artifacts: demonstrate/document, abstract, select deterministic work, implement verbose code. The task card supplies the scripted engineering rationale in CI; a human supplies it in class.
+2. Invoke GitHub Copilot CLI in four ordered stages with focused prompts and a current-stage context file. The full original task card and local contracts remain unchanged; consult other card sections on demand. Each stage reads the previous saved artifacts: demonstrate/document, abstract, select deterministic work, implement verbose code. The task card supplies the scripted engineering rationale in CI; a human supplies it in class.
 3. Preserve the MD-only checkpoint. Transfer only the selected workflow and, in code mode, reusable helpers. Do not transfer repaired parser sources, finished browser tests, device state, reports, or demo evidence.
 4. Execute both fresh tasks with actual tools. Compare authoritative input hashes with the clean preparation snapshot.
 5. Run independent Python/C/browser checks in a separate step without the Copilot token. These exit statuses determine assessment, not Copilot's completion message.
@@ -1082,9 +1094,9 @@ https://github.com/StefanTyllo/ABB-Training/actions/runs/38592278866
 **Independent checks:** firmware grading verifies the original device baseline and one-change recovery, or rebuilds the parser for 50 stream cases. Hardware grading verifies authority, report arithmetic, calibration provenance and repeat-run stability. Browser grading uses real Chrome, exact persistence assertions, and relevant failures on deliberately faulty variants. All modes use the same task criteria; code mode additionally invokes the generated helpers.
 
 ## Inspect and retain the evidence
-Open each job's **Independently grade generated work** step and summary. Download its `lab-<id>-<attempt>` artifact before the 14-day retention expires. Inspect assessment.json, grader logs, stage prompts/transcripts, generated workflows/code, and test evidence. A green agent step alone is insufficient. Browser startup failures and missing evidence are failures of readiness, not detected application defects.
+Open each job's **Independently grade generated work** step and summary. Download its `lab-<id>-<attempt>` artifact before the 14-day retention expires. Inspect assessment.json, grader logs, stage prompts/transcripts, exact context snapshots/delivery hashes, execution/timeout metadata, generated workflows/code, and test evidence. A green agent step alone is insufficient. Browser startup failures and missing evidence are failures of readiness, not detected application defects.
 
-**Interpretation:** this is a scripted Copilot rehearsal with separate stage invocations and file handoffs. It does not reproduce a human teaching conversation, validate Codex account access, establish classroom completion time, or prove MD-plus-code is statistically superior. Use the facilitator rubric and learner pilot for those remaining training judgments.
+**Interpretation:** this is a scripted Copilot rehearsal with separate stage invocations and file handoffs. It does not reproduce a human teaching conversation, validate every participant account, establish classroom completion time, or prove MD-plus-code is statistically superior. Use the facilitator rubric and learner pilot for those remaining training judgments.
 
 <!-- PAGE -->
 # 9 Assess the learning outcome
@@ -1134,7 +1146,7 @@ These verify supplied fixture behavior. They do not replace learner code review 
 | Instruction walkthrough | A reviewer follows setup and a lab without inventing a path, command, input, or success condition |
 | Fresh preparation | All six demo and transfer cases prepare without modifying clean originals |
 | Known failures | Seeded parser/data/app defects exist and are detected by appropriate independent checks |
-| Copilot and Codex | Both real smoke tests pass with the intended accounts and recorded versions |
+| GitHub Copilot CLI | Actual smoke test passes with the intended account and recorded version/model |
 | Browser | Preflight and correct-app tests pass; strengthened tests detect both app defects for the right reason |
 | Pedagogy | Demonstration precedes extraction; abstraction precedes reusable automation |
 | Pilot | One representative learner completes each team's first lab and understands the handoff to its second |
@@ -1162,6 +1174,8 @@ https://github.com/StefanTyllo/ABB-Training/actions/runs/38592278866
 | HW2 | Pass | Accepted design fail | Accepted design fail |
 | T1 | Pass | Pass | Pass; reporting refinement below |
 | T2 | Pass | Pass | Pass after timeout correction |
+
+**Edition 2 prompt update.** The focused context/runner changes in this edition have token-free regression and material checks. The authenticated runs summarized here used the earlier prompts; they are historical evidence, not measured outcomes for the new delivery. Run a new authenticated Copilot rehearsal before claiming new agent acceptance.
 
 **How to read this table.** “Accepted blocked” means missing source authority was correctly detected; “accepted design fail” means the unsafe design was accurately reported. Neither means the underlying engineering item passed. Code-assisted outcomes include the explicitly identified follow-ups on the next page.
 
@@ -1217,12 +1231,6 @@ https://docs.github.com/en/copilot/how-tos/copilot-cli/use-copilot-cli-in-action
 
 **G7 Official setup-node action and workflow examples**
 https://github.com/actions/setup-node
-
-**O1 OpenAI Codex installation example**
-https://developers.openai.com/cookbook/examples/codex/using_goals_in_codex
-
-**O2 OpenAI Codex authentication**
-https://learn.chatgpt.com/docs/auth
 
 **S1 Selenium Page Object guidance**
 https://www.selenium.dev/documentation/test_practices/encouraged/page_object_models/

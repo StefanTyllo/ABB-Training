@@ -1,0 +1,16 @@
+test_all_prepared_cases_include_the_complete_current_card (test_context_delivery.ContextDeliveryTests.test_all_prepared_cases_include_the_complete_current_card) ... ok
+test_copilot_call_is_isolated_and_browser_tools_are_explicit (test_context_delivery.ContextDeliveryTests.test_copilot_call_is_isolated_and_browser_tools_are_explicit) ... {"stage": "stage1", "agent": "GitHub Copilot CLI", "timeout_seconds": 600, "model": "CLI default; inspect transcript", "reasoning_effort": "CLI default", "context_sha256": "5ebde6eac8ac1a20abe6fdf04480a289b88ccd47c4d0c396790c5077d5dc6a09", "timed_out": false, "profile": "ephemeral; custom instructions and skill retrieval disabled", "returncode": 0, "elapsed_seconds": 0.0}
+ok
+test_every_real_card_and_transfer_keeps_original_authority (test_context_delivery.ContextDeliveryTests.test_every_real_card_and_transfer_keeps_original_authority) ... ok
+test_incomplete_card_is_rejected_before_writing_delivery (test_context_delivery.ContextDeliveryTests.test_incomplete_card_is_rejected_before_writing_delivery) ... ok
+test_invalid_lab_or_stage_cannot_select_another_file (test_context_delivery.ContextDeliveryTests.test_invalid_lab_or_stage_cannot_select_another_file) ... ok
+test_next_stage_preserves_previous_delivered_context (test_context_delivery.ContextDeliveryTests.test_next_stage_preserves_previous_delivered_context) ... ok
+test_runtime_authentication_enters_only_the_ephemeral_profile (test_context_delivery.ContextDeliveryTests.test_runtime_authentication_enters_only_the_ephemeral_profile) ... {"stage": "stage1", "agent": "GitHub Copilot CLI", "timeout_seconds": 600, "model": "CLI default; inspect transcript", "reasoning_effort": "CLI default", "context_sha256": "567138f053b57b6b9e8d0eb27a86dfa334efd5168d39e00304bf0dca41899f86", "timed_out": false, "profile": "ephemeral; custom instructions and skill retrieval disabled", "returncode": 0, "elapsed_seconds": 0.0}
+ok
+test_timeout_is_retained_as_failure_metadata (test_context_delivery.ContextDeliveryTests.test_timeout_is_retained_as_failure_metadata) ... {"stage": "stage1", "agent": "GitHub Copilot CLI", "timeout_seconds": 600, "model": "CLI default; inspect transcript", "reasoning_effort": "CLI default", "context_sha256": "567138f053b57b6b9e8d0eb27a86dfa334efd5168d39e00304bf0dca41899f86", "timed_out": true, "profile": "ephemeral; custom instructions and skill retrieval disabled", "returncode": 124, "elapsed_seconds": 0.0}
+ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.688s
+
+OK

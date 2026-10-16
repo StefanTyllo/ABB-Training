@@ -1,6 +1,12 @@
 name: Validate workflow training labs
 'on':
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      lab:
+        description: Lab to rehearse
+        type: choice
+        options: [all, fw1, fw2, hw1, hw2, t1, t2]
+        default: all
   push:
     paths:
     - training_kit/**
@@ -28,13 +34,7 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        lab:
-        - fw1
-        - fw2
-        - hw1
-        - hw2
-        - t1
-        - t2
+        lab: ${{ fromJSON(inputs.lab && inputs.lab != 'all' && format('["{0}"]', inputs.lab) || '["fw1","fw2","hw1","hw2","t1","t2"]') }}
     steps:
     - uses: actions/checkout@v6
       with:
@@ -52,6 +52,8 @@ jobs:
     - name: Rehearse four stages and fresh transfers with Copilot
       env:
         COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT }}
+        COPILOT_MODEL: ${{ vars.COPILOT_MODEL }}
+        COPILOT_REASONING_EFFORT: ${{ vars.COPILOT_REASONING_EFFORT }}
       run: |
         test -n "$COPILOT_GITHUB_TOKEN" || { echo '::error::COPILOT secret missing'; exit 1; }
         umask 077
@@ -60,7 +62,7 @@ jobs:
         printf '%s' "$COPILOT_GITHUB_TOKEN" > "$RUNNER_TEMP/abb-auth/copilot-token"
         # The private host directory protects the readable, provider-only bind-mounted file.
         chmod 444 "$RUNNER_TEMP/abb-auth/copilot-token"
-        docker run --rm --init --security-opt seccomp=docker/seccomp.json --shm-size=1g -v "$ABB_CI_VOLUME:/workspace/runs" --mount "type=bind,src=$RUNNER_TEMP/abb-auth/copilot-token,dst=/run/secrets/copilot_token,readonly" -e ABB_IMAGE_ID="${{ needs.image.outputs.image_id }}" "${{ needs.image.outputs.image_id }}" python /opt/abb/runtime/ci.py --provider copilot -- python /opt/abb/repo/training_ci/run_lab.py "${{ matrix.lab }}"
+        docker run --rm --init --security-opt seccomp=docker/seccomp.json --shm-size=1g -v "$ABB_CI_VOLUME:/workspace/runs" --mount "type=bind,src=$RUNNER_TEMP/abb-auth/copilot-token,dst=/run/secrets/copilot_token,readonly" -e COPILOT_MODEL -e COPILOT_REASONING_EFFORT -e ABB_IMAGE_ID="${{ needs.image.outputs.image_id }}" "${{ needs.image.outputs.image_id }}" python /opt/abb/runtime/ci.py --provider copilot -- python /opt/abb/repo/training_ci/run_lab.py "${{ matrix.lab }}"
     - name: Independent credential-free grading
       if: always()
       run: |

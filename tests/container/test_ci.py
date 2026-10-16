@@ -33,7 +33,10 @@ def test_lab_matrix_and_grade_remain_independent():
     import yaml
     workflow = yaml.load((ROOT/'.github/workflows/validate-workflow-labs.yml').read_text(), Loader=yaml.BaseLoader)
     job = workflow['jobs']['lab']
-    assert job['strategy']['matrix']['lab'] == ['fw1', 'fw2', 'hw1', 'hw2', 't1', 't2']
+    assert workflow['on']['workflow_dispatch']['inputs']['lab']['options'] == ['all', 'fw1', 'fw2', 'hw1', 'hw2', 't1', 't2']
+    expression = job['strategy']['matrix']['lab']
+    assert "inputs.lab != 'all'" in expression
+    assert '["fw1","fw2","hw1","hw2","t1","t2"]' in expression
     assert int(job['timeout-minutes']) == 80
     grade = next(s for s in job['steps'] if s.get('name') == 'Independent credential-free grading')
     assert grade['if'] == 'always()'

@@ -30,4 +30,17 @@ The repository's validation_records directory preserves exact original archives,
 
 ## Not established
 
-No authenticated Codex execution or representative learner pilot was performed. Production hardware, comprehensive adversarial robustness, learning improvements and speed/cost advantages are not established. Local account/browser readiness and the handbook's facilitator pilot remain required before classroom acceptance. A correctly reported engineering failure or blocked input is an accepted lab result.
+No representative learner pilot was performed. Production hardware, comprehensive adversarial robustness, learning improvements and speed/cost advantages are not established. Local account/browser readiness and the handbook's facilitator pilot remain required before classroom acceptance. A correctly reported engineering failure or blocked input is an accepted lab result.
+
+## 15 October 2026 — Copilot prompt/context delivery update
+
+The active handbook and setup now consistently use GitHub Copilot CLI. Focused
+stage/replay templates preserve the full original task card and local contracts;
+exact prompt/context snapshots and delivery hashes are retained. Regression checks
+cover all six actual cards, four stages and two transfer modes, including hardware
+without case.json, source preservation, Copilot isolation and timeout metadata.
+The PDF is rebuilt with the current starter files and an exact-content manifest.
+These are token-free implementation/material checks, not new authenticated
+Copilot outcome measurements. The historical authenticated runs above remain
+unchanged. New agent/model performance, authenticated handover and learner
+outcomes require their own rehearsals and facilitator review.

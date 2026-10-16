@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-16",
+  "branch": "plan/docker-training",
+  "parents": [
+    "e5626cd",
+    "a8f2f95a4af1c4f954121e16fda423d374efc296"
+  ],
+  "verified_source_tree_before_evidence_update": "f182a14c2a62dc9cf18ef373ce94927cb427a093",
+  "facilitator_image_id": "sha256:0edbe6a53c64290b849b069ae05b2906c4adae8af2bbee07d8c8a91629406c11",
+  "offline_tests": {
+    "passed": 67,
+    "failed": 0,
+    "seconds": 66.3
+  },
+  "published_pdf": {
+    "pages": 44,
+    "sha256": "58f82738f263fadecc1f95758226f0f37a079da28dc153b6bda9d4911e1e85c2",
+    "all_contact_sheets_visually_inspected": true
+  },
+  "live_provider_acceptance": "NOT RUN; credentials unavailable",
+  "windows_desktop_acceptance": "UNVERIFIED; previous engine unavailable",
+  "subagents": false
+}

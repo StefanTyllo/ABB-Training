@@ -1,0 +1,13 @@
+{
+  "README.md": "80cc41528079bf1a9714d8e0bfca23fe2b2521cd1c867ce1a16b0c15bb42001e",
+  "abb-training-9eaa593a1c81.manifest.json": "f95eb3b77715293503117157750128feb3a3743b155489c4588d5c5325c86d83",
+  "abb-training-facilitator-e1dc4a25cc7a.manifest.json": "e42704fb2ec62807b654d0b6767b3bcb44faa02cad89df7d1f055fb4e5f8656c",
+  "integration-manifest.json": "14cecac4c64e146ee5b540c1ec3f756ef7d0dbe8f066fbeb5720edf0beb57c83",
+  "merge-context-green.log": "5adc44f7d9caeb9decd56899d4f50d12efbfa152352b096c64aff36b317179ae",
+  "merge-context-red.log": "fe82d8194a7ab3f405863e4f713d33f54bc1187950465659eb722973178cd00e",
+  "merge-handbook.log": "29bf315f21ba5a84df74f3a5411505c049fb4a94d5585464c3362bd9cb7fd9aa",
+  "merge-materials.log": "c9b73d137c69e8591db2617b74de420c20e38eb022970cfdfa0a9ae0339017aa",
+  "merge-packages.log": "c8577da40869c25e303653254ee0acebbaf7622b2c726151626f155efd9daf83",
+  "merge-suite.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+  "merge-suite.log": "14bd59594f49eb95806334dc41d58badaf1ade511ac15054622a9818bb0cf2d7"
+}

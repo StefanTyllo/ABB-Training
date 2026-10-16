@@ -99,3 +99,24 @@ state or parser with the same independent result checks, but neither requires no
 invokes automation. The runner uses fresh, separate MD-only and code transfer
 workspaces. Learners must not access grader/instructor sources; the runner records
 protected-file hashes independently.
+
+## Stage context and evidence ownership
+
+Read the current-stage context first; the full task-card.md and this contract
+remain authoritative. Do not create automation/ before Stage 4, including fixture
+or placeholder directories. Early disposable fixtures belong under
+evidence/stage1-fixtures/. Preserve workflow-md-only.md byte-for-byte.
+
+Original source authorities, baselines and raw captures stay immutable.
+evidence/session.md is append-only: preserve earlier entries while allowing
+later entries. Verify original captures and journal prefixes separately from the
+current growing journal hash. Host-generated context/ changes between stages;
+it is not an original capture and must not be frozen into preservation guards.
+
+Complete required artifacts/checks before optional hardening. Helper-owned logs
+and metadata use unique run directories. Caller-owned stdout/stderr capture can
+already exist when a helper starts; do not reject or overwrite an inferred
+sibling .log. Exercise the documented entry point with caller console redirection
+and a fresh requested report path. Preserve actual subprocess exits and evidence.
+Verify an already completed task without repeating its mutation or inventing
+historical observations. Honest FAIL/BLOCKED outcomes remain visible.

@@ -1,0 +1,21 @@
+name: Check Copilot training context and materials
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - 'compose*.yaml'
+      - 'docker/**'
+      - 'tests/container/**'
+      - '.github/workflows/build-training-image.yml'
+      - 'training_ci/**'
+      - 'training_kit/**'
+      - 'training_author/**'
+      - 'docs/ABB_Workflow_Training.pdf'
+      - '.github/workflows/check-training-context.yml'
+      - '.github/workflows/validate-workflow-labs.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  image:
+    uses: ./.github/workflows/build-training-image.yml

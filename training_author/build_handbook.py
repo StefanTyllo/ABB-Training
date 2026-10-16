@@ -8,7 +8,7 @@ import tempfile
 
 from markdown_it import MarkdownIt
 from pypdf import PdfReader, PdfWriter
-from build_package import starter_bytes
+from build_package import starter_bytes, selected_files
 
 STYLE = '''
 body{font:9.5pt/1.30 Arial,sans-serif;color:#172337}h1{font-size:20pt;color:#174a70}
@@ -33,6 +33,8 @@ def build_handbook(source: Path, output: Path, materials: Path) -> dict:
     if output.exists():
         raise FileExistsError('Choose a fresh handbook output path')
     starter = starter_bytes(root)
+    source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+    starter_hash = hashlib.sha256(starter).hexdigest()
     with tempfile.TemporaryDirectory(prefix='abb-handbook-') as directory:
         temp = Path(directory)
         (temp/'guide.html').write_text(html)
@@ -43,10 +45,20 @@ def build_handbook(source: Path, output: Path, materials: Path) -> dict:
         for page in reader.pages:
             writer.add_page(page)
         writer.add_metadata({'/Title':'ABB workflow training — Docker edition',
-                             '/Subject':'Linux amd64; live account acceptance is recorded separately'})
+                             '/Subject':'Linux amd64; live account acceptance is recorded separately',
+                             '/TrainingSourceSHA256':source_hash,
+                             '/TrainingStartersSHA256':starter_hash})
         writer.add_attachment('ABB_Workflow_Training_Starters.zip', starter)
         with output.open('xb') as stream:
             writer.write(stream)
+    metadata = {'format_version': 2, 'pages': len(reader.pages),
+                'logical_sections': len([part for part in sections if part.strip()]),
+                'layout': 'A4 flowing text; 9.5pt body; no shrink-to-fit',
+                'guide_sha256': source_hash, 'starters_sha256': starter_hash,
+                'files': {name: hashlib.sha256(data).hexdigest() for name, data in
+                          sorted(selected_files(root, 'learner', include_pdf=False).items())}}
+    with output.with_name('materials-manifest.json').open('x') as stream:
+        json.dump(metadata, stream, indent=2); stream.write('\n')
     return {'output': str(output), 'pages': len(reader.pages),
             'source_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
             'attachment_sha256': hashlib.sha256(starter).hexdigest(),

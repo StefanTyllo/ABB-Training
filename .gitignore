@@ -3,3 +3,7 @@
 !.env.example
 .auth/
 dist/
+__pycache__/
+*.pyc
+.pytest_cache/
+runs/

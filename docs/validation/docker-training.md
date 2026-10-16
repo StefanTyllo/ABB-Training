@@ -1,5 +1,7 @@
 # Docker training verification — 15 October 2026
 
+> Updated 16 October 2026: remote main's Copilot context changes have been integrated. The current merged candidate passed **67 offline tests**; its regenerated handbook has **44 pages** and exact synchronized task cards/attachment. Current provenance is in `validation_records/docker-training-2026-10-16-main-integration/`. The 15 October image/results below describe the prior candidate; live account, native Windows and learner-pilot gates remain incomplete.
+
 The Docker implementation and offline distribution are ready for review. **Classroom release acceptance remains incomplete:** live provider rehearsals, FW1 live refinement and the native Windows Docker Desktop check have not passed. No live model result is inferred from deterministic checks.
 
 ## Candidate and provenance
