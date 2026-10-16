@@ -7,3 +7,10 @@ __pycache__/
 *.pyc
 .pytest_cache/
 runs/
+.venv/
+venv/
+work/
+export/
+node_modules/
+*.egg-info/
+build/

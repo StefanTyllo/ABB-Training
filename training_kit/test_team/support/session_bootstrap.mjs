@@ -1,8 +1,17 @@
 // Supplied infrastructure: validate the no-login fixture and export Playwright state.
 import { parseArgs } from 'node:util';
-import { mkdir, writeFile, lstat, chmod } from 'node:fs/promises';
+import { mkdir, writeFile, lstat, chmod, readFile } from 'node:fs/promises';
 import { resolve, relative, dirname, isAbsolute } from 'node:path';
-import { chromium } from '/opt/abb/node/node_modules/playwright/index.mjs';
+import { existsSync } from 'node:fs';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+let runtime = process.env.ABB_RUNTIME_DIR;
+for (let cursor = dirname(fileURLToPath(import.meta.url)); !runtime; cursor = dirname(cursor)) {
+  const candidate = resolve(cursor, 'training_runtime');
+  if (existsSync(resolve(candidate, 'node_modules/playwright/index.mjs'))) runtime = candidate;
+  if (dirname(cursor) === cursor) break;
+}
+if (!runtime) throw Error('Run setup_env.py --agents and enter the workspace with abb shell');
+const { chromium } = await import(pathToFileURL(resolve(runtime, 'node_modules/playwright/index.mjs')).href);
 
 let values, target, state, report;
 try {
@@ -40,9 +49,12 @@ if (values.mode === 'login') {
   await save({ status: 'BLOCKED', reason: 'No reviewed login adapter is supplied for this fixture' });
   process.exit(3);
 }
+const browserConfig = resolve(runtime, '../.venv/browser.json');
+const executablePath = process.env.CHROME_BINARY || (existsSync(browserConfig)
+  ? JSON.parse(await readFile(browserConfig, 'utf8')).executablePath : undefined);
 let browser, phase = "browser-start";
 try {
-  browser = await chromium.launch({ executablePath: process.env.CHROME_BINARY,
+  browser = await chromium.launch({ executablePath,
                                     headless: true, chromiumSandbox: true });
   const context = await browser.newContext();
   const page = await context.newPage();

@@ -90,15 +90,15 @@ class ContextDeliveryTests(unittest.TestCase):
             run_lab.agent(workspace, "stage1", "t1")
         args, kwargs = call.call_args
         command = args[0]
-        self.assertEqual(command[0], "copilot")
+        self.assertTrue(command[0].endswith(("copilot", "copilot.cmd")))
         self.assertIn("--no-custom-instructions", command)
         self.assertIn("--no-auto-update", command)
         self.assertIn("--disable-builtin-mcps", command)
         self.assertIn("--allow-tool=playwright", command)
         config = json.loads(command[command.index("--additional-mcp-config") + 1])
         browser = config["mcpServers"]["playwright"]
-        self.assertEqual(browser["command"], "/opt/abb/node/bin/node")
-        self.assertIn("/opt/abb/node/node_modules/@playwright/mcp/cli.js", browser["args"])
+        self.assertTrue(browser["command"].endswith(("node", "node.exe")))
+        self.assertTrue(Path(browser["args"][0]).as_posix().endswith("training_runtime/node_modules/@playwright/mcp/cli.js"))
         self.assertIn("--sandbox", browser["args"])
         self.assertEqual(kwargs["timeout"], 600)
         self.assertNotEqual(kwargs["env"].get("COPILOT_HOME"), str(Path.home() / ".copilot"))

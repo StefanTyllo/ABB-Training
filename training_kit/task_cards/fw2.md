@@ -7,28 +7,28 @@
 **Host terminal** — in the unpacked package folder; fresh FW2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 demo
-docker compose exec --workdir /workspace/work/fw2-demo training bash
+abb doctor --offline
+abb prepare fw2 demo
+abb shell --workspace work/fw2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-demo
+# Expected: work/fw2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
 Read `requirements.md` before editing. A packet is `A5 02 sequence low high checksum`; the value is signed 16-bit little-endian and checksum is XOR of the first five bytes. Each CLI argument is one receive chunk in the same stream. The complete contract defines noise, invalid length, checksum failure, and resynchronization. There is no timeout requirement in this fixture.
 
 **Allowed changes:** `fw2/parser.c`, plus common workflow/automation/evidence files. Preserve `parser.h`, `main.c`, and the specification. The compiled `fw2/parser` is a generated artifact.
 
 ## Stage 1 Guided operations
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 gcc -std=c11 -Wall -Wextra -Werror \
@@ -52,7 +52,7 @@ Make a focused repair. Rebuild and repeat the same reproductions. Then run a pos
 
 # FW2 Extract build and replay tooling
 
-Stay in the existing /workspace/work/fw2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/fw2-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -79,37 +79,37 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 transfer --name fw2-transfer-md
-docker compose exec --workdir /workspace/work/fw2-transfer-md training bash
+abb doctor --offline
+abb prepare fw2 transfer --name fw2-transfer-md
+abb shell --workspace work/fw2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-transfer-md
+# Expected: work/fw2-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 transfer --name fw2-transfer-code
-docker compose exec --workdir /workspace/work/fw2-transfer-code training bash
+abb doctor --offline
+abb prepare fw2 transfer --name fw2-transfer-code
+abb shell --workspace work/fw2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-transfer-code
+# Expected: work/fw2-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
 
 The fresh starters retain the defects. Use this new reproduction after building:
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 ./fw2/parser a502 2a00 f875
@@ -120,7 +120,7 @@ Expected result: sequence 42, value -2048. Transfer the workflow and helpers, no
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/firmware/instructor/smoke.py /workspace/work/fw2-demo/fw2/parser
+python training_kit/firmware/instructor/smoke.py work/fw2-demo/fw2/parser
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.

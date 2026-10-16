@@ -14,7 +14,7 @@ LABS = ['fw1', 'fw2', 'hw1', 'hw2', 't1', 't2']
 
 def package_builder():
     path = ROOT/'training_author/build_package.py'
-    assert path.is_file(), 'Docker distribution builder is missing'
+    assert path.is_file(), 'Virtual environment distribution builder is missing'
     sys.path.insert(0, str(path.parent))
     import build_package
     return build_package
@@ -26,14 +26,15 @@ def test_audience_packages_have_separate_allowlists(tmp_path):
         result = builder.build_package(ROOT, tmp_path/audience, audience)
         with zipfile.ZipFile(result['archive']) as archive:
             names = archive.namelist()
-            assert 'Dockerfile' in names and 'docker/runtime.lock.json' in names
+            assert 'setup_env.py' in names and 'requirements.lock' in names
+            assert not any(name.startswith('docker/') or name == 'Dockerfile' for name in names)
             assert 'docs/ABB_Workflow_Training.pdf' in names
             assert 'release-manifest.json' in names
             assert all(f'docs/{lab.upper()}_STUDENT_GUIDE.md' in names for lab in LABS)
             assert not any('/.auth/' in n or '/.git/' in n or n.startswith(('runs/', 'work/')) for n in names)
             if audience == 'learner':
                 assert not any('/instructor/' in n or '/author_checks/' in n or n.startswith(('validation_', 'training_ci/', 'training_author/')) for n in names)
-                assert b'facilitator:' not in archive.read('compose.yaml')
+                assert 'training_ci/grade_all.py' not in names
             else:
                 assert 'training_ci/grade_all.py' in names
                 assert 'validation_t2_package/source_hashes.json' in names
@@ -49,12 +50,12 @@ def test_handbook_attachment_is_executable_and_clean(tmp_path):
     assert len(attachments) == 1
     import io
     with zipfile.ZipFile(io.BytesIO(attachments[0])) as archive:
-        assert 'Dockerfile' in archive.namelist()
+        assert 'setup_env.py' in archive.namelist()
         assert not any('/instructor/' in n or '/author_checks/' in n or n.startswith('validation_') for n in archive.namelist())
         for name in archive.namelist():
             if name == 'release-manifest.json':
                 continue
-            current = ROOT/('compose.learner.yaml' if name == 'compose.yaml' else name)
+            current = ROOT/name
             assert current.is_file(), 'Removed file remains in PDF starter: '+name
             assert archive.read(name) == current.read_bytes(), 'Stale PDF starter file: '+name
         archive.extractall(tmp_path/'attachment')
@@ -70,7 +71,7 @@ def test_package_excludes_synthetic_secrets_and_refuses_overwrite(tmp_path):
     import shutil
     builder = package_builder()
     source = tmp_path/'source'
-    shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns('.git', '.superpowers', '__pycache__'))
+    shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns('.git', '.superpowers', '__pycache__', '.venv', 'node_modules', 'work', 'runs', 'export'))
     for path in [source, *source.rglob('*')]:
         if not path.is_symlink():
             path.chmod(path.stat().st_mode | 0o200)
@@ -95,21 +96,21 @@ def test_package_excludes_synthetic_secrets_and_refuses_overwrite(tmp_path):
 
 
 @pytest.mark.parametrize('lab', LABS)
-def test_each_exercise_has_usable_container_entry(lab):
+def test_each_exercise_has_usable_workspace_entry(lab):
     track = 'FIRMWARE' if lab.startswith('fw') else 'HARDWARE' if lab.startswith('hw') else 'TEST'
     for relative in [f'docs/{lab.upper()}_STUDENT_GUIDE.md', f'docs/{track}_TEAM_WALKTHROUGH.md',
                      'training_author/guide.md']:
         path = ROOT/relative
         assert path.is_file(), f'Missing current guide: {relative}'
         text = path.read_text()
-        assert '**Host terminal**' in text and '**Inside the container**' in text
-        assert 'docker compose up -d training' in text
+        assert '**Host terminal**' in text and '**Inside the workspace**' in text
+        assert 'abb doctor --offline' in text
         assert f'abb prepare {lab} demo' in text
         for suffix in ['demo', 'transfer-md', 'transfer-code']:
-            location = f'/workspace/work/{lab}-{suffix}'
-            assert f'docker compose exec --workdir {location} training bash' in text
+            location = f'work/{lab}-{suffix}'
+            assert f'abb shell --workspace {location}' in text
             assert f'Expected: {location}' in text
         assert f'abb prepare {lab} transfer --name {lab}-transfer-md' in text
         assert f'abb prepare {lab} transfer --name {lab}-transfer-code' in text
         assert 'resume' in text.lower() and 'pwd' in text
-        assert 'source .venv' not in text
+        assert 'docker compose' not in text

@@ -16,11 +16,12 @@ import time
 import urllib.request
 import tempfile
 
-from context_delivery import prepare_context
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from training_ci.context_delivery import prepare_context
 from training_ci.runtime_paths import runs_root
+from training_runtime.paths import provider_command, RUNTIME
 LABS = ('fw1', 'fw2', 'hw1', 'hw2', 't1', 't2')
 ALLOWED_SHELL = ('python', 'python3', 'gcc', './fw2/parser', 'cat', 'ls', 'pwd', 'mkdir', 'sed', 'head', 'rg', 'node', 'npm', 'npx', 'git')
 
@@ -57,7 +58,7 @@ def card(lab):
 
 def copilot_command(workspace, stage, lab, prompt):
     """Keep programmatic Copilot context explicit, without changing user settings."""
-    command = ['copilot', '-p', prompt, '--no-ask-user', '-s',
+    command = [provider_command('copilot'), '-p', prompt, '--no-ask-user', '-s',
                '--no-auto-update', '--no-custom-instructions', '--disable-builtin-mcps',
                '--dynamic-retrieval', 'skills=off',
                '--share=' + str(workspace/'evidence'/f'{stage}-transcript.md'),
@@ -68,8 +69,7 @@ def copilot_command(workspace, stage, lab, prompt):
     if os.getenv('COPILOT_REASONING_EFFORT'):
         command += ['--reasoning-effort', os.environ['COPILOT_REASONING_EFFORT']]
     if lab.startswith('t'):
-        sys.path.insert(0, '/opt/abb/runtime')
-        from auth import configure_mcp
+        from training_runtime.auth import configure_mcp
         config = configure_mcp(workspace)
         command += ['--additional-mcp-config', Path(config['copilot']).read_text(), '--allow-tool=playwright']
     return command
@@ -77,10 +77,8 @@ def copilot_command(workspace, stage, lab, prompt):
 
 def authenticate_profile(env):
     """Import the selected runtime secret into this invocation's private profile."""
-    if Path('/run/secrets/copilot_token').is_file():
-        sys.path.insert(0, '/opt/abb/runtime')
-        from auth import _import_secret
-        _import_secret('copilot', env)
+    from training_runtime.auth import _import_secret
+    _import_secret('copilot', env)
 
 
 def agent(workspace, stage, lab):
@@ -95,7 +93,7 @@ def agent(workspace, stage, lab):
     # The Actions token is inherited only by the Copilot step. Never persist it
     # into a profile or metadata; the independent grader is a separate step.
     with tempfile.TemporaryDirectory(prefix='abb-copilot-') as profile:
-        env = dict(os.environ, COPILOT_HOME=profile)
+        env = dict(os.environ, COPILOT_HOME=profile, ABB_RUNTIME_DIR=str(RUNTIME))
         env.pop('COPILOT_CUSTOM_INSTRUCTIONS_DIRS', None)
         authenticate_profile(env)
         with (workspace/'evidence'/f'{stage}-response.txt').open('w') as stream:
@@ -156,7 +154,7 @@ def main():
         shutil.copy2(ROOT / f'training_ci/{contract_name}_contract.md', workspace / 'CI_CONTRACT.md')
         snapshots[case_name] = fingerprint(workspace)
     (output / 'protected-inputs.json').write_text(json.dumps(snapshots, indent=2))
-    version = subprocess.run(['copilot', '--no-auto-update', '--version'], capture_output=True, text=True, check=True)
+    version = subprocess.run([provider_command('copilot'), '--no-auto-update', '--version'], capture_output=True, text=True, check=True)
     (output / 'environment.json').write_text(json.dumps({'copilot':version.stdout.strip(), 'python':sys.version,
         'runner_os':os.getenv('RUNNER_OS'), 'commit':os.getenv('GITHUB_SHA'), 'lab':lab,
         'model':os.getenv('COPILOT_MODEL') or 'CLI default; inspect transcript for model identity',

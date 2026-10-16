@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import zipfile
 
-from export import export_workspace
+from .export import export_workspace
 
 
 def collect_evidence(root: Path, output: Path) -> None:
@@ -22,7 +22,7 @@ def collect_evidence(root: Path, output: Path) -> None:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--root', type=Path, default=Path('/workspace/runs'))
-    parser.add_argument('--output', type=Path, default=Path('/tmp/abb-evidence'))
+    parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1] / 'runs')
+    parser.add_argument('--output', type=Path, default=Path(tempfile.gettempdir()) / 'abb-evidence')
     args = parser.parse_args()
     collect_evidence(args.root, args.output)

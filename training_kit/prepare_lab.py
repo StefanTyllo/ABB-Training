@@ -42,7 +42,7 @@ def main():
     if args.lab.startswith('hw'):
         shutil.copy2(root/'hardware/REPORT_CONTRACT.md', output/'REPORT_CONTRACT.md')
     shutil.copy2(task_card, output/'task-card.md')
-    # Copies belong to the learner; image-owned source stays read-only.
+    # Copies belong to the learner; original starter files remain in training_kit/.
     for copied in [output, *output.rglob("*")]:
         if not copied.is_symlink():
             copied.chmod(copied.stat().st_mode | 0o200)
