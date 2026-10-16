@@ -1,100 +1,115 @@
-# ABB workflow training in Docker
+# ABB workflow training
 
-Unpack the learner package into a folder of your choice. Host requirements are Docker Engine or Docker Desktop with Linux containers, Compose v2 or newer, network access for the initial build and approved agent accounts. The supported runtime is **linux/amd64**. Windows Docker Desktop and ARM require separate acceptance evidence; the local validation report records what was actually tested.
+Run the training tools in a local Python virtual environment. Install Python 3.11+
+(with pip and venv) and Git. FW2 also needs GCC: on Windows, use WSL with GCC for
+that lab. Browser labs need Chrome/Chromium; Selenium Manager finds/downloads a
+matching driver when `CHROME_BINARY` and `CHROMEDRIVER` are unset. Initial setup
+and automatic browser/driver downloads need network access.
 
-**Host terminal** — PowerShell on Windows or a terminal on Linux, in the unpacked package folder:
+From the repository or unpacked learner package folder:
 
-```text
-docker compose build training
-docker compose up -d training
-docker compose exec training abb doctor --offline
-```
-
-The offline doctor launches sandboxed browsers, compiles a disposable program, checks clean preparation and runs the Codex sandbox. Account access is reported separately. Keep the original output when a check returns FAIL or BLOCKED.
-
-**Host terminal** — authenticate each approved provider once, completing its displayed device-code flow:
-
-```text
-docker compose exec -it training abb login codex
-docker compose exec -it training abb login copilot
-```
-
-Accounts, entitlement and organization policy remain required. Run a real harmless tool command through each agent before treating its account as ready. Codex uses `gpt-6.1-sol` with medium reasoning. Login and version output alone do not prove model access.
-
-**Host terminal** — a fresh FW1 example:
-
-```text
-docker compose exec training abb prepare fw1 demo
-docker compose exec --workdir /workspace/work/fw1-demo training bash
-```
-
-**Inside the container**:
-
-```bash
-pwd
-# Expected: /workspace/work/fw1-demo
-abb agent codex --workspace /workspace/work/fw1-demo
-```
-
-Review normal approval requests. Use the same selected agent/model throughout a lab. The [handbook](docs/ABB_Workflow_Training.pdf), six student guides and three track walkthroughs give the exact demo and transfer entry commands for each exercise. The source materials are image-owned; prepared work belongs to you. The firmware and test starters intentionally contain unfinished or faulty behavior.
-
-`exit` returns to the host. Re-enter an existing workspace with its `docker compose exec --workdir ... training bash` command; **do not prepare it again**. Starting or stopping a shell does not remove work.
-
-**Host terminal** — stop and resume:
-
-```text
-docker compose stop training
-docker compose up -d training
-```
-
-Named work, run, export and separate provider-auth volumes survive normal stop/start and image rebuilds. Preparation refuses an existing workspace. Choose a fresh name for a new attempt.
-
-For several participants on one Docker host, choose distinct Docker project names and repeat `-p` on every command, for example `docker compose -p team-a up -d training`. Keep both terminals and that participant's facilitator grading in the same project.
-
-**Host terminal** — export code and evidence to a fresh filename:
-
-```text
-docker compose exec training abb export --output /workspace/export/submission.zip
-docker compose cp training:/workspace/export/submission.zip ./submission.zip
-```
-
-The export excludes `.env`, `.auth`, provider stores, Git metadata and caches. Inspect the contents before submitting; the exercise asks you to transfer only the specified workflow or reusable code.
-
-## Optional local browser preview
-
-Prepare one T1/T2 workspace first and stop its Terminal A server with Ctrl-C. One workspace can own port 8765 in a service at a time. The optional override publishes only the host loopback address.
-
-**Host terminal — Bash**:
-
-```bash
-ABB_PREVIEW_WORKSPACE=t1-demo ABB_PREVIEW_PORT=8765 docker compose -f compose.yaml -f compose.preview.yaml up -d training
-```
-
-**Host terminal — PowerShell**:
+**Windows PowerShell**:
 
 ```powershell
-$env:ABB_PREVIEW_WORKSPACE = 't1-demo'
-$env:ABB_PREVIEW_PORT = '8765'
-docker compose -f compose.yaml -f compose.preview.yaml up -d training
+py -3 setup_env.py
+. .\.venv\Scripts\Activate.ps1
+abb doctor --offline
 ```
 
-Open the local address `http://127.0.0.1:8765` in your host browser. Choose a different host port if occupied. Return to the normal service with this **Host terminal** command:
+**Linux / macOS / WSL — Bash**:
+
+```bash
+python3 setup_env.py
+source .venv/bin/activate
+abb doctor --offline
+```
+
+On Debian/Ubuntu, install `python3-venv`, `python3-pip`, `git` and `gcc` through
+your system package manager if missing. Use a separate `.venv` for Windows and
+WSL; virtual environments cannot be shared across operating systems or moved.
+To recreate one, remove only `.venv` and rerun setup; your prepared work persists.
+If PowerShell activation is restricted, invoke `.\.venv\Scripts\abb.exe` directly.
+
+## Coding agents and browser tools
+
+Install Node.js 22+ with npm, then run `python setup_env.py --agents`. This installs
+the pinned Codex, Copilot and Playwright tools locally under
+`training_runtime/node_modules` and downloads Playwright Chromium. Linux may
+also need browser system libraries (`node training_runtime/node_modules/playwright/cli.js install-deps chromium`).
+These are host tools; a Python virtual environment isolates Python packages.
 
 ```text
-docker compose -f compose.yaml up -d training
+abb login codex
+abb login copilot
+abb prepare fw1 demo
+abb agent codex --workspace work/fw1-demo
 ```
+
+Complete the displayed login flow with your approved account. Credentials stay
+in the ignored `.auth/` directory. Normal provider approvals apply. Run a real
+harmless tool command to verify account/model access; login alone is insufficient.
+The offline doctor checks installed Python packages, host tools, compilation and
+clean preparation. Missing optional tools are BLOCKED; accounts and browser
+execution remain separately UNTESTED until exercised.
+
+## Prepare, resume and export
+
+With `.venv` activated, run commands from the package folder:
+
+```text
+abb prepare fw1 demo
+abb shell --workspace work/fw1-demo
+```
+
+The second command opens a shell in your prepared workspace. Run `pwd` (PowerShell:
+`Get-Location`) to verify its location. `exit` returns to the package folder.
+Reopen existing work with the same `abb shell` command; preparation refuses an
+existing name. Use `--name another-attempt` for fresh work. All six labs are
+available: `fw1`, `fw2`, `hw1`, `hw2`, `t1`, `t2`, with `demo` or `transfer` cases.
+Keep the same agent/model throughout each lab and transfer comparison.
+
+Work lives in `work/`, CI evidence in `runs/`, and exports in `export/`. For several
+participants, use a separate checkout/package folder per participant. The
+[handbook](docs/ABB_Workflow_Training.pdf), student guides and team walkthroughs
+provide exercise instructions. Source starters intentionally contain unfinished
+or faulty behavior; edit prepared copies.
+
+```text
+abb export --output export/submission.zip
+```
+
+Exports omit authentication state, `.env`, Git metadata and caches. Inspect code
+and evidence before submitting. Starting or stopping a shell preserves your work.
+
+## Browser labs
+
+In Terminal A, activate `.venv`, enter the prepared T1/T2 workspace with `abb shell`
+and run `python server.py`. In Terminal B, activate the same environment and enter
+the same workspace, then run:
+
+```text
+python -m pytest browser_preflight.py -q
+python -m pytest -q
+```
+
+Open `http://127.0.0.1:8765` for a local preview. Stop your server with Ctrl-C before
+switching workspaces; one server owns port 8765 at a time. Optional environment
+variables `CHROME_BINARY` and `CHROMEDRIVER` select explicit local executables.
 
 ## Facilitators
 
-Use the separately named facilitator package for assessment sources, CI workflows and publication tools. Learner archives and the PDF attachment exclude instructor and solved validation sources. The full source tree supports:
-
-**Host terminal**:
+Use the facilitator package for assessment and publication sources. Learner
+archives and the PDF attachment omit instructor and solved validation sources.
+After setup and activation:
 
 ```text
-docker compose --profile facilitator build facilitator
-docker compose --profile facilitator run --rm grader python -m pytest /opt/abb/repo/tests/container -q
+python -m pytest tests/runtime -q
+python -m unittest discover -s training_ci/tests -v
+python training_author/check_materials.py
 ```
 
-The grader has no provider-auth mounts or model secrets. The [CI guide](COPILOT_ACTIONS_GUIDE.md) describes separate rehearsals and grading. Live provider acceptance is distinct from deterministic runtime checks; see [Docker validation](docs/validation/docker-training.md).
-
-Dependencies are installed at image build time from the checked-in base digest, Debian snapshot and npm/pip locks. Update pins deliberately, rebuild and repeat the relevant offline and live gates before releasing a new candidate. Current MCP and bootstrap Playwright versions differ as recorded in their lock; both browser paths have their own tests. An offline image can be provided separately with `docker save`/`docker load`; it is never embedded in the PDF.
+See [publication instructions](training_author/README.md), the
+[CI guide](COPILOT_ACTIONS_GUIDE.md) and [local validation](docs/validation/virtual-environment.md).
+Dependencies are pinned in `requirements.lock` and `training_runtime/package-lock.json`.
+Rerun setup after updates and verify relevant labs before release. Historical
+validation records describe earlier runtimes and remain unchanged.

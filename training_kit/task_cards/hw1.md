@@ -7,28 +7,28 @@
 **Host terminal** — in the unpacked package folder; fresh HW1 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw1 demo
-docker compose exec --workdir /workspace/work/hw1-demo training bash
+abb doctor --offline
+abb prepare hw1 demo
+abb shell --workspace work/hw1-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw1-demo
+# Expected: work/hw1-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
 **Inputs:** `source/approval.json` declares the expected board/revision; `source/bom.csv` is authoritative for component identity and value; `source/schematic.json` is authoritative for pin-to-net mapping and corroborates values. `derived/netlist.json` is an output to review, not an authority. Required source provenance must be present and consistent.
 
 **Allowed changes:** `derived/netlist.json`, `report.json`, and common workflow/automation/evidence files. Preserve source files and any supplied tools. Use the report contract in `REPORT_CONTRACT.md` supplied in the prepared workspace.
 
 ## Stage 1 Guided operations
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m json.tool source/approval.json
@@ -52,7 +52,7 @@ Correct only demonstrable export errors. Re-read the result and create report.js
 
 # HW1 Extract source and consistency checks
 
-Stay in the existing /workspace/work/hw1-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/hw1-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -79,31 +79,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw1 transfer --name hw1-transfer-md
-docker compose exec --workdir /workspace/work/hw1-transfer-md training bash
+abb doctor --offline
+abb prepare hw1 transfer --name hw1-transfer-md
+abb shell --workspace work/hw1-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw1-transfer-md
+# Expected: work/hw1-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw1 transfer --name hw1-transfer-code
-docker compose exec --workdir /workspace/work/hw1-transfer-code training bash
+abb doctor --offline
+abb prepare hw1 transfer --name hw1-transfer-code
+abb shell --workspace work/hw1-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw1-transfer-code
+# Expected: work/hw1-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
@@ -114,7 +114,7 @@ The package changes board identity, component references/order, and omits one so
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw1 --case demo --workspace /workspace/work/hw1-demo
+python training_kit/hardware/instructor/check.py --lab hw1 --case demo --workspace work/hw1-demo
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.

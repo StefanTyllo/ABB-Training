@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "dependencies": {
+    "@openai/codex": "0.162.1",
+    "@github/copilot": "1.0.97",
+    "playwright": "1.64.1",
+    "@playwright/mcp": "0.0.83"
+  }
+}

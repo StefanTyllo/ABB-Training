@@ -4,9 +4,9 @@ You will diagnose a simulated communication problem, preserve the original state
 
 ## Before you begin
 
-Use the Docker package and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. The image supplies all language, compiler, browser and agent tools. Record the same selected agent/model throughout.
+Follow the [virtual environment setup](../README.md) and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. Activate `.venv` before running commands. Record the same selected agent/model throughout.
 
-Host commands run in the unpacked package folder. Commands marked Inside the container run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
+Host commands run in the unpacked package folder. Commands marked Inside the workspace run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
 
 Change device configuration only through the supplied device command. Keep the simulator, `fw1/expected.json` and direct state JSON unchanged. Create your own workflow, evidence and later automation files.
 
@@ -23,23 +23,23 @@ Expected results below describe the supplied examples. Save actual output; if it
 **Host terminal** — in the unpacked package folder; fresh FW1 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 demo
-docker compose exec --workdir /workspace/work/fw1-demo training bash
+abb doctor --offline
+abb prepare fw1 demo
+abb shell --workspace work/fw1-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-demo
+# Expected: work/fw1-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 cat requirements.md
@@ -56,7 +56,7 @@ Start the coding agent here. Preparation already initializes `device/`; do not i
 
 **Do this:** Run and inspect these one at a time; save their outputs under `evidence/`:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python fw1/device.py --workdir device read --field identity
@@ -72,7 +72,7 @@ python fw1/device.py --workdir device read --field config
 
 **Do this:** Run each operation and retain its complete output:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python fw1/device.py --workdir device read --field faults
@@ -90,7 +90,7 @@ Explain what each result adds to the diagnosis.
 
 **Do this:** Inspect the reference:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m json.tool fw1/expected.json
@@ -106,7 +106,7 @@ Select its entry using the observed device identity. Ask the agent to save the o
 
 **Do this:** Inspect help, then confirm the target from your reference before running the write:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python fw1/device.py --workdir device set --help
@@ -123,7 +123,7 @@ Save the mutation response. `19200` is the supplied demo’s value, not a univer
 
 **Do this:** Read configuration, faults and probe again, then inspect logs:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python fw1/device.py --workdir device read --field config
@@ -148,7 +148,7 @@ Save separate after-files; keep the originals.
 
 ## 8. Generalize the instructions — Stage 2
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Replace example-specific details with inputs: tool/state/reference paths, observed identity and evidence destination; derive required baud from the matching reference. Define input sources, validation and missing-input behavior. Keep genuine engineering rules. Save `workflow.md` and an identical `workflow-md-only.md` checkpoint.
 
@@ -158,7 +158,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 9. Decide what becomes code — Stage 3
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Write `extraction-map.md`: each operation’s purpose, inputs, output, failure condition and owner (code, model or human). Consider automating: capture state, validate completeness, match reference, require a current same-device baseline before one allowed change, capture after-state and compare recovery. Do not implement yet.
 
@@ -168,7 +168,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 10. Implement and test — Stage 4
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Implement the agreed helpers under `automation/`. Use readable functions, engineering explanations, actual-result logs and meaningful failure statuses. Test: valid capture; missing state; failed required read or evidence save; unknown identity; absent/stale baseline; one-change recovery; repeat execution preserving the original records. Use disposable fixtures under `automation/tests/`. Update `workflow.md` and document exact commands in `automation/README.md`. Keep the Markdown checkpoint and original evidence unchanged.
 
@@ -185,31 +185,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 transfer --name fw1-transfer-md
-docker compose exec --workdir /workspace/work/fw1-transfer-md training bash
+abb doctor --offline
+abb prepare fw1 transfer --name fw1-transfer-md
+abb shell --workspace work/fw1-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-transfer-md
+# Expected: work/fw1-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 transfer --name fw1-transfer-code
-docker compose exec --workdir /workspace/work/fw1-transfer-code training bash
+abb doctor --offline
+abb prepare fw1 transfer --name fw1-transfer-code
+abb shell --workspace work/fw1-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-transfer-code
+# Expected: work/fw1-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.

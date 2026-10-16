@@ -4,9 +4,9 @@ You will expose a misleading green smoke test, strengthen its assertions and bui
 
 ## Before you begin
 
-Use the Docker package and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. The image supplies all language, compiler, browser and agent tools. Record the same selected agent/model throughout.
+Follow the [virtual environment setup](../README.md) and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. Activate `.venv` before running commands. Record the same selected agent/model throughout.
 
-Host commands run in the unpacked package folder. Commands marked Inside the container run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
+Host commands run in the unpacked package folder. Commands marked Inside the workspace run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
 
 Extend `pages/settings_page.py`, `tests/test_settings.py` and your learning artifacts. Keep the app, BasePage, fixtures, case and requirements unchanged. Read requirements to establish expected results; do not inspect the server’s fault-switch implementation for answers.
 
@@ -18,28 +18,28 @@ Expected results below describe the supplied examples. Save actual output; if it
 
 ## 1. Prepare and run the weak starting suite
 
-**Do this:** Use Terminal A in the container as shown below:
+**Do this:** Use Terminal A in the workspace as shown below:
 
 **Host terminal** — in the unpacked package folder; fresh T2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 demo
-docker compose exec --workdir /workspace/work/t2-demo training bash
+abb doctor --offline
+abb prepare t2 demo
+abb shell --workspace work/t2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-demo
+# Expected: work/t2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+**Inside the workspace — Terminal A**: start only this workspace's server and leave it running.
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -48,14 +48,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**, opened separately in the same package folder:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-demo training bash
+abb shell --workspace work/t2-demo
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-demo
+# Expected: work/t2-demo
 ```
 
 Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
@@ -63,7 +63,7 @@ Run the bootstrap/tests from Terminal B. Both terminals enter the same `training
 
 In terminal B, repeat the host-side entry command into this same service and workspace:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m pytest browser_preflight.py -q
@@ -80,7 +80,7 @@ Read `REQUIREMENTS.md` and the existing smoke test.
 
 **Do this:** Stop your server in terminal A with Ctrl-C. Only after it stops, run:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -c "from pathlib import Path; Path('state.json').unlink(missing_ok=True)"
@@ -89,7 +89,7 @@ python server.py --variant no-persist --port 8765 --state state.json
 
 In terminal B, rerun the unchanged test:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m pytest tests -q
@@ -120,7 +120,7 @@ Use the same assertions on every variant; do not branch expected results on the 
 
 **Do this:** Run the strengthened suite against the running no-persist app:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m pytest tests -q -ra --junitxml=evidence/no-persist.xml
@@ -128,7 +128,7 @@ python -m pytest tests -q -ra --junitxml=evidence/no-persist.xml
 
 Expect relevant persistence assertions to fail. Stop your server, reset only its state as in step 2, then launch:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -136,7 +136,7 @@ python server.py --variant correct --port 8765 --state state.json
 
 Run the identical strengthened suite:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m pytest tests -q -ra --junitxml=evidence/correct.xml
@@ -156,7 +156,7 @@ python -m pytest tests -q -ra --junitxml=evidence/correct.xml
 
 ## 6. Generalize the instructions — Stage 2
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Replace example-specific details with inputs: test workspace, server command/variant, port, owned state path, current case and evidence destination. Define input sources, validation and missing-input behavior. Keep genuine engineering rules. Save `workflow.md` and an identical `workflow-md-only.md` checkpoint.
 
@@ -166,7 +166,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 7. Decide what becomes code — Stage 3
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Write `extraction-map.md`: each operation’s purpose, inputs, output, failure condition and owner (code, model or human). Consider automating: start owned servers serially, poll readiness, run the unchanged suite, retain stdout/JUnit, compare expected outcomes and stop only owned child processes. Do not implement yet.
 
@@ -176,7 +176,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 8. Implement and test — Stage 4
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Implement the agreed helpers under `automation/`. Use readable functions, engineering explanations, actual-result logs and meaningful failure statuses. Test: correct app passing; no-persist failing a save_reload assertion; bad-boundary failing a port_boundary assertion; required skips rejected; occupied port/failed startup reported as infrastructure failure; genuine test exits preserved. Use disposable fixtures under `automation/tests/`. Update `workflow.md` and document exact commands in `automation/README.md`. Keep the Markdown checkpoint and original evidence unchanged.
 
@@ -193,19 +193,19 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 transfer --name t2-transfer-md
-docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+abb doctor --offline
+abb prepare t2 transfer --name t2-transfer-md
+abb shell --workspace work/t2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-md
+# Expected: work/t2-transfer-md
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -214,14 +214,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+abb shell --workspace work/t2-transfer-md
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-md
+# Expected: work/t2-transfer-md
 python -m pytest browser_preflight.py -q
 ```
 
@@ -230,19 +230,19 @@ Run this transfer's tests in Terminal B. Stop this Terminal A server before the 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 transfer --name t2-transfer-code
-docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+abb doctor --offline
+abb prepare t2 transfer --name t2-transfer-code
+abb shell --workspace work/t2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-code
+# Expected: work/t2-transfer-code
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -251,14 +251,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+abb shell --workspace work/t2-transfer-code
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-code
+# Expected: work/t2-transfer-code
 python -m pytest browser_preflight.py -q
 ```
 

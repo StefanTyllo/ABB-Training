@@ -2,7 +2,6 @@
   "browser": {
     "browserName": "chromium",
     "launchOptions": {
-      "executablePath": "/opt/abb/browser/chrome-linux64/chrome",
       "headless": true,
       "chromiumSandbox": true
     }

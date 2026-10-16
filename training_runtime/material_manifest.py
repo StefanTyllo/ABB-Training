@@ -1,4 +1,4 @@
-"""One clean-material allowlist for image layers, distributions and PDF starters."""
+"""One clean-material allowlist for virtual environments, distributions and PDF starters."""
 from pathlib import Path
 import shutil
 import sys

@@ -1,4 +1,4 @@
-"""Render the current Markdown and attach the same clean Docker starter context."""
+"""Render the current Markdown and attach the same clean virtual environment starter context."""
 import argparse
 import hashlib
 import json
@@ -44,8 +44,8 @@ def build_handbook(source: Path, output: Path, materials: Path) -> dict:
         writer = PdfWriter()
         for page in reader.pages:
             writer.add_page(page)
-        writer.add_metadata({'/Title':'ABB workflow training — Docker edition',
-                             '/Subject':'Linux amd64; live account acceptance is recorded separately',
+        writer.add_metadata({'/Title':'ABB workflow training — virtual environment edition',
+                             '/Subject':'Local Python virtual environment; live account acceptance is recorded separately',
                              '/TrainingSourceSHA256':source_hash,
                              '/TrainingStartersSHA256':starter_hash})
         writer.add_attachment('ABB_Workflow_Training_Starters.zip', starter)

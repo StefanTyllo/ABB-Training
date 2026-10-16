@@ -1,4 +1,4 @@
-"""Build sanitized, reproducible Docker distributions from audience allowlists."""
+"""Build sanitized, reproducible virtual environment distributions from audience allowlists."""
 import argparse
 import hashlib
 import io
@@ -6,14 +6,13 @@ import json
 from pathlib import Path
 import zipfile
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"docker"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"training_runtime"))
 from material_manifest import clean_material_files
 
 LABS = ['FW1', 'FW2', 'HW1', 'HW2', 'T1', 'T2']
-RUNTIME_FILES = ['abb', 'launcher.py', 'doctor.py', 'export.py', 'auth.py', 'ci.py',
-                 'download.py', 'collect.py', 'material_manifest.py', 'runtime.lock.json', 'requirements.in', 'requirements.lock',
-                 'os-packages.lock', 'package.json', 'package-lock.json', 'seccomp.json',
-                 'playwright.json', 'codex.toml', 'copilot-mcp.json']
+RUNTIME_FILES = ['__init__.py', '__main__.py', 'paths.py', 'launcher.py', 'doctor.py',
+                 'export.py', 'auth.py', 'ci.py', 'collect.py', 'material_manifest.py',
+                 'package.json', 'package-lock.json', 'playwright.json', 'codex.toml', 'copilot-mcp.json']
 EXCLUDED_PARTS = {'.git', '.superpowers', '.auth', '.codex', '.copilot', '.venv',
                   '__pycache__', '.pytest_cache', 'node_modules', '.cache'}
 
@@ -32,22 +31,20 @@ def selected_files(source: Path, audience: str, include_pdf: bool = True) -> dic
     source = source.resolve(strict=True)
     if audience not in {'learner', 'facilitator'}:
         raise ValueError('Unknown audience')
-    required = ['Dockerfile', '.dockerignore', '.gitattributes', 'README.md',
-                'compose.learner.yaml', 'compose.preview.yaml', 'COPILOT_ACTIONS_GUIDE.md']
-    required += ['docker/'+name for name in RUNTIME_FILES]
+    required = ['pyproject.toml', 'setup_env.py', 'requirements.txt', 'requirements.lock',
+                '.gitattributes', '.gitignore', 'README.md', 'COPILOT_ACTIONS_GUIDE.md']
+    required += ['training_runtime/'+name for name in RUNTIME_FILES]
     required += [f'docs/{lab}_STUDENT_GUIDE.md' for lab in LABS]
     required += [f'docs/{track}_TEAM_WALKTHROUGH.md' for track in ['FIRMWARE','HARDWARE','TEST']]
     if include_pdf:
         required += ['docs/ABB_Workflow_Training.pdf']
-    if audience == 'facilitator':
-        required += ['compose.yaml', 'compose.auth.yaml']
     files = {}
     for relative in required:
         path = source/relative
         if not safe(path, source):
             raise ValueError('Required safe package input is missing: '+relative)
         files[relative] = path.read_bytes()
-    for relative in ['docs/validation/docker-training.md']:
+    for relative in ['docs/validation/virtual-environment.md']:
         if include_pdf and safe(source/relative, source):
             files[relative] = (source/relative).read_bytes()
     material_root = source/'training_kit'
@@ -55,11 +52,9 @@ def selected_files(source: Path, audience: str, include_pdf: bool = True) -> dic
     for path in paths:
         if safe(path, source):
             files[path.relative_to(source).as_posix()] = path.read_bytes()
-    if audience == 'learner':
-        files['compose.yaml'] = files['compose.learner.yaml']
-    else:
+    if audience == 'facilitator':
         for directory in ['training_ci', 'training_author', 'validation_browser', 'validation_replay',
-                          'validation_t1_package', 'validation_t2_package', 'tests/container', '.github/workflows']:
+                          'validation_t1_package', 'validation_t2_package', 'tests/runtime', '.github/workflows']:
             for path in (source/directory).rglob('*'):
                 if safe(path, source):
                     files[path.relative_to(source).as_posix()] = path.read_bytes()
@@ -71,7 +66,7 @@ def manifest(files: dict[str, bytes], audience: str) -> dict:
     revision = hashlib.sha256(json.dumps(hashes, sort_keys=True).encode()).hexdigest()
     return {'format_version': 1, 'audience': audience, 'revision': revision,
             'source_identity': 'content-sha256:'+revision,
-            'runtime': json.loads(files['docker/runtime.lock.json']), 'files': hashes}
+            'runtime': {'python': '>=3.11', 'dependencies': 'requirements.lock', 'environment': '.venv'}, 'files': hashes}
 
 
 def archive_bytes(files: dict[str, bytes], metadata: dict) -> bytes:
@@ -82,7 +77,7 @@ def archive_bytes(files: dict[str, bytes], metadata: dict) -> bytes:
         for name, data in sorted(payload.items()):
             entry = zipfile.ZipInfo(name, date_time=(2026, 10, 15, 0, 0, 0))
             entry.compress_type = zipfile.ZIP_DEFLATED
-            entry.external_attr = (0o100755 if name.endswith('.sh') or name == 'docker/abb' else 0o100644) << 16
+            entry.external_attr = (0o100755 if name.endswith('.sh') else 0o100644) << 16
             archive.writestr(entry, data)
     return output.getvalue()
 

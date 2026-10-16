@@ -16,7 +16,7 @@ def main():
         parser.error(f"output already exists; choose a fresh directory: {args.output}")
     source = root / "fixtures" / args.lab / args.case
     shutil.copytree(source, args.output)
-    # Copies belong to the learner; image-owned source stays read-only.
+    # Copies belong to the learner; original starter files remain in training_kit/.
     for copied in [args.output, *args.output.rglob("*")]:
         if not copied.is_symlink():
             copied.chmod(copied.stat().st_mode | 0o200)

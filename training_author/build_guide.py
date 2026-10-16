@@ -1,4 +1,4 @@
-"""Author entry point for the locked Docker handbook renderer."""
+"""Author entry point for the locked virtual environment handbook renderer."""
 import argparse
 from pathlib import Path
 from build_handbook import build_handbook

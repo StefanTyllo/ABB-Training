@@ -13,7 +13,7 @@ if args.output.exists():
     parser.error("Output already exists; choose a fresh directory")
 root = Path(__file__).resolve().parent
 shutil.copytree(root / "scaffold", args.output, ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache"))
-# Copies belong to the learner; image-owned source stays read-only.
+# Copies belong to the learner; original starter files remain in training_kit/.
 for copied in [args.output, *args.output.rglob("*")]:
     if not copied.is_symlink():
         copied.chmod(copied.stat().st_mode | 0o200)

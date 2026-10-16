@@ -1,8 +1,10 @@
-import { chromium } from '/opt/abb/node/node_modules/playwright/index.mjs';
+import { chromium } from '../training_runtime/node_modules/playwright/index.mjs';
 import { pathToFileURL } from 'node:url';
+import { readFile } from 'node:fs/promises';
+const browserConfig = await readFile(new URL('../.venv/browser.json', import.meta.url), 'utf8').then(JSON.parse).catch(() => ({}));
 const [input, output] = process.argv.slice(2);
 if (!input || !output) throw Error('Expected HTML input and PDF output paths');
-const browser = await chromium.launch({ executablePath: process.env.CHROME_BINARY,
+const browser = await chromium.launch({ executablePath: process.env.CHROME_BINARY || browserConfig.executablePath,
                                         headless: true, chromiumSandbox: true });
 try {
   const page = await browser.newPage();
