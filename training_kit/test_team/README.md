@@ -14,7 +14,7 @@ Editable files: `pages/settings_page.py`, `tests/test_settings.py`, `evidence/se
 
 From the prepared workspace, stop terminal A's server with Ctrl-C before clearing state or selecting a variant:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -c "from pathlib import Path; Path('state.json').unlink(missing_ok=True)"
@@ -27,11 +27,11 @@ For a separate port, start `python server.py --variant correct --port 8766 --sta
 
 ## Verification boundary
 
-The facilitator image provides `python /opt/abb/repo/training_kit/test_team/author_checks/check_server.py` through a separate Docker invocation; it checks real HTTP contracts using stdlib only. It does not verify browser rendering or Selenium waits. See `VERIFICATION.md` for measured results. The initial author browser could not start; the subsequent GitHub Actions rehearsals used real Chrome successfully. Passing the supplied preflight on each teaching machine remains required. See VERIFICATION.md for run links and the exact scope.
+The facilitator image provides `python training_kit/test_team/author_checks/check_server.py` through a separate Docker invocation; it checks real HTTP contracts using stdlib only. It does not verify browser rendering or Selenium waits. See `VERIFICATION.md` for measured results. The initial author browser could not start; the subsequent GitHub Actions rehearsals used real Chrome successfully. Passing the supplied preflight on each teaching machine remains required. See VERIFICATION.md for run links and the exact scope.
 
 ## Container workspaces
 
-Use these commands from the unpacked Docker package folder. Provider login is separate; retain the chosen provider/model. Fresh transfers are performed only after Stage 4.
+Use these commands from the unpacked package folder with `.venv` activated. Provider login is separate; retain the chosen provider/model. Fresh transfers are performed only after Stage 4.
 
 
 ### T1
@@ -39,23 +39,23 @@ Use these commands from the unpacked Docker package folder. Provider login is se
 **Host terminal** — in the unpacked package folder; fresh T1 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t1 demo
-docker compose exec --workdir /workspace/work/t1-demo training bash
+abb doctor --offline
+abb prepare t1 demo
+abb shell --workspace work/t1-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-demo
+# Expected: work/t1-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+**Inside the workspace — Terminal A**: start only this workspace's server and leave it running.
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -64,14 +64,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**, opened separately in the same package folder:
 
 ```text
-docker compose exec --workdir /workspace/work/t1-demo training bash
+abb shell --workspace work/t1-demo
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-demo
+# Expected: work/t1-demo
 ```
 
 Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
@@ -81,19 +81,19 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t1 transfer --name t1-transfer-md
-docker compose exec --workdir /workspace/work/t1-transfer-md training bash
+abb doctor --offline
+abb prepare t1 transfer --name t1-transfer-md
+abb shell --workspace work/t1-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-md
+# Expected: work/t1-transfer-md
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -102,14 +102,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t1-transfer-md training bash
+abb shell --workspace work/t1-transfer-md
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-md
+# Expected: work/t1-transfer-md
 python -m pytest browser_preflight.py -q
 ```
 
@@ -118,19 +118,19 @@ Run this transfer's tests in Terminal B. Stop this Terminal A server before the 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t1 transfer --name t1-transfer-code
-docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+abb doctor --offline
+abb prepare t1 transfer --name t1-transfer-code
+abb shell --workspace work/t1-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-code
+# Expected: work/t1-transfer-code
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -139,14 +139,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+abb shell --workspace work/t1-transfer-code
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-code
+# Expected: work/t1-transfer-code
 python -m pytest browser_preflight.py -q
 ```
 
@@ -159,23 +159,23 @@ To resume either transfer, repeat its host-side entry command without `abb prepa
 **Host terminal** — in the unpacked package folder; fresh T2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 demo
-docker compose exec --workdir /workspace/work/t2-demo training bash
+abb doctor --offline
+abb prepare t2 demo
+abb shell --workspace work/t2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-demo
+# Expected: work/t2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+**Inside the workspace — Terminal A**: start only this workspace's server and leave it running.
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -184,14 +184,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**, opened separately in the same package folder:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-demo training bash
+abb shell --workspace work/t2-demo
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-demo
+# Expected: work/t2-demo
 ```
 
 Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
@@ -201,19 +201,19 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 transfer --name t2-transfer-md
-docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+abb doctor --offline
+abb prepare t2 transfer --name t2-transfer-md
+abb shell --workspace work/t2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-md
+# Expected: work/t2-transfer-md
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -222,14 +222,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+abb shell --workspace work/t2-transfer-md
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-md
+# Expected: work/t2-transfer-md
 python -m pytest browser_preflight.py -q
 ```
 
@@ -238,19 +238,19 @@ Run this transfer's tests in Terminal B. Stop this Terminal A server before the 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 transfer --name t2-transfer-code
-docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+abb doctor --offline
+abb prepare t2 transfer --name t2-transfer-code
+abb shell --workspace work/t2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-code
+# Expected: work/t2-transfer-code
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -259,14 +259,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+abb shell --workspace work/t2-transfer-code
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-code
+# Expected: work/t2-transfer-code
 python -m pytest browser_preflight.py -q
 ```
 

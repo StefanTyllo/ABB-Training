@@ -7,23 +7,23 @@
 **Host terminal** — in the unpacked package folder; fresh HW2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 demo
-docker compose exec --workdir /workspace/work/hw2-demo training bash
+abb doctor --offline
+abb prepare hw2 demo
+abb shell --workspace work/hw2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-demo
+# Expected: work/hw2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m json.tool source/circuit.json
@@ -48,7 +48,7 @@ Calculate one quantity at a time in the terminal, explaining the equation before
 | ADC margin | ADC limit minus maximum ADC voltage |
 
 Explain why upper-resistor minimum and lower-resistor maximum maximize output. Compare the existing coefficient and provenance with current inputs. Then invoke the existing generator:
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python tools/generate_calibration.py --config source/circuit.json \
@@ -59,7 +59,7 @@ python tools/generate_calibration.py --config source/circuit.json \
 
 # HW2 Extract calculations and freshness checks
 
-Stay in the existing /workspace/work/hw2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/hw2-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -86,31 +86,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 transfer --name hw2-transfer-md
-docker compose exec --workdir /workspace/work/hw2-transfer-md training bash
+abb doctor --offline
+abb prepare hw2 transfer --name hw2-transfer-md
+abb shell --workspace work/hw2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-transfer-md
+# Expected: work/hw2-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 transfer --name hw2-transfer-code
-docker compose exec --workdir /workspace/work/hw2-transfer-code training bash
+abb doctor --offline
+abb prepare hw2 transfer --name hw2-transfer-code
+abb shell --workspace work/hw2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-transfer-code
+# Expected: work/hw2-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
@@ -121,7 +121,7 @@ The upper resistor changes. Use current inputs for every calculation. Correct tr
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw2 --case demo --workspace /workspace/work/hw2-demo
+python training_kit/hardware/instructor/check.py --lab hw2 --case demo --workspace work/hw2-demo
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.

@@ -1,6 +1,6 @@
 # From demonstrated work to executable workflows
 ## ABB engineering training guide
-Firmware, hardware, and test teams | 15 October 2026 | Docker edition
+Firmware, hardware, and test teams | 15 October 2026 | virtual environment edition
 
 **Outcome.** Complete a real task with a coding agent, explain your decisions, extract a reusable Markdown workflow, and implement its repeatable activities as clear deterministic code. Prove that the extracted workflow works on a fresh case.
 
@@ -10,13 +10,13 @@ Firmware, hardware, and test teams | 15 October 2026 | Docker edition
 3. Identify operations that do not need an LLM and can become deterministic code.
 4. Ask GitHub Copilot CLI to implement highly verbose, readable code for those operations; verify it and update the workflow.
 
-**What is included.** Six lab guides, shared prompts, in-container Copilot CLI and Codex setup, containerized CI and labeled historical Actions results, an assessment rubric, and an embedded ZIP containing runnable synthetic starters. Starter tools provide basic access to data and systems. Participants create the reusable workflow automation during the labs.
+**What is included.** Six lab guides, shared prompts, local Copilot CLI and Codex setup, virtual environment CI and labeled historical Actions results, an assessment rubric, and an embedded ZIP containing runnable synthetic starters. Starter tools provide basic access to data and systems. Participants create the reusable workflow automation during the labs.
 
-**Scope.** These exercises use synthetic devices, board data, and a local WebUI. No ABB production repository, device, Azure DevOps project, or proprietary document is required. Firmware lab 2 runs C inside the container; hardware calculations use an explicitly idealized circuit; browser labs use Selenium against an actual local application.
+**Scope.** These exercises use synthetic devices, board data, and a local WebUI. No ABB production repository, device, Azure DevOps project, or proprietary document is required. Firmware lab 2 runs C with the host compiler; hardware calculations use an explicitly idealized circuit; browser labs use Selenium against an actual local application.
 
 **Acceptance status.** Technical and editorial checks are recorded at the end of this guide. Live Copilot Actions results are recorded in the release record. Local Copilot access and a facilitated learner pilot remain separate checks. The readiness gates make those requirements explicit; this document does not claim an unperformed classroom acceptance.
 
-Start with the route on page 2. Unpack the Docker distribution or the starter attachment, then pass the readiness gate.
+Start with the route on page 2. Unpack the learner distribution or the starter attachment, then pass the readiness gate.
 <!-- PAGE -->
 # 1 Training route and responsibilities
 
@@ -44,78 +44,62 @@ Start with the route on page 2. Unpack the Docker distribution or the starter at
 | Fresh-case replay and debrief | 30 |
 | Total | 245 |
 
-These are facilitation budgets, not measured completion times. Build the locked image and rehearse the browser before the session. If a stage reaches its budget, record the unfinished requirement; do not skip verification to obtain a pass.
+These are facilitation budgets, not measured completion times. Set up the virtual environment and rehearse the browser before the session. If a stage reaches its budget, record the unfinished requirement; do not skip verification to obtain a pass.
 
 **Agent choice.** Use GitHub Copilot CLI for guided work, workflow extraction and code generation. Keep the selected Copilot model consistent through all four stages and both replay conditions, and record it with the CLI version. A change of agent/model is a separate intervention, not an effect of adding deterministic code.
 <!-- PAGE -->
-# 2 Obtain and start the Docker package
+# 2 Set up the Python virtual environment
 
-Save this handbook and unpack the supplied learner distribution into a folder of your choice. The PDF also contains exactly one attachment, **ABB_Workflow_Training_Starters.zip**: extract it with a desktop PDF reader's Attachments panel if you need the clean Docker starter context. Browser previews may hide attachments. The standalone distribution additionally includes this PDF and its release manifest.
+Unpack the learner distribution or the handbook's **ABB_Workflow_Training_Starters.zip** attachment. Install Python 3.11+ with venv/pip and Git. FW2 needs GCC (use WSL on Windows). Browser labs need Chrome/Chromium and a Selenium driver, which Selenium Manager can download. Install Node.js 22+ with npm for the agents and Playwright browser tools.
 
-Host requirements are Docker Engine/Desktop with Linux containers, Compose v2 or newer, network access for the build and approved accounts. Windows PowerShell and Linux host terminals use the same basic Docker commands. The initial image targets linux/amd64; ARM and Windows Docker Desktop require their own acceptance evidence.
+**Host terminal** — Bash, in the package folder:
 
-**Host terminal** — in the unpacked folder containing `Dockerfile` and `compose.yaml`:
-
-```text
-docker compose build training
-docker compose up -d training
-docker compose exec training abb doctor --offline
+```bash
+python3 setup_env.py --agents
+source .venv/bin/activate
+abb doctor --offline
 ```
 
-Python, Node, GCC, browsers, drivers and both CLIs are installed in the image from locked dependencies. The shell starts at `/workspace`; `materials/` points to read-only clean sources. Prepared work lives under `/workspace/work`, run evidence under `/workspace/runs`, and exports under `/workspace/export`.
+**Host terminal** — Windows PowerShell:
 
-Named volumes survive normal stop/start and rebuild. Each fresh preparation refuses an existing name. Resume existing work by re-entering its exact directory; do not prepare it again. The six exercise cards show their own entry commands.
+```powershell
+py -3 setup_env.py --agents
+. .\.venv\Scripts\Activate.ps1
+abb doctor --offline
+```
+
+See README for host browser libraries and activation alternatives. Work lives under `work/`, run evidence under `runs/`, exports under `export/`. Activate the environment in every new terminal. Preparation refuses existing names; re-enter an existing workspace to resume.
 <!-- PAGE -->
 # 3 Authenticate and verify the coding agents
 
-**Host terminal**, in the package folder:
+**Host terminal**, in the package folder with `.venv` activated:
 
 ```text
-docker compose exec -it training abb login codex
-docker compose exec -it training abb login copilot
+abb login codex
+abb login copilot
+abb prepare fw1 demo --name agent-smoke
+abb agent codex --workspace work/agent-smoke
 ```
 
-Complete each provider's displayed device-code flow with the intended approved account. Its own authentication volume persists separately. Accounts, model entitlement and organization CLI policy remain required. Do not place credentials in prompts, source, reports or exported work. Only authenticate again when the selected provider requires it.
-
-**Host terminal** — prepare a disposable smoke workspace and start one selected agent:
-
-```text
-docker compose exec training abb prepare fw1 demo --name agent-smoke
-docker compose exec -it training abb agent codex --workspace work/agent-smoke
-```
-
-Ask it to run `pwd` and `git status --short`, explain the actual output and change no files. Inspect the real tool event and any normal approval request. Codex requests `gpt-6.1-sol` with medium reasoning; unavailable model access is BLOCKED. Exit and run the corresponding Copilot smoke in the same workspace using `abb agent copilot --workspace work/agent-smoke` through `docker compose exec -it training`.
+Complete the device flow with the approved account. Credentials persist in ignored `.auth/` provider directories. Ask the agent to run `pwd` and `git status --short`, explain actual output and change no files. Review normal approvals and perform the corresponding Copilot smoke. Login alone does not prove model access. Keep the same provider/model across the lab and transfers.
 
 **Focused context.** Deliver the current stage and named inputs while retaining the full task card and acceptance contracts as authority. Scripted CI saves exact prompt/context snapshots and delivery hashes, uses an ephemeral Copilot profile, disables personal custom instructions and skill retrieval, and supplies explicit browser MCP configuration. Classroom work keeps normal approvals and pauses for participant explanation.
-
-Record CLI versions, the chosen lab provider/model, image identity where available, workspace and actual command evidence. Login and version commands alone do not prove account or tool readiness. Preserve the selected agent/model across all four teaching stages and both transfers.
 <!-- PAGE -->
-# 4 Pass readiness, stop, resume and export
+# 4 Pass readiness, resume and export
 
-**Host terminal**:
+`abb doctor --offline` checks the active virtual environment, dependencies, available host tools, compilation and clean preparation. Missing tools are BLOCKED; browser execution and accounts are UNTESTED until exercised. Run a T1/T2 browser preflight with its server running and make a real harmless provider tool call before marking those capabilities ready.
 
-```text
-docker compose exec training abb doctor --offline
-docker compose stop training
-docker compose up -d training
-```
+Each exercise supplies `abb shell --workspace work/NAME`. Run `pwd` (PowerShell: `Get-Location`) before its commands. `exit` returns to the package folder and preserves work. Reopening a terminal means activating `.venv` and repeating that exercise's entry; preparation is only for fresh work.
 
-The offline doctor checks non-root execution, locked tool versions, GCC execution, clean preparation, the normal Codex sandbox and actual sandboxed Selenium/Playwright browsers. It reports accounts as UNTESTED. Readiness requires both this tool evidence and the separate real provider smoke tests. `abb doctor` without `--offline` leaves unverified account access BLOCKED.
+For T1/T2, Terminal A runs `python server.py`; Terminal B activates the same environment and enters the same workspace for tests. Preview at `http://127.0.0.1:8765`. Stop your server with Ctrl-C before changing workspaces.
 
-Every exercise supplies its exact `docker compose exec --workdir ... training bash` entry. Run `pwd` before its commands. `exit` returns to the host without deleting work. Reopening a terminal means returning to the package folder and repeating that exercise's entry; preparation is only for a fresh workspace.
-
-For T1/T2, Terminal A runs the local server and Terminal B enters the same service and directory before bootstrap/tests. Stop only your Terminal A server with Ctrl-C before changing the workspace that owns port 8765. Optional host-browser preview uses the loopback-only override documented in README; ordinary exercises publish no ports.
-
-**Host terminal** — create a fresh sanitized submission export:
+**Host terminal** — create a fresh submission export:
 
 ```text
-docker compose exec training abb export --output /workspace/export/submission.zip
-docker compose cp training:/workspace/export/submission.zip ./submission.zip
+abb export --output export/submission.zip
 ```
 
-Exports exclude `.env`, `.auth`, provider stores, Git metadata and caches. Inspect code and evidence before submission. Keep FAIL and BLOCKED results meaningful: an intentional starter defect, a missing authority, unavailable account access and a failed browser launch are different findings.
-
-If the container is stopped, start it. If `pwd` is wrong, exit and repeat the stated entry command. If a sandbox or browser fails, retain its actual diagnostic and resolve host policy with the facilitator; readiness has not passed.
+Exports exclude `.env`, `.auth`, provider stores, Git metadata and caches. Inspect code and evidence before submission. Keep FAIL and BLOCKED results meaningful: a starter defect, missing authority, unavailable account and failed browser launch are distinct findings. If a directory is wrong, exit and repeat its workspace entry command.
 <!-- PAGE -->
 # 5 The four-stage method
 
@@ -207,21 +191,21 @@ Do this after completing the two labs for your team. The facilitator selects at 
 **Host terminal** — in the unpacked package folder; fresh FW1 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 demo
-docker compose exec --workdir /workspace/work/fw1-demo training bash
+abb doctor --offline
+abb prepare fw1 demo
+abb shell --workspace work/fw1-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-demo
+# Expected: work/fw1-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
 Read `requirements.md`. Start the agent here and use the Stage 1 start prompt. The state is already initialized under `device/`. Reinitialization is unnecessary and refuses existing state.
 
@@ -229,7 +213,7 @@ Read `requirements.md`. Start the agent here and use the Stage 1 start prompt. T
 
 ## Stage 1 Guided operations
 Run these one at a time, explaining the question each answers:
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python fw1/device.py --workdir device read --field identity
@@ -254,7 +238,7 @@ Use the tool's help to construct a single `set --parameter baud --value` operati
 <!-- PAGE -->
 # FW1 Extract the reusable operations
 
-Stay in the existing /workspace/work/fw1-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/fw1-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -282,31 +266,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 transfer --name fw1-transfer-md
-docker compose exec --workdir /workspace/work/fw1-transfer-md training bash
+abb doctor --offline
+abb prepare fw1 transfer --name fw1-transfer-md
+abb shell --workspace work/fw1-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-transfer-md
+# Expected: work/fw1-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 transfer --name fw1-transfer-code
-docker compose exec --workdir /workspace/work/fw1-transfer-code training bash
+abb doctor --offline
+abb prepare fw1 transfer --name fw1-transfer-code
+abb shell --workspace work/fw1-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-transfer-code
+# Expected: work/fw1-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
@@ -325,28 +309,28 @@ Use the shared replay procedure. The transfer has a different identity and requi
 **Host terminal** — in the unpacked package folder; fresh FW2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 demo
-docker compose exec --workdir /workspace/work/fw2-demo training bash
+abb doctor --offline
+abb prepare fw2 demo
+abb shell --workspace work/fw2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-demo
+# Expected: work/fw2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
 Read `requirements.md` before editing. A packet is `A5 02 sequence low high checksum`; the value is signed 16-bit little-endian and checksum is XOR of the first five bytes. Each CLI argument is one receive chunk in the same stream. The complete contract defines noise, invalid length, checksum failure, and resynchronization. There is no timeout requirement in this fixture.
 
 **Allowed changes:** `fw2/parser.c`, plus common workflow/automation/evidence files. Preserve `parser.h`, `main.c`, and the specification. The compiled `fw2/parser` is a generated artifact.
 
 ## Stage 1 Guided operations
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 gcc -std=c11 -Wall -Wextra -Werror \
@@ -369,7 +353,7 @@ Make a focused repair. Rebuild and repeat the same reproductions. Then run a pos
 <!-- PAGE -->
 # FW2 Extract build and replay tooling
 
-Stay in the existing /workspace/work/fw2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/fw2-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -396,37 +380,37 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 transfer --name fw2-transfer-md
-docker compose exec --workdir /workspace/work/fw2-transfer-md training bash
+abb doctor --offline
+abb prepare fw2 transfer --name fw2-transfer-md
+abb shell --workspace work/fw2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-transfer-md
+# Expected: work/fw2-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 transfer --name fw2-transfer-code
-docker compose exec --workdir /workspace/work/fw2-transfer-code training bash
+abb doctor --offline
+abb prepare fw2 transfer --name fw2-transfer-code
+abb shell --workspace work/fw2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-transfer-code
+# Expected: work/fw2-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
 
 The fresh starters retain the defects. Use this new reproduction after building:
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 ./fw2/parser a502 2a00 f875
@@ -437,7 +421,7 @@ Expected result: sequence 42, value -2048. Transfer the workflow and helpers, no
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/firmware/instructor/smoke.py /workspace/work/fw2-demo/fw2/parser
+python training_kit/firmware/instructor/smoke.py work/fw2-demo/fw2/parser
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
@@ -452,28 +436,28 @@ Use the transfer executable path for a transfer submission. The checker evaluate
 **Host terminal** — in the unpacked package folder; fresh HW1 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw1 demo
-docker compose exec --workdir /workspace/work/hw1-demo training bash
+abb doctor --offline
+abb prepare hw1 demo
+abb shell --workspace work/hw1-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw1-demo
+# Expected: work/hw1-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
 **Inputs:** `source/approval.json` declares the expected board/revision; `source/bom.csv` is authoritative for component identity and value; `source/schematic.json` is authoritative for pin-to-net mapping and corroborates values. `derived/netlist.json` is an output to review, not an authority. Required source provenance must be present and consistent.
 
 **Allowed changes:** `derived/netlist.json`, `report.json`, and common workflow/automation/evidence files. Preserve source files and any supplied tools. Use the report contract in `REPORT_CONTRACT.md` supplied in the prepared workspace.
 
 ## Stage 1 Guided operations
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m json.tool source/approval.json
@@ -496,7 +480,7 @@ Correct only demonstrable export errors. Re-read the result and create report.js
 <!-- PAGE -->
 # HW1 Extract source and consistency checks
 
-Stay in the existing /workspace/work/hw1-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/hw1-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -523,31 +507,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw1 transfer --name hw1-transfer-md
-docker compose exec --workdir /workspace/work/hw1-transfer-md training bash
+abb doctor --offline
+abb prepare hw1 transfer --name hw1-transfer-md
+abb shell --workspace work/hw1-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw1-transfer-md
+# Expected: work/hw1-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw1 transfer --name hw1-transfer-code
-docker compose exec --workdir /workspace/work/hw1-transfer-code training bash
+abb doctor --offline
+abb prepare hw1 transfer --name hw1-transfer-code
+abb shell --workspace work/hw1-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw1-transfer-code
+# Expected: work/hw1-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
@@ -558,7 +542,7 @@ The package changes board identity, component references/order, and omits one so
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw1 --case demo --workspace /workspace/work/hw1-demo
+python training_kit/hardware/instructor/check.py --lab hw1 --case demo --workspace work/hw1-demo
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
@@ -575,23 +559,23 @@ For transfer, change the case and workspace arguments. The instructor check acce
 **Host terminal** — in the unpacked package folder; fresh HW2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 demo
-docker compose exec --workdir /workspace/work/hw2-demo training bash
+abb doctor --offline
+abb prepare hw2 demo
+abb shell --workspace work/hw2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-demo
+# Expected: work/hw2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -m json.tool source/circuit.json
@@ -616,7 +600,7 @@ Calculate one quantity at a time in the terminal, explaining the equation before
 | ADC margin | ADC limit minus maximum ADC voltage |
 
 Explain why upper-resistor minimum and lower-resistor maximum maximize output. Compare the existing coefficient and provenance with current inputs. Then invoke the existing generator:
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python tools/generate_calibration.py --config source/circuit.json \
@@ -626,7 +610,7 @@ python tools/generate_calibration.py --config source/circuit.json \
 <!-- PAGE -->
 # HW2 Extract calculations and freshness checks
 
-Stay in the existing /workspace/work/hw2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/hw2-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -653,31 +637,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 transfer --name hw2-transfer-md
-docker compose exec --workdir /workspace/work/hw2-transfer-md training bash
+abb doctor --offline
+abb prepare hw2 transfer --name hw2-transfer-md
+abb shell --workspace work/hw2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-transfer-md
+# Expected: work/hw2-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 transfer --name hw2-transfer-code
-docker compose exec --workdir /workspace/work/hw2-transfer-code training bash
+abb doctor --offline
+abb prepare hw2 transfer --name hw2-transfer-code
+abb shell --workspace work/hw2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-transfer-code
+# Expected: work/hw2-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
@@ -688,7 +672,7 @@ The upper resistor changes. Use current inputs for every calculation. Correct tr
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/hardware/instructor/check.py --lab hw2 --case demo --workspace /workspace/work/hw2-demo
+python training_kit/hardware/instructor/check.py --lab hw2 --case demo --workspace work/hw2-demo
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.
@@ -705,23 +689,23 @@ Change case/workspace for transfer. The check validates numerical results and ar
 **Host terminal** — in the unpacked package folder; fresh T1 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t1 demo
-docker compose exec --workdir /workspace/work/t1-demo training bash
+abb doctor --offline
+abb prepare t1 demo
+abb shell --workspace work/t1-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-demo
+# Expected: work/t1-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+**Inside the workspace — Terminal A**: start only this workspace's server and leave it running.
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -730,19 +714,19 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**, opened separately in the same package folder:
 
 ```text
-docker compose exec --workdir /workspace/work/t1-demo training bash
+abb shell --workspace work/t1-demo
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-demo
+# Expected: work/t1-demo
 ```
 
 Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
 
-Keep the server running. In terminal B, repeat the exact Terminal B container-entry command for /workspace/work/t1-demo, and run `python -m pytest browser_preflight.py -q`, then `python -m pytest -q`. Expect a passing preflight, one smoke pass and one skipped placeholder. Browser startup failure is BLOCKED; the skip is unfinished coverage.
+Keep the server running. In terminal B, repeat the exact Terminal B workspace-entry command for work/t1-demo, and run `python -m pytest browser_preflight.py -q`, then `python -m pytest -q`. Expect a passing preflight, one smoke pass and one skipped placeholder. Browser startup failure is BLOCKED; the skip is unfinished coverage.
 
 **Session preparation.** Follow the next page before exploration. The supplied synthetic app has no login; use its no-login session bootstrap. To exercise authentication, the facilitator supplies an authorized test URL, account, approved login selectors and an authenticated readiness signal. Do not add login to the protected fixture. Use the chosen agent consistently in the demonstration and both transfer conditions; record versions and model.
 
@@ -783,7 +767,7 @@ Check `git check-ignore .env .auth/state.json` and `git ls-files -- .env .auth`.
 
 The prepared T1 workspace supplies the reviewed no-login bootstrap under `tools/`; it creates no learner `automation/` code. In Terminal B, with Terminal A's server running:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 node tools/session_bootstrap.mjs --mode no-login --url http://127.0.0.1:8765 --state .auth/state.json --report evidence/bootstrap.json
@@ -803,19 +787,19 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t1 transfer --name t1-transfer-md
-docker compose exec --workdir /workspace/work/t1-transfer-md training bash
+abb doctor --offline
+abb prepare t1 transfer --name t1-transfer-md
+abb shell --workspace work/t1-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-md
+# Expected: work/t1-transfer-md
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -824,14 +808,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t1-transfer-md training bash
+abb shell --workspace work/t1-transfer-md
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-md
+# Expected: work/t1-transfer-md
 python -m pytest browser_preflight.py -q
 ```
 
@@ -840,19 +824,19 @@ Run this transfer's tests in Terminal B. Stop this Terminal A server before the 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t1 transfer --name t1-transfer-code
-docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+abb doctor --offline
+abb prepare t1 transfer --name t1-transfer-code
+abb shell --workspace work/t1-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-code
+# Expected: work/t1-transfer-code
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -861,14 +845,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t1-transfer-code training bash
+abb shell --workspace work/t1-transfer-code
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t1-transfer-code
+# Expected: work/t1-transfer-code
 python -m pytest browser_preflight.py -q
 ```
 
@@ -892,23 +876,23 @@ Stop the previous T1 or transfer server with Ctrl-C before starting this lab.
 **Host terminal** — in the unpacked package folder; fresh T2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 demo
-docker compose exec --workdir /workspace/work/t2-demo training bash
+abb doctor --offline
+abb prepare t2 demo
+abb shell --workspace work/t2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-demo
+# Expected: work/t2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container — Terminal A**: start only this workspace's server and leave it running.
+**Inside the workspace — Terminal A**: start only this workspace's server and leave it running.
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -917,14 +901,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**, opened separately in the same package folder:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-demo training bash
+abb shell --workspace work/t2-demo
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-demo
+# Expected: work/t2-demo
 ```
 
 Run the bootstrap/tests from Terminal B. Both terminals enter the same `training` service and workspace. Stop your Terminal A server with Ctrl-C before changing workspaces; if port 8765 is occupied, identify its owning terminal and stop that server. Keep the evidence and do not stop another participant's process.
@@ -938,7 +922,7 @@ Use terminal B in the same workspace with the training venv active. Run the brow
 2. Read SAVE-01, VAL-01, and ASYNC-01 in REQUIREMENTS.md. Map each to observable browser behavior.
 3. Show a valid save and browser reload on the correct app.
 4. Stop terminal A with Ctrl-C. With the server stopped, reset the local state and launch the demonstration defect:
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python -c "from pathlib import Path; Path('state.json').unlink(missing_ok=True)"
@@ -954,7 +938,7 @@ python server.py --variant no-persist --port 8765 --state state.json
 <!-- PAGE -->
 # T2 Extract repeatable test effectiveness evaluation
 
-Stay in the existing /workspace/work/t2-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/t2-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -983,19 +967,19 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 transfer --name t2-transfer-md
-docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+abb doctor --offline
+abb prepare t2 transfer --name t2-transfer-md
+abb shell --workspace work/t2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-md
+# Expected: work/t2-transfer-md
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -1004,14 +988,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-transfer-md training bash
+abb shell --workspace work/t2-transfer-md
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-md
+# Expected: work/t2-transfer-md
 python -m pytest browser_preflight.py -q
 ```
 
@@ -1020,19 +1004,19 @@ Run this transfer's tests in Terminal B. Stop this Terminal A server before the 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare t2 transfer --name t2-transfer-code
-docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+abb doctor --offline
+abb prepare t2 transfer --name t2-transfer-code
+abb shell --workspace work/t2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-code
+# Expected: work/t2-transfer-code
 ```
 
-**Inside the container — Terminal A**:
+**Inside the workspace — Terminal A**:
 
 ```bash
 python server.py --variant correct --port 8765 --state state.json
@@ -1041,14 +1025,14 @@ python server.py --variant correct --port 8765 --state state.json
 **Host terminal — Terminal B**:
 
 ```text
-docker compose exec --workdir /workspace/work/t2-transfer-code training bash
+abb shell --workspace work/t2-transfer-code
 ```
 
-**Inside the container — Terminal B**:
+**Inside the workspace — Terminal B**:
 
 ```bash
 pwd
-# Expected: /workspace/work/t2-transfer-code
+# Expected: work/t2-transfer-code
 python -m pytest browser_preflight.py -q
 ```
 
@@ -1134,7 +1118,7 @@ Before teaching, complete a full rehearsal on the participant environment. Run t
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python -m pytest /opt/abb/repo/tests/container -q
+python -m pytest tests/runtime -q
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.

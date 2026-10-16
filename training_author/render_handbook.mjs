@@ -1,4 +1,4 @@
-import { chromium } from '/opt/abb/node/node_modules/playwright/index.mjs';
+import { chromium } from '../training_runtime/node_modules/playwright/index.mjs';
 import { pathToFileURL } from 'node:url';
 const [input, output] = process.argv.slice(2);
 if (!input || !output) throw Error('Expected HTML input and PDF output paths');

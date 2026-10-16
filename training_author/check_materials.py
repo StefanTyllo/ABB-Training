@@ -1,4 +1,4 @@
-"""Verify the Docker handbook, current cards and sanitized starter attachment."""
+"""Verify the virtual environment handbook, current cards and sanitized starter attachment."""
 from pathlib import Path
 import hashlib
 import io
@@ -17,7 +17,7 @@ def main():
     items = pdf.attachments[ATTACHMENT]
     assert len(items) == 1
     data = items[0]
-    assert data == starter_bytes(ROOT), "Embedded Docker starter differs from current clean source"
+    assert data == starter_bytes(ROOT), "Embedded virtual environment starter differs from current clean source"
     expected = selected_files(ROOT, 'learner', include_pdf=False)
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         assert archive.testzip() is None

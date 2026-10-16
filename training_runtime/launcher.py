@@ -1,4 +1,4 @@
-"""Public container launcher. All process arguments remain separate argv items."""
+"""Public local launcher. All process arguments remain separate argv items."""
 import argparse
 import json
 import os
@@ -7,18 +7,17 @@ import re
 import subprocess
 import sys
 
-WORK = Path('/workspace/work')
-EXPORT = Path('/workspace/export')
+from .paths import ROOT, WORK, EXPORT
 LABS = ['fw1', 'fw2', 'hw1', 'hw2', 't1', 't2']
 
 
 def workspace_path(value: str) -> Path:
     candidate = Path(value)
     if not candidate.is_absolute():
-        candidate = Path('/workspace') / candidate
+        candidate = ROOT / candidate
     candidate = candidate.resolve(strict=True)
     if not candidate.is_relative_to(WORK) or candidate == WORK or not candidate.is_dir():
-        raise ValueError('Workspace must be a prepared directory under /workspace/work')
+        raise ValueError('Workspace must be a prepared directory under work/')
     if not (candidate / 'evidence').is_dir():
         raise ValueError('Workspace is not prepared: evidence directory is missing')
     return candidate
@@ -36,7 +35,7 @@ def main(argv: list[str]) -> int:
     shell = commands.add_parser('shell')
     shell.add_argument('--workspace', required=True)
     export = commands.add_parser('export')
-    export.add_argument('--output', default='/workspace/export/learner-work.zip')
+    export.add_argument('--output', default=str(EXPORT / 'learner-work.zip'))
     login = commands.add_parser('login')
     login.add_argument('provider', choices=['codex', 'copilot'])
     agent = commands.add_parser('agent')
@@ -45,7 +44,7 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv)
     try:
         if args.command == 'doctor':
-            from doctor import run_checks
+            from .doctor import run_checks
             report = run_checks(args.offline)
             print(json.dumps(report, indent=2))
             print('Readiness: ' + report['status'], file=sys.stderr)
@@ -57,22 +56,24 @@ def main(argv: list[str]) -> int:
             target = WORK / name
             if target.exists() or target.is_symlink():
                 raise ValueError('Workspace already exists; resume it or choose a fresh name')
-            result = subprocess.run([sys.executable, '/opt/abb/materials/prepare_lab.py',
+            result = subprocess.run([sys.executable, str(ROOT / 'training_kit/prepare_lab.py'),
                                      args.lab, args.case, str(target)])
             return result.returncode
         if args.command == 'export':
-            from export import export_workspace
+            from .export import export_workspace
             output = Path(args.output).resolve()
             if not output.is_relative_to(EXPORT):
                 raise ValueError('Export output must be under /workspace/export')
+            WORK.mkdir(parents=True, exist_ok=True)
             print(json.dumps(export_workspace(WORK, output)))
             return 0
         if args.command == 'shell':
             os.chdir(workspace_path(args.workspace))
-            os.execvp('bash', ['bash'])
+            shell = os.environ.get('COMSPEC', 'cmd.exe') if os.name == 'nt' else os.environ.get('SHELL', '/bin/bash')
+            return subprocess.run([shell]).returncode
         if args.command in {'login', 'agent'}:
             try:
-                import auth
+                from . import auth
             except ImportError:
                 print('BLOCKED: provider setup is not installed', file=sys.stderr)
                 return 3
@@ -91,5 +92,5 @@ def main(argv: list[str]) -> int:
     return 1
 
 
-if __name__ == '__main__':
+def entrypoint():
     raise SystemExit(main(sys.argv[1:]))

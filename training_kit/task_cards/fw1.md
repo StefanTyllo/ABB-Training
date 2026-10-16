@@ -7,21 +7,21 @@
 **Host terminal** — in the unpacked package folder; fresh FW1 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 demo
-docker compose exec --workdir /workspace/work/fw1-demo training bash
+abb doctor --offline
+abb prepare fw1 demo
+abb shell --workspace work/fw1-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-demo
+# Expected: work/fw1-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
 Read `requirements.md`. Start the agent here and use the Stage 1 start prompt. The state is already initialized under `device/`. Reinitialization is unnecessary and refuses existing state.
 
@@ -29,7 +29,7 @@ Read `requirements.md`. Start the agent here and use the Stage 1 start prompt. T
 
 ## Stage 1 Guided operations
 Run these one at a time, explaining the question each answers:
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python fw1/device.py --workdir device read --field identity
@@ -55,7 +55,7 @@ Use the tool's help to construct a single `set --parameter baud --value` operati
 
 # FW1 Extract the reusable operations
 
-Stay in the existing /workspace/work/fw1-demo container shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
+Stay in the existing work/fw1-demo workspace shell for Stages 2–4. If reopening a terminal, repeat this lab's demo entry command without preparation.
 
 
 ## Stage 2 Abstraction focus
@@ -83,31 +83,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 transfer --name fw1-transfer-md
-docker compose exec --workdir /workspace/work/fw1-transfer-md training bash
+abb doctor --offline
+abb prepare fw1 transfer --name fw1-transfer-md
+abb shell --workspace work/fw1-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-transfer-md
+# Expected: work/fw1-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw1 transfer --name fw1-transfer-code
-docker compose exec --workdir /workspace/work/fw1-transfer-code training bash
+abb doctor --offline
+abb prepare fw1 transfer --name fw1-transfer-code
+abb shell --workspace work/fw1-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw1-transfer-code
+# Expected: work/fw1-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.

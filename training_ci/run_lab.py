@@ -68,8 +68,7 @@ def copilot_command(workspace, stage, lab, prompt):
     if os.getenv('COPILOT_REASONING_EFFORT'):
         command += ['--reasoning-effort', os.environ['COPILOT_REASONING_EFFORT']]
     if lab.startswith('t'):
-        sys.path.insert(0, '/opt/abb/runtime')
-        from auth import configure_mcp
+        from training_runtime.auth import configure_mcp
         config = configure_mcp(workspace)
         command += ['--additional-mcp-config', Path(config['copilot']).read_text(), '--allow-tool=playwright']
     return command
@@ -77,10 +76,8 @@ def copilot_command(workspace, stage, lab, prompt):
 
 def authenticate_profile(env):
     """Import the selected runtime secret into this invocation's private profile."""
-    if Path('/run/secrets/copilot_token').is_file():
-        sys.path.insert(0, '/opt/abb/runtime')
-        from auth import _import_secret
-        _import_secret('copilot', env)
+    from training_runtime.auth import _import_secret
+    _import_secret('copilot', env)
 
 
 def agent(workspace, stage, lab):

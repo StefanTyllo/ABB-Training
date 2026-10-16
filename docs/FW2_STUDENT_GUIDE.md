@@ -4,9 +4,9 @@ You will reproduce two parser defects, repair the candidate and turn build/repla
 
 ## Before you begin
 
-Use the Docker package and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. The image supplies all language, compiler, browser and agent tools. Record the same selected agent/model throughout.
+Follow the [virtual environment setup](../README.md) and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. Activate `.venv` before running commands. Record the same selected agent/model throughout.
 
-Host commands run in the unpacked package folder. Commands marked Inside the container run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
+Host commands run in the unpacked package folder. Commands marked Inside the workspace run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
 
 Edit the candidate `fw2/parser.c` and your learning artifacts. Preserve `parser.h`, `main.c` and requirements. Do not copy a repaired parser into the fresh replay workspaces.
 
@@ -23,23 +23,23 @@ Expected results below describe the supplied examples. Save actual output; if it
 **Host terminal** — in the unpacked package folder; fresh FW2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 demo
-docker compose exec --workdir /workspace/work/fw2-demo training bash
+abb doctor --offline
+abb prepare fw2 demo
+abb shell --workspace work/fw2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-demo
+# Expected: work/fw2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 cat requirements.md
@@ -56,7 +56,7 @@ Read the FW2 section before opening the candidate implementation.
 
 **Do this:** Run:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 gcc -std=c11 -Wall -Wextra -Werror fw2/parser.c fw2/main.c -o fw2/parser
@@ -72,7 +72,7 @@ Record the source version/digest, compiler output and exit status. Continue only
 
 **Do this:** Run and save the actual output:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 ./fw2/parser a5020785ffda
@@ -88,7 +88,7 @@ Compare it with the protocol-derived expectation.
 
 **Do this:** Supply exactly the same bytes split between two arguments:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 ./fw2/parser a50207 85ffda
@@ -116,7 +116,7 @@ Compare it with the protocol-derived expectation.
 
 ## 7. Generalize the instructions — Stage 2
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Replace example-specific details with inputs: source/compiler/executable paths, packet fields, chunk schedule and evidence destination; preserve the protocol constants. Define input sources, validation and missing-input behavior. Keep genuine engineering rules. Save `workflow.md` and an identical `workflow-md-only.md` checkpoint.
 
@@ -126,7 +126,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 8. Decide what becomes code — Stage 3
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Write `extraction-map.md`: each operation’s purpose, inputs, output, failure condition and owner (code, model or human). Consider automating: validate packet inputs, build, construct specification-derived packets, split streams, replay, compare JSON and summarize requirement-linked outcomes. Do not implement yet.
 
@@ -136,7 +136,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 9. Implement and test — Stage 4
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Implement the agreed helpers under `automation/`. Use readable functions, engineering explanations, actual-result logs and meaningful failure statuses. Test: original defects; valid packets and signed limits; corruption/resynchronization; empty and incomplete input; malformed CLI input; failed compilation proving a stale executable is not run. Use disposable fixtures under `automation/tests/`. Update `workflow.md` and document exact commands in `automation/README.md`. Keep the Markdown checkpoint and original evidence unchanged.
 
@@ -153,31 +153,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 transfer --name fw2-transfer-md
-docker compose exec --workdir /workspace/work/fw2-transfer-md training bash
+abb doctor --offline
+abb prepare fw2 transfer --name fw2-transfer-md
+abb shell --workspace work/fw2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-transfer-md
+# Expected: work/fw2-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare fw2 transfer --name fw2-transfer-code
-docker compose exec --workdir /workspace/work/fw2-transfer-code training bash
+abb doctor --offline
+abb prepare fw2 transfer --name fw2-transfer-code
+abb shell --workspace work/fw2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/fw2-transfer-code
+# Expected: work/fw2-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
@@ -198,7 +198,7 @@ Start a new conversation in each workspace with the same agent/model. Ask it to 
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_kit/firmware/instructor/smoke.py /workspace/work/fw2-demo/fw2/parser
+python training_kit/firmware/instructor/smoke.py work/fw2-demo/fw2/parser
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.

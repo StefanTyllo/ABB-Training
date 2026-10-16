@@ -1,0 +1,122 @@
+name: Codex PR review
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: codex-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Fork and Dependabot runs cannot access the CODEX authentication secret.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]' &&
+      !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Install Codex CLI
+        run: npm install --global @openai/codex@0.162.1
+
+      - name: Sign in with ChatGPT access token
+        env:
+          CODEX_ACCESS_TOKEN: ${{ secrets.CODEX }}
+          CODEX_HOME: ${{ runner.temp }}/review-codex
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CODEX_ACCESS_TOKEN" || { echo '::error::CODEX secret is missing'; exit 1; }
+          umask 077
+          mkdir -p "$CODEX_HOME"
+          printf '%s' "$CODEX_ACCESS_TOKEN" | env -u CODEX_ACCESS_TOKEN \
+            codex -c cli_auth_credentials_store='"file"' login --with-access-token
+
+      - name: Review PR changes with Codex
+        id: codex
+        env:
+          CODEX_HOME: ${{ runner.temp }}/review-codex
+          REVIEW_BASE: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git cat-file -e "${REVIEW_BASE}^{commit}"
+          codex exec --sandbox read-only review \
+            --base "$REVIEW_BASE" --ephemeral \
+            --output-last-message "$RUNNER_TEMP/codex-review.md"
+          test -s "$RUNNER_TEMP/codex-review.md"
+          cat "$RUNNER_TEMP/codex-review.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove temporary Codex credentials
+        if: always()
+        shell: bash
+        run: rm -rf -- "$RUNNER_TEMP/review-codex"
+
+      - name: Publish or update PR review comment
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@v8
+        env:
+          REVIEW_OUTCOME: ${{ steps.codex.outcome }}
+          REVIEW_HEAD: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner, repo, pull_number: issue_number
+            });
+            if (pr.state !== 'open' || pr.head.sha !== process.env.REVIEW_HEAD) {
+              core.info('Skipping comment: PR closed or newer commits are available.');
+              return;
+            }
+            const marker = '<!-- codex-pr-review -->';
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            let review = `Review could not complete. See the [workflow logs](${runUrl}) for details.`;
+            if (process.env.REVIEW_OUTCOME === 'success') {
+              review = fs.readFileSync(path.join(process.env.RUNNER_TEMP, 'codex-review.md'), 'utf8');
+            }
+            if (review.length > 55000) {
+              review = review.slice(0, 55000) + '\n\nReview truncated. Download the full review from the workflow artifacts.';
+            }
+            const body = `${marker}\n## Codex review\n\nReviewed commit: ${process.env.REVIEW_HEAD}\n\n${review}\n\n[Workflow run](${runUrl})`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100
+            });
+            const existing = comments.find(comment =>
+              comment.user?.login === 'github-actions[bot]' &&
+              comment.body?.startsWith(marker)
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id, body
+              });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+      - name: Upload full review
+        if: ${{ !cancelled() && steps.codex.outcome == 'success' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: codex-review-${{ github.event.pull_request.number }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/codex-review.md
+          if-no-files-found: error

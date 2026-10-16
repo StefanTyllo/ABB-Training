@@ -4,10 +4,11 @@ import os
 from pathlib import Path
 import subprocess
 import tomllib
+from .paths import ROOT, RUNTIME, NODE_MODULES, node_command, provider_command
 
 TOKEN_KEYS = ['OPENAI_API_KEY', 'CODEX_API_KEY', 'CODEX_ACCESS_TOKEN',
               'COPILOT_GITHUB_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN']
-HOMES = {'codex': Path('/home/learner/.codex'), 'copilot': Path('/home/learner/.copilot')}
+HOMES = {name: ROOT / '.auth' / name for name in ('codex', 'copilot')}
 
 
 class ProviderBlocked(RuntimeError):
@@ -37,30 +38,32 @@ def configure_mcp(workspace: Path) -> dict:
     state = workspace/'.auth/state.json'
     if not state.resolve().is_relative_to(workspace):
         raise ValueError('MCP state must remain inside this workspace')
-    browser = json.loads(Path('/opt/abb/runtime/playwright.json').read_text())
+    browser = json.loads((RUNTIME / 'playwright.json').read_text())
     browser['browser']['isolated'] = True
+    if os.environ.get('CHROME_BINARY'):
+        browser['browser']['launchOptions']['executablePath'] = os.environ['CHROME_BINARY']
     (config_dir/'playwright.json').write_text(json.dumps(browser, indent=2)+'\n')
-    args = ['/opt/abb/node/node_modules/@playwright/mcp/cli.js', '--config',
+    args = [str(NODE_MODULES / '@playwright/mcp/cli.js'), '--config',
             str(config_dir/'playwright.json'), '--isolated', '--sandbox',
             '--output-dir', str(workspace/'evidence/mcp')]
     if (workspace/'.auth/state.json').is_file():
         args += ['--storage-state', str(workspace/'.auth/state.json')]
-    server = {'type': 'local', 'command': '/opt/abb/node/bin/node', 'args': args,
+    server = {'type': 'local', 'command': node_command(), 'args': args,
               'cwd': str(workspace), 'tools': ['*'], 'env': {k: '' for k in TOKEN_KEYS}}
-    copilot = json.loads(Path('/opt/abb/runtime/copilot-mcp.json').read_text())
+    copilot = json.loads((RUNTIME / 'copilot-mcp.json').read_text())
     copilot['mcpServers']['playwright'] = server
     (config_dir/'copilot-mcp.json').write_text(json.dumps(copilot, indent=2)+'\n')
     return {'args': args, 'copilot': str(config_dir/'copilot-mcp.json')}
 
 
 def _import_secret(provider: str, env: dict) -> bool:
-    secret = Path('/run/secrets', 'codex_api_key' if provider == 'codex' else 'copilot_token')
+    secret = Path(os.environ.get('ABB_SECRETS_DIR', str(ROOT / '.auth' / 'secrets'))) / ('codex_api_key' if provider == 'codex' else 'copilot_token')
     if not secret.is_file():
         return False
     value = secret.read_text().strip()
     if not value or '\n' in value:
         raise ProviderBlocked('Runtime secret must contain one nonempty token line')
-    command = [provider, 'login', '--with-api-key' if provider == 'codex' else '--with-token']
+    command = [provider_command(provider), 'login', '--with-api-key' if provider == 'codex' else '--with-token']
     try:
         result = subprocess.run(command, input=value+'\n', capture_output=True, text=True,
                                 env=env, timeout=60)
@@ -73,13 +76,14 @@ def _import_secret(provider: str, env: dict) -> bool:
 
 def login(provider: str) -> int:
     env = provider_environment(provider)
+    HOMES[provider].mkdir(parents=True, exist_ok=True)
     try:
         if _import_secret(provider, env):
             return 0
     except ProviderBlocked as error:
         print('BLOCKED: '+str(error))
         return 3
-    command = [provider, 'login', '--device-auth' if provider == 'codex' else '--device-code']
+    command = [provider_command(provider), 'login', '--device-auth' if provider == 'codex' else '--device-code']
     return subprocess.run(command, env=env).returncode
 
 
@@ -95,7 +99,7 @@ def credentials_present(provider: str) -> bool:
 
 
 def prepare_agent_process(provider: str, workspace: Path) -> tuple[list[str], dict[str, str]]:
-    from launcher import workspace_path
+    from .launcher import workspace_path
     workspace = workspace_path(str(workspace))
     env = provider_environment(provider)
     _import_secret(provider, env)
@@ -103,19 +107,19 @@ def prepare_agent_process(provider: str, workspace: Path) -> tuple[list[str], di
         raise ProviderBlocked(f'No {provider} login is available; run abb login {provider}')
     mcp = configure_mcp(workspace)
     if provider == 'codex':
-        base = tomllib.loads(Path('/opt/abb/runtime/codex.toml').read_text())
-        command = ['codex']
+        base = tomllib.loads((RUNTIME / 'codex.toml').read_text())
+        command = [provider_command('codex')]
         for key, value in base.items():
             if isinstance(value, dict):
                 for nested_key, nested_value in value.items():
                     command += ['-c', key+'.'+nested_key+'='+json.dumps(nested_value)]
             else:
                 command += ['-c', key+'='+json.dumps(value)]
-        command += ['-c', 'mcp_servers.playwright.command="/opt/abb/node/bin/node"',
+        command += ['-c', 'mcp_servers.playwright.command='+json.dumps(node_command()),
                     '-c', 'mcp_servers.playwright.args='+json.dumps(mcp['args'])]
     else:
-        command = ['copilot', '--no-auto-update', '--additional-mcp-config', '@'+mcp['copilot']]
-    version = subprocess.run([provider, '--version'], env=env, capture_output=True, text=True, timeout=15)
+        command = [provider_command('copilot'), '--no-auto-update', '--additional-mcp-config', '@'+mcp['copilot']]
+    version = subprocess.run([provider_command(provider), '--version'], env=env, capture_output=True, text=True, timeout=15)
     record = {'provider': provider, 'cli': version.stdout.strip(), 'workspace': str(workspace),
               'model_requested': 'gpt-6.1-sol' if provider == 'codex' else 'account default',
               'effort_requested': 'medium' if provider == 'codex' else 'account default',

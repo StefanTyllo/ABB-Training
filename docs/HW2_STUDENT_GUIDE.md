@@ -4,9 +4,9 @@ You will calculate an ideal voltage divider’s worst-case output, assess its AD
 
 ## Before you begin
 
-Use the Docker package and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. The image supplies all language, compiler, browser and agent tools. Record the same selected agent/model throughout.
+Follow the [virtual environment setup](../README.md) and complete the [handbook](ABB_Workflow_Training.pdf) readiness checks. Activate `.venv` before running commands. Record the same selected agent/model throughout.
 
-Host commands run in the unpacked package folder. Commands marked Inside the container run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
+Host commands run in the unpacked package folder. Commands marked Inside the workspace run in this exercise's prepared workspace. Preparation is for fresh work; resume by re-entering the existing workspace.
 
 Preserve `source/circuit.json` and supplied tools. You may regenerate `derived/calibration.json` and create the report and learning artifacts. Do not redesign the source to force a pass.
 
@@ -23,23 +23,23 @@ Expected results below describe the supplied examples. Save actual output; if it
 **Host terminal** — in the unpacked package folder; fresh HW2 demonstration:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 demo
-docker compose exec --workdir /workspace/work/hw2-demo training bash
+abb doctor --offline
+abb prepare hw2 demo
+abb shell --workspace work/hw2-demo
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-demo
+# Expected: work/hw2-demo
 ```
 
-This opens a local container shell; it requires no SSH account or container password. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
+This opens a local shell with the active virtual environment. Agent authentication is separate. If your chosen provider is not already authenticated, use its `abb login` command from the setup instructions. Keep the same agent/model throughout the exercise.
 
-Stages 1–4 stay in this shell. `exit` returns to the host. To resume in a new terminal, return to the package folder, run `docker compose up -d training`, and repeat the exact entry command above without preparation. If the directory is wrong, check `pwd` and re-enter the stated workspace. A stopped service is recovered with `docker compose up -d training`; a missing workspace needs its original volume or a deliberately fresh attempt. Normal `docker compose stop training` and `up -d training` preserve work.
+Stages 1–4 stay in this shell. To resume, return to the package folder, activate `.venv`, and repeat the exact workspace entry command without preparation. Check `pwd` before continuing. Shell exit preserves your files; choose a fresh name for another attempt.
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 cat REPORT_CONTRACT.md
@@ -87,7 +87,7 @@ Use the report’s exact key names and retain at least 10 significant digits; th
 
 **Do this:** Use the existing generator, then inspect its output:
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 python tools/generate_calibration.py --config source/circuit.json --output derived/calibration.json --replace
@@ -110,7 +110,7 @@ Compare board/revision, inverse gain and the canonical source digest using `REPO
 
 ## 6. Generalize the instructions — Stage 2
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Replace example-specific details with inputs: every component value, tolerance, input/ADC voltage, source path and report/calibration destination. Define input sources, validation and missing-input behavior. Keep genuine engineering rules. Save `workflow.md` and an identical `workflow-md-only.md` checkpoint.
 
@@ -120,7 +120,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 7. Decide what becomes code — Stage 3
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Write `extraction-map.md`: each operation’s purpose, inputs, output, failure condition and owner (code, model or human). Consider automating: validate finite positive inputs and 0 < tolerance < 1, calculate named intermediate quantities, assess the limit, invoke the supplied generator, check canonical provenance and write the report. Do not implement yet.
 
@@ -130,7 +130,7 @@ Stay in the existing container shell. If reopening a terminal, repeat the demo e
 
 ## 8. Implement and test — Stage 4
 
-Stay in the existing container shell. If reopening a terminal, repeat the demo entry command without preparation.
+Stay in the existing workspace shell. If reopening a terminal, repeat the demo entry command without preparation.
 
 **Do this:** Implement the agreed helpers under `automation/`. Use readable functions, engineering explanations, actual-result logs and meaningful failure statuses. Test: valid demo; worst-case limit violation; missing/invalid input; changed source invalidating old calibration provenance; identical inputs producing identical regenerated calibration; unchanged source. Use disposable fixtures under `automation/tests/`. Update `workflow.md` and document exact commands in `automation/README.md`. Keep the Markdown checkpoint and original evidence unchanged.
 
@@ -147,31 +147,31 @@ After Stage 4, stop any owned app server and use two fresh transfer workspaces. 
 **Host terminal** — fresh instructions-only transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 transfer --name hw2-transfer-md
-docker compose exec --workdir /workspace/work/hw2-transfer-md training bash
+abb doctor --offline
+abb prepare hw2 transfer --name hw2-transfer-md
+abb shell --workspace work/hw2-transfer-md
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-transfer-md
+# Expected: work/hw2-transfer-md
 ```
 
 **Host terminal** — fresh instructions-plus-code transfer:
 
 ```text
-docker compose up -d training
-docker compose exec training abb prepare hw2 transfer --name hw2-transfer-code
-docker compose exec --workdir /workspace/work/hw2-transfer-code training bash
+abb doctor --offline
+abb prepare hw2 transfer --name hw2-transfer-code
+abb shell --workspace work/hw2-transfer-code
 ```
 
-**Inside the container**:
+**Inside the workspace**:
 
 ```bash
 pwd
-# Expected: /workspace/work/hw2-transfer-code
+# Expected: work/hw2-transfer-code
 ```
 
 To resume either transfer, repeat its host-side entry command without `abb prepare`. Do not overwrite an existing workspace.
@@ -192,7 +192,7 @@ Start a new conversation in each workspace with the same agent/model. Ask it to 
 **Host terminal — facilitator package only**:
 
 ```text
-docker compose --profile facilitator run --rm grader python -m pytest /opt/abb/repo/tests/container -q
+python -m pytest tests/runtime -q
 ```
 
 The facilitator's independent checks and assessment sources are supplied separately from the learner materials.

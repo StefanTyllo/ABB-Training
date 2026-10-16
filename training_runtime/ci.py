@@ -1,9 +1,9 @@
-"""Run one CI phase; provider auth exists only in its rehearsal container."""
+"""Run one CI phase; provider auth exists only in its rehearsal process."""
 import argparse
 import subprocess
 import sys
 
-from auth import ProviderBlocked, _import_secret, provider_environment
+from .auth import ProviderBlocked, _import_secret, provider_environment
 
 
 def main(argv: list[str]) -> int:

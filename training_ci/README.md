@@ -3,7 +3,7 @@
 `run_lab.py LAB` prepares three fresh workspaces, runs four teaching stages with
 GitHub Copilot CLI, then performs separate Markdown-only and code-assisted fresh
 transfers. `grade_all.py LAB` independently assesses the generated work. Keep the
-Copilot runtime token scoped to the agent container; graders neither need nor receive it.
+Copilot runtime token scoped to the agent process; graders neither need nor receive it.
 
 ## Context delivery
 
@@ -25,7 +25,7 @@ saved snapshots instead of treating the mutable host directory as baseline data.
 
 The pinned CLI receives `--no-auto-update`, `--no-custom-instructions` and disabled
 skill retrieval inside a fresh temporary `COPILOT_HOME`. The profile is removed
-after each invocation, including timeouts; user-global configuration is untouched. The selected runtime secret is imported into that temporary profile through standard input, so the scoped container secret route also works with profile isolation.
+after each invocation, including timeouts; user-global configuration is untouched. The selected runtime secret is imported into that temporary profile through standard input, so the scoped local secret route also works with profile isolation.
 Built-in remote MCPs are disabled and browser labs explicitly configure reviewed
 Playwright MCP 0.0.83. Shell allowances include the supplied Python/C tools plus
 Node/npm/npx and Git for the T1 bootstrap/ignore checks. These allowances and the
@@ -47,15 +47,15 @@ does not permit omitting grading checks.
 Host terminal, in the facilitator package:
 
 ```text
-docker compose --profile facilitator build facilitator
-docker compose --profile facilitator run --rm grader python -m unittest discover -s /opt/abb/repo/training_ci/tests -v
-docker compose --profile facilitator run --rm grader python /opt/abb/repo/training_author/check_materials.py
+python setup_env.py --agents
+python -m unittest discover -s training_ci/tests -v
+python training_author/check_materials.py
 ```
 
 These verify real card/stage/replay delivery, authority/past-snapshot preservation,
 the Copilot command interface and recorded timeout failures, plus exact PDF/source
 and starter-attachment consistency. Command execution is stubbed in interface
 tests; this is not an authenticated Copilot acceptance run. PR CI also runs the
-checks inside the same locked Docker image. Original Copilot results remain in validation_records;
+checks inside the same pinned virtual environment. Original Copilot results remain in validation_records;
 new prompt/runner changes need their own authenticated rehearsal before any claim
 of new agent acceptance, facilitator approval or classroom readiness.
