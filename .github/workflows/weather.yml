@@ -53,13 +53,35 @@ jobs:
             cat "$RUNNER_TEMP/weather.json"
           } > "$RUNNER_TEMP/weather-prompt.txt"
 
-      - name: Format weather report with Codex
-        uses: openai/codex-action@1d82a3dba7c7988ec71ecae1ed5b8e8db96495c5 # v1
+      - uses: actions/setup-node@v6
         with:
-          openai-api-key: ${{ secrets.CODEX }}
-          prompt-file: ${{ runner.temp }}/weather-prompt.txt
-          output-file: ${{ runner.temp }}/weather-report.md
-          sandbox: read-only
+          node-version: '24'
+
+      - name: Install Codex CLI
+        run: npm install --global @openai/codex@0.162.1
+
+      - name: Sign in with ChatGPT access token
+        env:
+          CODEX_ACCESS_TOKEN: ${{ secrets.CODEX }}
+          CODEX_HOME: ${{ runner.temp }}/weather-codex
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CODEX_ACCESS_TOKEN" || { echo '::error::CODEX secret is missing'; exit 1; }
+          umask 077
+          mkdir -p "$CODEX_HOME"
+          printf '%s' "$CODEX_ACCESS_TOKEN" | env -u CODEX_ACCESS_TOKEN \
+            codex -c cli_auth_credentials_store='"file"' login --with-access-token
+
+      - name: Format weather report with Codex
+        env:
+          CODEX_HOME: ${{ runner.temp }}/weather-codex
+        shell: bash
+        run: |
+          set -euo pipefail
+          codex exec --sandbox read-only --ephemeral \
+            --output-last-message "$RUNNER_TEMP/weather-report.md" \
+            - < "$RUNNER_TEMP/weather-prompt.txt"
 
       - name: Store and commit weather report
         env:
@@ -81,3 +103,8 @@ jobs:
           git commit -m "docs: update weather report" -- log/weather.md
           git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
             "HEAD:refs/heads/${WEATHER_BRANCH}"
+
+      - name: Remove temporary Codex credentials
+        if: always()
+        shell: bash
+        run: rm -rf -- "$RUNNER_TEMP/weather-codex"
