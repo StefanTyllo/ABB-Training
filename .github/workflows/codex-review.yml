@@ -36,6 +36,34 @@ jobs:
       - name: Install Codex CLI
         run: npm install --global @openai/codex@0.162.1
 
+      - name: Install Linux sandbox prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes bubblewrap apparmor-profiles apparmor-utils
+          # Ubuntu 24.04 restricts user namespaces for unprofiled executables.
+          # Permit the distribution's bwrap without disabling AppArmor globally.
+          if [ -f /usr/share/apparmor/extra-profiles/bwrap-userns-restrict ]; then
+            sudo install -m 0644 \
+              /usr/share/apparmor/extra-profiles/bwrap-userns-restrict \
+              /etc/apparmor.d/bwrap-userns-restrict
+            sudo apparmor_parser -r /etc/apparmor.d/bwrap-userns-restrict
+          fi
+          bwrap --version
+
+      - name: Verify sandbox can inspect the PR
+        env:
+          CODEX_HOME: ${{ runner.temp }}/review-codex
+          REVIEW_BASE: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$CODEX_HOME"
+          codex -c sandbox_mode='"read-only"' sandbox -- \
+            git diff --stat "$REVIEW_BASE...HEAD"
+
       - name: Sign in with ChatGPT access token
         env:
           CODEX_ACCESS_TOKEN: ${{ secrets.CODEX }}
